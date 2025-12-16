@@ -7,6 +7,9 @@ export async function GET() {
   try {
     const supabase = await createServerClient()
 
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser()
+
     // Fetch posts
     const { data: posts, error } = await supabase
       .from('posts')
@@ -38,10 +41,35 @@ export async function GET() {
 
     const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
 
-    // Calculate vote scores for each post
+    // Fetch user votes for posts if user is authenticated
+    let userVotesMap = new Map<string, -1 | 0 | 1>()
+    if (user) {
+      const postIds = posts.map(post => post.id)
+      const { data: userVotes } = await supabase
+        .from('votes')
+        .select('target_id, value')
+        .eq('user_id', user.id)
+        .eq('target_type', 'post')
+        .in('target_id', postIds)
+
+      userVotesMap = new Map(userVotes?.map(vote => [vote.target_id, vote.value as -1 | 1]) || [])
+    }
+
+    // Calculate vote scores and comment counts for each post
     const postsWithScores = await Promise.all(
       posts.map(async (post) => {
-        const voteScore = await getVoteScore('post', post.id)
+        const [voteScore, commentCount] = await Promise.all([
+          getVoteScore('post', post.id),
+          // Count comments for this post
+          (async () => {
+            const { count, error } = await supabase
+              .from('comments')
+              .select('*', { count: 'exact', head: true })
+              .eq('post_id', post.id)
+            return error ? 0 : count || 0
+          })()
+        ])
+
         const profile = profileMap.get(post.author_id)
         return {
           ...post,
@@ -49,7 +77,9 @@ export async function GET() {
             username: profile?.username || 'Anonymous',
             full_name: profile?.full_name || 'Anonymous'
           },
-          vote_score: voteScore
+          vote_score: voteScore,
+          comment_count: commentCount,
+          user_vote: userVotesMap.get(post.id) || 0
         }
       })
     )

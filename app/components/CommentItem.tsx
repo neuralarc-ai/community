@@ -1,26 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import VoteButton from './VoteButton'
-import CommentForm from './CommentForm'
+import CommentThreadLine from './CommentThreadLine'
+import CommentActions from './CommentActions'
+import ReplyInput from './ReplyInput'
 import { Comment } from '@/app/types'
 
 interface CommentItemProps {
   comment: Comment
   userVote?: -1 | 0 | 1
+  userVotes?: Record<string, -1 | 0 | 1>
   onVoteChange?: (commentId: string, newScore: number, newUserVote: -1 | 0 | 1) => void
   onReplyAdded?: (parentId: string, newComment: Comment) => void
   depth?: number
+  activeReplyId?: string | null
+  onReplyToggle?: (commentId: string | null) => void
 }
 
 export default function CommentItem({
   comment,
   userVote = 0,
+  userVotes = {},
   onVoteChange,
   onReplyAdded,
-  depth = 0
+  depth = 0,
+  activeReplyId,
+  onReplyToggle
 }: CommentItemProps) {
-  const [showReplyForm, setShowReplyForm] = useState(false)
+  const maxDepth = 5 // Prevent infinite nesting visually
 
   const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange?.(comment.id, newScore, newUserVote)
@@ -28,7 +35,15 @@ export default function CommentItem({
 
   const handleReplyAdded = (newComment: Comment) => {
     onReplyAdded?.(comment.id, newComment)
-    setShowReplyForm(false)
+    onReplyToggle?.(null) // Close reply input
+  }
+
+  const handleReplyClick = () => {
+    onReplyToggle?.(activeReplyId === comment.id ? null : comment.id)
+  }
+
+  const handleReplyCancel = () => {
+    onReplyToggle?.(null)
   }
 
   const formatTime = (dateString: string) => {
@@ -43,25 +58,18 @@ export default function CommentItem({
     return date.toLocaleDateString()
   }
 
-  const maxDepth = 5 // Prevent infinite nesting visually
+  const isReplyInputVisible = activeReplyId === comment.id
 
   return (
-    <div className={`${depth > 0 ? 'ml-6 pl-4 border-l-2 border-gray-200' : ''}`}>
-      <div className="flex space-x-3 mb-2">
-        {/* Vote section */}
-        <div className="flex-shrink-0">
-          <VoteButton
-            targetType="comment"
-            targetId={comment.id}
-            initialScore={comment.vote_score || 0}
-            userVote={userVote}
-            onVoteChange={handleVoteChange}
-          />
-        </div>
+    <div className="relative">
+      {/* Thread line for nested comments */}
+      <CommentThreadLine depth={depth} />
 
-        {/* Comment content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 text-sm text-gray-500 mb-1">
+      {/* Comment content */}
+      <div className={`${depth > 0 ? 'ml-4 sm:ml-6' : ''} group`}>
+        <div className="bg-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
+          {/* Comment header */}
+          <div className="flex items-center space-x-2 text-sm text-gray-500 p-3 pb-2">
             <span className="font-medium text-gray-900">
               {comment.author?.username || 'Anonymous'}
             </span>
@@ -69,52 +77,56 @@ export default function CommentItem({
             <span>{formatTime(comment.created_at)}</span>
           </div>
 
-          <div className="text-gray-800 mb-2 whitespace-pre-wrap">
-            {comment.body}
+          {/* Comment body */}
+          <div className="px-3 pb-2">
+            <div className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+              {comment.body}
+            </div>
           </div>
 
-          {/* Action buttons */}
-          {depth < maxDepth && (
-            <div className="flex items-center space-x-4 text-sm">
-              <button
-                onClick={() => setShowReplyForm(!showReplyForm)}
-                className="text-gray-500 hover:text-blue-600 flex items-center space-x-1"
-              >
-                <span>💬</span>
-                <span>Reply</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Reply form */}
-      {showReplyForm && (
-        <div className="ml-9 mt-3 mb-4">
-          <CommentForm
-            postId={comment.post_id}
-            parentCommentId={comment.id}
-            onCommentAdded={handleReplyAdded}
-            onCancel={() => setShowReplyForm(false)}
-            placeholder="Write a reply..."
-          />
-        </div>
-      )}
-
-      {/* Nested replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="mt-4 space-y-4">
-          {comment.replies.map((reply) => (
-            <CommentItem
-              key={reply.id}
-              comment={reply}
+          {/* Comment actions */}
+          <div className="px-3 pb-3">
+            <CommentActions
+              commentId={comment.id}
+              initialScore={comment.vote_score || 0}
+              userVote={userVote}
               onVoteChange={onVoteChange}
-              onReplyAdded={onReplyAdded}
-              depth={depth + 1}
+              onReplyClick={handleReplyClick}
+              onShareClick={() => {/* TODO: implement share */}}
+              onMoreClick={() => {/* TODO: implement more options */}}
             />
-          ))}
+          </div>
         </div>
-      )}
+
+        {/* Reply input */}
+        <ReplyInput
+          postId={comment.post_id}
+          parentCommentId={comment.id}
+          onReplyAdded={handleReplyAdded}
+          onCancel={handleReplyCancel}
+          depth={depth}
+          isVisible={isReplyInputVisible}
+        />
+
+        {/* Nested replies */}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className="mt-4 space-y-4">
+            {comment.replies.map((reply, index) => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                userVote={userVotes[reply.id] || 0}
+                userVotes={userVotes}
+                onVoteChange={onVoteChange}
+                onReplyAdded={onReplyAdded}
+                depth={depth + 1}
+                activeReplyId={activeReplyId}
+                onReplyToggle={onReplyToggle}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

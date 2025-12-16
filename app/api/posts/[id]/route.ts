@@ -8,6 +8,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const supabase = await createServerClient()
     const { id: postId } = await params
 
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser()
+
     // Fetch the post
     const { data: post, error: postError } = await supabase
       .from('posts')
@@ -59,6 +62,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       )
     }
 
+    // Fetch user votes if authenticated
+    let userVotesMap = new Map<string, -1 | 0 | 1>()
+    if (user) {
+      const targetIds = [postId, ...comments.map(comment => comment.id)]
+      const { data: userVotes } = await supabase
+        .from('votes')
+        .select('target_type, target_id, value')
+        .eq('user_id', user.id)
+        .in('target_id', targetIds)
+
+      userVotesMap = new Map(
+        userVotes?.map(vote => [`${vote.target_type}:${vote.target_id}`, vote.value as -1 | 1]) || []
+      )
+    }
+
     // Calculate vote scores for post and comments
     const [postVoteScore, commentVoteScores] = await Promise.all([
       getVoteScore('post', postId),
@@ -90,6 +108,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           full_name: profile?.full_name || 'Anonymous'
         },
         vote_score: commentVoteScores[index],
+        user_vote: userVotesMap.get(`comment:${comment.id}`) || 0,
         replies: []
       })
     })
@@ -107,13 +126,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }
     })
 
-    const postWithDetails: Post & { comments: Comment[] } = {
+    const postWithDetails: Post & { comments: Comment[], user_vote?: number } = {
       ...post,
       author: {
         username: postProfile?.username || 'Anonymous',
         full_name: postProfile?.full_name || 'Anonymous'
       },
       vote_score: postVoteScore,
+      user_vote: userVotesMap.get(`post:${postId}`) || 0,
       comments: rootComments
     }
 

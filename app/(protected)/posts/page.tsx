@@ -12,6 +12,7 @@ export default function PostsPage() {
   const [loading, setLoading] = useState(true)
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set())
   const [postComments, setPostComments] = useState<Record<string, Comment[]>>({})
+  const [userCommentVotes, setUserCommentVotes] = useState<Record<string, Record<string, -1 | 0 | 1>>>({})
 
   useEffect(() => {
     fetchPosts()
@@ -62,10 +63,31 @@ export default function PostsPage() {
           ...prev,
           [postId]: postData.comments || []
         }))
+        // Update user votes for this post's comments
+        setUserCommentVotes(prev => ({
+          ...prev,
+          [postId]: extractUserVotesFromComments(postData.comments || [])
+        }))
       }
     } catch (error) {
       console.error('Failed to fetch comments:', error)
     }
+  }
+
+  const extractUserVotesFromComments = (comments: Comment[]): Record<string, -1 | 0 | 1> => {
+    const votes: Record<string, -1 | 0 | 1> = {}
+
+    const processComment = (comment: Comment) => {
+      if ((comment as any).user_vote !== undefined) {
+        votes[comment.id] = (comment as any).user_vote
+      }
+      if (comment.replies) {
+        comment.replies.forEach(processComment)
+      }
+    }
+
+    comments.forEach(processComment)
+    return votes
   }
 
   const handleCommentAdded = (postId: string, newComment: Comment) => {
@@ -84,6 +106,14 @@ export default function PostsPage() {
           : comment
       )
     }))
+    // Update user vote for this comment
+    setUserCommentVotes(prev => ({
+      ...prev,
+      [postId]: {
+        ...prev[postId],
+        [commentId]: newUserVote
+      }
+    }))
   }
 
   const handleReplyAdded = (postId: string, parentId: string, newComment: Comment) => {
@@ -92,7 +122,7 @@ export default function PostsPage() {
         if (comment.id === parentId) {
           return {
             ...comment,
-            replies: [...(comment.replies || []), newComment]
+            replies: [...(comment.replies || []), { ...newComment, user_vote: 0 }]
           }
         } else if (comment.replies && comment.replies.length > 0) {
           return {
@@ -107,6 +137,14 @@ export default function PostsPage() {
     setPostComments(prev => ({
       ...prev,
       [postId]: addReplyToTree(prev[postId] || [])
+    }))
+    // Add user vote entry for the new comment
+    setUserCommentVotes(prev => ({
+      ...prev,
+      [postId]: {
+        ...prev[postId],
+        [newComment.id]: 0
+      }
     }))
   }
 
@@ -149,16 +187,18 @@ export default function PostsPage() {
               <div key={post.id} className="space-y-4">
                 <PostCard
                   post={post}
+                  userVote={(post as any).user_vote || 0}
                   onVoteChange={handleVoteChange}
                   isExpanded={expandedPosts.has(post.id)}
                   onToggleComments={() => togglePostComments(post.id)}
-                  commentCount={postComments[post.id]?.length || 0}
+                  commentCount={post.comment_count || 0}
                 />
                 {expandedPosts.has(post.id) && (
                   <div className="ml-12">
                     <CommentTree
                       postId={post.id}
                       comments={postComments[post.id] || []}
+                      userVotes={userCommentVotes[post.id] || {}}
                       onCommentAdded={(comment) => handleCommentAdded(post.id, comment)}
                       onReplyAdded={(parentId, comment) => handleReplyAdded(post.id, parentId, comment)}
                       onVoteChange={(commentId, newScore, newUserVote) =>
