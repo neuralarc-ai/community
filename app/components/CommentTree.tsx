@@ -58,7 +58,7 @@ export default function CommentTree({
 
       {/* Comments list */}
       {comments.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {comments.map((comment) => (
             <CommentItem
               key={comment.id}

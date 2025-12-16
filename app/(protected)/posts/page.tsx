@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Header from '@/app/components/Header'
-import PostCard from '@/app/components/PostCard'
+import PostList from '@/app/components/PostList'
+import PostItem from '@/app/components/PostItem'
 import CommentTree from '@/app/components/CommentTree'
 import { Post, Comment } from '@/app/types'
 import Link from 'next/link'
@@ -177,15 +178,15 @@ export default function PostsPage() {
         </div>
 
         {/* Posts List */}
-        <div className="space-y-6">
+        <PostList>
           {posts.length === 0 && !loading ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">No posts yet. Be the first to start a discussion!</p>
             </div>
           ) : (
             posts.map((post) => (
-              <div key={post.id} className="space-y-4">
-                <PostCard
+              <div key={post.id}>
+                <PostItem
                   post={post}
                   userVote={(post as any).user_vote || 0}
                   onVoteChange={handleVoteChange}
@@ -194,7 +195,7 @@ export default function PostsPage() {
                   commentCount={post.comment_count || 0}
                 />
                 {expandedPosts.has(post.id) && (
-                  <div className="ml-12">
+                  <div className="ml-12 mt-4">
                     <CommentTree
                       postId={post.id}
                       comments={postComments[post.id] || []}
@@ -210,7 +211,7 @@ export default function PostsPage() {
               </div>
             ))
           )}
-        </div>
+        </PostList>
       </main>
     </div>
   )

@@ -10,6 +10,7 @@ export interface Post {
   author?: {
     username: string;
     full_name: string;
+    avatar_url: string;
   };
   vote_score?: number;
   comment_count?: number;

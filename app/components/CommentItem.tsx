@@ -4,6 +4,7 @@ import { useState } from 'react'
 import CommentThreadLine from './CommentThreadLine'
 import CommentActions from './CommentActions'
 import ReplyInput from './ReplyInput'
+import VoteColumn from './VoteColumn' // Import VoteColumn
 import { Comment } from '@/app/types'
 
 interface CommentItemProps {
@@ -61,15 +62,23 @@ export default function CommentItem({
   const isReplyInputVisible = activeReplyId === comment.id
 
   return (
-    <div className="relative">
-      {/* Thread line for nested comments */}
+    <div className="relative flex">
       <CommentThreadLine depth={depth} />
 
-      {/* Comment content */}
-      <div className={`${depth > 0 ? 'ml-4 sm:ml-6' : ''} group`}>
-        <div className="bg-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-200">
-          {/* Comment header */}
-          <div className="flex items-center space-x-2 text-sm text-gray-500 p-3 pb-2">
+      <div className={`${depth > 0 ? 'ml-4 sm:ml-6' : ''} group flex flex-grow`}>
+        <div className="flex flex-col items-center pr-2">
+          <VoteColumn
+            targetType="comment"
+            targetId={comment.id}
+            initialScore={comment.vote_score || 0}
+            userVote={userVote}
+            onVoteChange={handleVoteChange}
+            orientation="vertical"
+          />
+        </div>
+
+        <div className="flex-1 bg-white rounded-md shadow-sm hover:shadow-md transition-shadow duration-200 p-3">
+          <div className="flex items-center space-x-2 text-xs text-gray-500 mb-1">
             <span className="font-medium text-gray-900">
               {comment.author?.username || 'Anonymous'}
             </span>
@@ -77,55 +86,30 @@ export default function CommentItem({
             <span>{formatTime(comment.created_at)}</span>
           </div>
 
-          {/* Comment body */}
-          <div className="px-3 pb-2">
-            <div className="text-gray-800 whitespace-pre-wrap leading-relaxed">
-              {comment.body}
-            </div>
+          <div className="text-gray-800 whitespace-pre-wrap leading-relaxed mb-2">
+            {comment.body}
           </div>
 
-          {/* Comment actions */}
-          <div className="px-3 pb-3">
-            <CommentActions
-              commentId={comment.id}
-              initialScore={comment.vote_score || 0}
-              userVote={userVote}
-              onVoteChange={onVoteChange}
-              onReplyClick={handleReplyClick}
-              onShareClick={() => {/* TODO: implement share */}}
-              onMoreClick={() => {/* TODO: implement more options */}}
-            />
-          </div>
+          <CommentActions
+            commentId={comment.id}
+            initialScore={comment.vote_score || 0}
+            userVote={userVote}
+            onVoteChange={onVoteChange}
+            onReplyClick={handleReplyClick}
+            onShareClick={() => { /* TODO: implement share */ }}
+            onMoreClick={() => { /* TODO: implement more options */ }}
+            orientation="horizontal"
+          />
+
+          <ReplyInput
+            postId={comment.post_id}
+            parentCommentId={comment.id}
+            onReplyAdded={handleReplyAdded}
+            onCancel={handleReplyCancel}
+            depth={depth}
+            isVisible={isReplyInputVisible}
+          />
         </div>
-
-        {/* Reply input */}
-        <ReplyInput
-          postId={comment.post_id}
-          parentCommentId={comment.id}
-          onReplyAdded={handleReplyAdded}
-          onCancel={handleReplyCancel}
-          depth={depth}
-          isVisible={isReplyInputVisible}
-        />
-
-        {/* Nested replies */}
-        {comment.replies && comment.replies.length > 0 && (
-          <div className="mt-4 space-y-4">
-            {comment.replies.map((reply, index) => (
-              <CommentItem
-                key={reply.id}
-                comment={reply}
-                userVote={userVotes[reply.id] || 0}
-                userVotes={userVotes}
-                onVoteChange={onVoteChange}
-                onReplyAdded={onReplyAdded}
-                depth={depth + 1}
-                activeReplyId={activeReplyId}
-                onReplyToggle={onReplyToggle}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
