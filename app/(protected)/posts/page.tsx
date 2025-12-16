@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import Header from '@/app/components/Header'
-import { Post } from '@/app/types'
-import { MessageCircle, Heart, Reply } from 'lucide-react'
+import PostCard from '@/app/components/PostCard'
+import CommentTree from '@/app/components/CommentTree'
+import { Post, Comment } from '@/app/types'
+import Link from 'next/link'
 
 export default function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
+  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set())
+  const [postComments, setPostComments] = useState<Record<string, Comment[]>>({})
 
   useEffect(() => {
     fetchPosts()
@@ -26,10 +29,86 @@ export default function PostsPage() {
     }
   }
 
-  const filteredPosts = posts.filter(post => {
-    if (filter === 'all') return true
-    return post.status === filter
-  })
+  const handleVoteChange = (postId: string, newScore: number, newUserVote: -1 | 0 | 1) => {
+    setPosts(currentPosts =>
+      currentPosts.map(post =>
+        post.id === postId
+          ? { ...post, vote_score: newScore }
+          : post
+      )
+    )
+  }
+
+  const togglePostComments = async (postId: string) => {
+    const newExpanded = new Set(expandedPosts)
+    if (newExpanded.has(postId)) {
+      newExpanded.delete(postId)
+    } else {
+      newExpanded.add(postId)
+      // Fetch comments if not already loaded
+      if (!postComments[postId]) {
+        await fetchPostComments(postId)
+      }
+    }
+    setExpandedPosts(newExpanded)
+  }
+
+  const fetchPostComments = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/posts/${postId}`)
+      if (response.ok) {
+        const postData = await response.json()
+        setPostComments(prev => ({
+          ...prev,
+          [postId]: postData.comments || []
+        }))
+      }
+    } catch (error) {
+      console.error('Failed to fetch comments:', error)
+    }
+  }
+
+  const handleCommentAdded = (postId: string, newComment: Comment) => {
+    setPostComments(prev => ({
+      ...prev,
+      [postId]: [...(prev[postId] || []), newComment]
+    }))
+  }
+
+  const handleCommentVoteChange = (postId: string, commentId: string, newScore: number, newUserVote: -1 | 0 | 1) => {
+    setPostComments(prev => ({
+      ...prev,
+      [postId]: (prev[postId] || []).map(comment =>
+        comment.id === commentId
+          ? { ...comment, vote_score: newScore }
+          : comment
+      )
+    }))
+  }
+
+  const handleReplyAdded = (postId: string, parentId: string, newComment: Comment) => {
+    const addReplyToTree = (comments: Comment[]): Comment[] => {
+      return comments.map(comment => {
+        if (comment.id === parentId) {
+          return {
+            ...comment,
+            replies: [...(comment.replies || []), newComment]
+          }
+        } else if (comment.replies && comment.replies.length > 0) {
+          return {
+            ...comment,
+            replies: addReplyToTree(comment.replies)
+          }
+        }
+        return comment
+      })
+    }
+
+    setPostComments(prev => ({
+      ...prev,
+      [postId]: addReplyToTree(prev[postId] || [])
+    }))
+  }
 
   if (loading) {
     return (
@@ -52,70 +131,45 @@ export default function PostsPage() {
         <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">Community Posts</h1>
-            <p className="text-gray-600">Manage and respond to community discussions</p>
+            <p className="text-gray-600">Share ideas and engage in discussions</p>
           </div>
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+          <Link href="/posts/new" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
             New Post
-          </button>
+          </Link>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6">
-          {['all', 'unanswered', 'trending'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                filter === tab
-                  ? 'bg-yellow-400 text-gray-900'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} Posts
-            </button>
-          ))}
-        </div>
-
-        {/* Posts Grid */}
+        {/* Posts List */}
         <div className="space-y-6">
-          {filteredPosts.map((post) => (
-            <div key={post.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-semibold text-gray-900">
-                    {post.avatar}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{post.author}</h4>
-                    <span className="text-sm text-gray-500">{post.time}</span>
-                  </div>
-                </div>
-                <span className="px-3 py-1 bg-yellow-400 text-gray-900 rounded-full text-xs font-medium">
-                  {post.category}
-                </span>
-              </div>
-
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{post.title}</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">{post.content}</p>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2 text-gray-500">
-                    <MessageCircle size={18} />
-                    <span className="text-sm">{post.replies} replies</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-500">
-                    <Heart size={18} />
-                    <span className="text-sm">{post.likes} likes</span>
-                  </div>
-                </div>
-                <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                  <Reply size={16} />
-                  Reply
-                </button>
-              </div>
+          {posts.length === 0 && !loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No posts yet. Be the first to start a discussion!</p>
             </div>
-          ))}
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className="space-y-4">
+                <PostCard
+                  post={post}
+                  onVoteChange={handleVoteChange}
+                  isExpanded={expandedPosts.has(post.id)}
+                  onToggleComments={() => togglePostComments(post.id)}
+                  commentCount={postComments[post.id]?.length || 0}
+                />
+                {expandedPosts.has(post.id) && (
+                  <div className="ml-12">
+                    <CommentTree
+                      postId={post.id}
+                      comments={postComments[post.id] || []}
+                      onCommentAdded={(comment) => handleCommentAdded(post.id, comment)}
+                      onReplyAdded={(parentId, comment) => handleReplyAdded(post.id, parentId, comment)}
+                      onVoteChange={(commentId, newScore, newUserVote) =>
+                        handleCommentVoteChange(post.id, commentId, newScore, newUserVote)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </main>
     </div>
