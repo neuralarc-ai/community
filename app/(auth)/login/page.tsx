@@ -34,7 +34,8 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else {
-        router.push('/')
+        // Redirect to dashboard after successful login
+        router.push('/dashboard')
       }
     } catch (err) {
       setError('An unexpected error occurred')
