@@ -32,12 +32,12 @@ export default function WorkshopsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[var(--bg-primary)]">
         <Header />
         <main className="container py-8">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading workshops...</p>
+            <div className="spinner mx-auto"></div>
+            <p className="mt-4 text-[var(--text-secondary)]">Loading workshops...</p>
           </div>
         </main>
       </div>
@@ -45,15 +45,15 @@ export default function WorkshopsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <Header />
       <main className="container py-8">
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Workshops</h1>
-            <p className="text-gray-600">Schedule and manage online workshops</p>
+            <h1 className="page-title mb-2">Workshops</h1>
+            <p className="page-subtitle">Schedule and manage online workshops</p>
           </div>
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+          <button className="btn-primary self-start">
             Schedule Workshop
           </button>
         </div>
@@ -61,8 +61,8 @@ export default function WorkshopsPage() {
         {/* Workshops Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {workshops.map((workshop) => (
-            <div key={workshop.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="bg-gradient-to-r from-yellow-400 to-green-400 p-6 text-gray-900">
+            <div key={workshop.id} className="card overflow-hidden">
+              <div className="bg-gradient-to-r from-[var(--accent-yellow)] to-[var(--accent-green)] p-6 text-[var(--text-primary)]">
                 <div className="flex items-center gap-2 mb-3">
                   <Calendar size={16} />
                   <span className="text-sm font-medium">{formatDate(workshop.date)} at {workshop.time}</span>
@@ -71,25 +71,25 @@ export default function WorkshopsPage() {
               </div>
 
               <div className="p-6">
-                <p className="text-gray-600 mb-4 leading-relaxed">{workshop.description}</p>
+                <p className="text-[var(--text-secondary)] mb-4 leading-relaxed">{workshop.description}</p>
 
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)] text-sm">
                     <Clock size={16} />
                     <span>{workshop.duration} hours</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)] text-sm">
                     <Users size={16} />
                     <span>{workshop.enrolled}/{workshop.maxParticipants} enrolled</span>
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <button className="flex-1 flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button className="btn-primary flex-1 flex justify-center items-center gap-2">
                     <Video size={16} />
                     Join Workshop
                   </button>
-                  <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                  <button className="btn-secondary flex justify-center items-center gap-2">
                     <Edit size={16} />
                     Edit
                   </button>

@@ -44,7 +44,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <Header />
       <main className="container py-8">
         <Dashboard />

@@ -56,15 +56,15 @@ export default function Header() {
   ]
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <header className="bg-[var(--bg-secondary)] border-b border-[var(--border-color)] sticky top-0 z-50 shadow-sm">
       <div className="container">
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-3">
-            <Users size={32} className="text-gray-700" />
-            <span className="text-xl font-semibold text-gray-900">Community Portal</span>
+            <Users size={32} className="text-[var(--text-secondary)]" />
+            <span className="text-xl font-semibold text-[var(--text-primary)]">Community Portal</span>
           </div>
 
-          <nav className="flex gap-2">
+          <nav className="hidden md:flex gap-2">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -72,8 +72,8 @@ export default function Header() {
                 onClick={() => setActiveSection(item.href.slice(1))}
                 className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
                   item.active
-                    ? 'bg-yellow-400 text-gray-900'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-[var(--accent-yellow)] text-[var(--text-primary)]'
+                    : 'text-[var(--text-secondary)] hover:bg-gray-50 hover:text-[var(--text-primary)]'
                 }`}
               >
                 {item.icon}
@@ -83,18 +83,46 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-gray-600">Community Manager</span>
-            <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-semibold text-gray-900">
+            <span className="hidden sm:block text-sm font-medium text-[var(--text-secondary)]">Community Manager</span>
+            <div className="w-10 h-10 bg-[var(--accent-yellow)] rounded-full flex items-center justify-center font-semibold text-[var(--text-primary)]">
               CM
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              className="btn-secondary hidden sm:flex"
             >
               <LogOut size={18} />
               Logout
             </button>
+            {/* Mobile menu button - could be expanded in future */}
+            <button
+              onClick={handleLogout}
+              className="sm:hidden btn-secondary p-2"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
+        </div>
+
+        {/* Mobile navigation */}
+        <div className="md:hidden border-t border-[var(--border-color)] pt-4 pb-2">
+          <nav className="flex gap-2 overflow-x-auto">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setActiveSection(item.href.slice(1))}
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
+                  item.active
+                    ? 'bg-[var(--accent-yellow)] text-[var(--text-primary)]'
+                    : 'text-[var(--text-secondary)] hover:bg-gray-50 hover:text-[var(--text-primary)]'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </header>

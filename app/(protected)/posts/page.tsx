@@ -33,12 +33,12 @@ export default function PostsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[var(--bg-primary)]">
         <Header />
         <main className="container py-8">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading posts...</p>
+            <div className="spinner mx-auto"></div>
+            <p className="mt-4 text-[var(--text-secondary)]">Loading posts...</p>
           </div>
         </main>
       </div>
@@ -46,29 +46,29 @@ export default function PostsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <Header />
       <main className="container py-8">
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Community Posts</h1>
-            <p className="text-gray-600">Manage and respond to community discussions</p>
+            <h1 className="page-title mb-2">Community Posts</h1>
+            <p className="page-subtitle">Manage and respond to community discussions</p>
           </div>
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+          <button className="btn-primary self-start">
             New Post
           </button>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto">
           {['all', 'unanswered', 'trending'].map((tab) => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 filter === tab
-                  ? 'bg-yellow-400 text-gray-900'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  ? 'bg-[var(--accent-yellow)] text-[var(--text-primary)]'
+                  : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-gray-50 border border-[var(--border-color)]'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)} Posts
@@ -79,37 +79,37 @@ export default function PostsPage() {
         {/* Posts Grid */}
         <div className="space-y-6">
           {filteredPosts.map((post) => (
-            <div key={post.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-4">
+            <div key={post.id} className="card p-6">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-semibold text-gray-900">
+                  <div className="w-10 h-10 bg-[var(--accent-yellow)] rounded-full flex items-center justify-center font-semibold text-[var(--text-primary)] flex-shrink-0">
                     {post.avatar}
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{post.author}</h4>
-                    <span className="text-sm text-gray-500">{post.time}</span>
+                  <div className="min-w-0">
+                    <h4 className="font-semibold text-[var(--text-primary)] truncate">{post.author}</h4>
+                    <span className="text-sm text-[var(--text-muted)]">{post.time}</span>
                   </div>
                 </div>
-                <span className="px-3 py-1 bg-yellow-400 text-gray-900 rounded-full text-xs font-medium">
+                <span className="badge self-start">
                   {post.category}
                 </span>
               </div>
 
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{post.title}</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">{post.content}</p>
+              <h3 className="card-title mb-3">{post.title}</h3>
+              <p className="text-[var(--text-secondary)] mb-6 leading-relaxed">{post.content}</p>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2 text-gray-500">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
                     <MessageCircle size={18} />
                     <span className="text-sm">{post.replies} replies</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500">
+                  <div className="flex items-center gap-2 text-[var(--text-muted)]">
                     <Heart size={18} />
                     <span className="text-sm">{post.likes} likes</span>
                   </div>
                 </div>
-                <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <button className="btn-secondary self-start">
                   <Reply size={16} />
                   Reply
                 </button>
