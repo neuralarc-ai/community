@@ -48,9 +48,9 @@ export default function HomePage() {
   }
 
   if (user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 text-center">
+      return (
+        
+        <div className="max-w-7xl mx-auto h-screen w-full space-y-8 justify-center text-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Welcome back, {user.email}!
@@ -74,13 +74,13 @@ export default function HomePage() {
             </button>
           </div>
         </div>
-      </div>
-    )
+     )
+     
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 text-center">
+    // <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-7xl mx-auto h-full w-full space-y-8 text-center">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">
             Community Portal
@@ -92,7 +92,7 @@ export default function HomePage() {
         <div className="space-y-4">
           <Link
             href="/login"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+            className="w-full flex justify-center p-10   border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-red-400 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
           >
             Sign In
           </Link>
@@ -104,6 +104,6 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
-    </div>
+    // </div>
   )
 }
