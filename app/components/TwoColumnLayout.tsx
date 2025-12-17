@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from './ui/card';
 import { Shield } from 'lucide-react';
+import TrendingSection from '@/app/components/TrendingSection';
 
 interface TwoColumnLayoutProps {
   children: React.ReactNode;
@@ -34,13 +35,8 @@ export default function TwoColumnLayout({ children, rightSidebar }: TwoColumnLay
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-xs text-gray-400">
-                    © 2024 Community Portal. All rights reserved.
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Trending Section as part of the sidebar */}
+              <TrendingSection />
             </>
           )}
         </div>
