@@ -350,18 +350,18 @@ export default function PostsPage() {
                 <input 
                     type="text" 
                     placeholder="Create Post" 
-                    className="bg-muted hover:bg-input border border-transparent hover:border-primary/50 rounded-md px-4 py-2 flex-grow text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-text"
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-yellow-500/30 rounded-lg px-4 py-2.5 flex-grow text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-yellow-500/20 transition-all cursor-text"
                     onFocus={() => router.push('/posts/new')}
                 />
                 <button 
                     onClick={() => router.push('/posts/new')}
-                    className="text-muted-foreground hover:bg-muted p-2 rounded transition-colors"
+                    className="text-muted-foreground hover:bg-white/10 hover:text-white p-2 rounded-lg transition-all"
                 >
                     <ImageIcon size={20} />
                 </button>
                 <button 
                     onClick={() => router.push('/posts/new')}
-                    className="text-muted-foreground hover:bg-muted p-2 rounded transition-colors"
+                    className="text-muted-foreground hover:bg-white/10 hover:text-white p-2 rounded-lg transition-all"
                 >
                     <LinkIcon size={20} />
                 </button>
