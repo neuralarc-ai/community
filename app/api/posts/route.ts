@@ -1,11 +1,92 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mockPosts } from '@/app/data/mockData'
+import { createServerClient } from '@/app/lib/supabaseServerClient'
 import { Post } from '@/app/types'
+import { getVoteScore } from '@/app/lib/voteUtils'
 
 export async function GET() {
   try {
-    return NextResponse.json(mockPosts)
+    const supabase = await createServerClient()
+
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Fetch posts
+    const { data: posts, error } = await supabase
+      .from('posts')
+      .select(`
+        id,
+        author_id,
+        title,
+        body,
+        tags,
+        created_at,
+        updated_at
+      `)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching posts:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch posts' },
+        { status: 500 }
+      )
+    }
+
+    // Fetch profiles for all post authors
+    const authorIds = [...new Set(posts.map(post => post.author_id))]
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, full_name')
+      .in('id', authorIds)
+
+    const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
+
+    // Fetch user votes for posts if user is authenticated
+    let userVotesMap = new Map<string, -1 | 0 | 1>()
+    if (user) {
+      const postIds = posts.map(post => post.id)
+      const { data: userVotes } = await supabase
+        .from('votes')
+        .select('target_id, value')
+        .eq('user_id', user.id)
+        .eq('target_type', 'post')
+        .in('target_id', postIds)
+
+      userVotesMap = new Map(userVotes?.map(vote => [vote.target_id, vote.value as -1 | 1]) || [])
+    }
+
+    // Calculate vote scores and comment counts for each post
+    const postsWithScores = await Promise.all(
+      posts.map(async (post) => {
+        const [voteScore, commentCount] = await Promise.all([
+          getVoteScore('post', post.id),
+          // Count comments for this post
+          (async () => {
+            const { count, error } = await supabase
+              .from('comments')
+              .select('*', { count: 'exact', head: true })
+              .eq('post_id', post.id)
+            return error ? 0 : count || 0
+          })()
+        ])
+
+        const profile = profileMap.get(post.author_id)
+        return {
+          ...post,
+          author: {
+            username: profile?.username || 'Anonymous',
+            full_name: profile?.full_name || 'Anonymous'
+          },
+          vote_score: voteScore,
+          comment_count: commentCount,
+          user_vote: userVotesMap.get(post.id) || 0
+        }
+      })
+    )
+
+    return NextResponse.json(postsWithScores)
   } catch (error) {
+    console.error('Server error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch posts' },
       { status: 500 }
@@ -15,24 +96,75 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createServerClient()
     const body = await request.json()
-    const newPost: Post = {
-      id: mockPosts.length + 1,
-      author: body.author || 'Community Manager',
-      avatar: body.avatar || 'CM',
-      time: 'Just now',
-      category: (body.category || 'general') as Post['category'],
-      title: body.title,
-      content: body.content,
-      replies: 0,
-      likes: 0,
-      status: 'all' as const
+
+    // Get the authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
-    mockPosts.unshift(newPost)
+    const { title, body: postBody, tags = [] } = body
 
-    return NextResponse.json(newPost, { status: 201 })
+    if (!title || !postBody) {
+      return NextResponse.json(
+        { error: 'Title and body are required' },
+        { status: 400 }
+      )
+    }
+
+    // Create the post
+    const { data: newPost, error } = await supabase
+      .from('posts')
+      .insert({
+        author_id: user.id,
+        title,
+        body: postBody,
+        tags
+      })
+      .select(`
+        id,
+        author_id,
+        title,
+        body,
+        tags,
+        created_at,
+        updated_at
+      `)
+      .single()
+
+    if (error) {
+      console.error('Error creating post:', error)
+      return NextResponse.json(
+        { error: 'Failed to create post' },
+        { status: 500 }
+      )
+    }
+
+    // Fetch the author profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username, full_name')
+      .eq('id', user.id)
+      .single()
+
+    const postWithAuthor = {
+      ...newPost,
+      author: {
+        username: profile?.username || 'Anonymous',
+        full_name: profile?.full_name || 'Anonymous'
+      },
+      vote_score: 0
+    }
+
+    return NextResponse.json(postWithAuthor, { status: 201 })
   } catch (error) {
+    console.error('Server error:', error)
     return NextResponse.json(
       { error: 'Failed to create post' },
       { status: 500 }

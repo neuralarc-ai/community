@@ -37,10 +37,9 @@ export default function SignupPage() {
       if (error) {
         setError(error.message)
       } else {
-        setSuccess('Account created successfully! Please check your email to verify your account.')
-        setTimeout(() => {
-          router.push('/')
-        }, 2000)
+        setSuccess('Account created successfully! Please complete your profile.')
+        // Redirect to complete profile page after successful signup
+        router.push('/complete-profile')
       }
     } catch (err) {
       setError('An unexpected error occurred')
