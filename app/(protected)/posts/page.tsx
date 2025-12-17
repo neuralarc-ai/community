@@ -176,6 +176,24 @@ export default function PostsPage() {
     }))
   }
 
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setPosts(currentPosts => currentPosts.filter(post => post.id !== postId))
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to delete post')
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error)
+      alert('Failed to delete post')
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -187,7 +205,7 @@ export default function PostsPage() {
   return (
     <TwoColumnLayout>
         {/* Create Post Input & Filter Bar */}
-        <Card className="mb-6 shadow-sm border-border p-2">
+        <Card className="mb-6 shadow-sm border-yellow-500/20 bg-card/50 backdrop-blur-sm p-2 hover:border-yellow-500/40 hover:shadow-[0_0_20px_rgba(234,179,8,0.05)] transition-all">
             <div className="flex items-center space-x-2 p-2">
                 <div className="flex-shrink-0">
                     <Avatar 
@@ -199,7 +217,7 @@ export default function PostsPage() {
                 <input 
                     type="text" 
                     placeholder="Create Post" 
-                    className="bg-muted hover:bg-background border border-transparent hover:border-primary/50 rounded-md px-4 py-2 flex-grow text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-text"
+                    className="bg-muted hover:bg-input border border-transparent hover:border-primary/50 rounded-md px-4 py-2 flex-grow text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-text"
                     onFocus={() => router.push('/posts/new')}
                 />
                 <button 
@@ -233,6 +251,8 @@ export default function PostsPage() {
                   isExpanded={expandedPosts.has(post.id)}
                   onToggleComments={() => togglePostComments(post.id)}
                   commentCount={post.comment_count || 0}
+                  currentUserId={currentUserProfile?.id}
+                  onDelete={handleDeletePost}
                 />
                 {expandedPosts.has(post.id) && (
                   <div className="ml-0 mt-2 bg-card rounded-b-xl border-x border-b border-border p-4 animate-in fade-in slide-in-from-top-2 shadow-sm">

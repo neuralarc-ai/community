@@ -52,10 +52,10 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
         
         <main 
             className={`
-                flex-1 px-4 py-6 transition-all duration-300 ease-in-out
-                ${!isMobile && isSidebarOpen ? 'ml-60' : ''}
-                ${!isMobile && !isSidebarOpen ? 'ml-20' : ''}
-                ${isMobile ? 'ml-0' : ''}
+                flex-1 px-4 py-6 transition-all duration-300 ease-in-out pl-8
+                ${!isMobile && isSidebarOpen ? 'ml-64' : ''}
+                ${!isMobile && !isSidebarOpen ? 'ml-24' : ''}
+                ${isMobile ? 'ml-0 pl-4' : ''}
             `}
         >
           {children}

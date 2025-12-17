@@ -11,6 +11,8 @@ interface PostItemProps {
   commentCount: number;
   isExpanded: boolean;
   onToggleComments: () => void;
+  currentUserId?: string;
+  onDelete?: (postId: string) => void;
 }
 
 const formatTime = (dateString: string) => {
@@ -32,15 +34,17 @@ export default function PostItem({
   commentCount,
   isExpanded,
   onToggleComments,
+  currentUserId,
+  onDelete
 }: PostItemProps) {
   const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange(post.id, newScore, newUserVote);
   };
 
   return (
-    <div className="flex bg-white border border-gray-200 rounded-xl mb-4 hover:border-gray-300 transition-all duration-200 cursor-pointer overflow-hidden shadow-sm hover:shadow-md">
+    <div className="flex bg-card/40 backdrop-blur-sm border border-white/5 rounded-2xl mb-6 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02] overflow-hidden group">
       {/* Vote Column - Hidden on mobile */}
-      <div className="hidden sm:flex bg-gray-50/50 w-12 border-r border-gray-100 flex-col items-center pt-3 gap-1">
+      <div className="hidden sm:flex bg-white/[0.02] w-14 border-r border-white/5 flex-col items-center pt-4 gap-2 group-hover:border-yellow-500/10 transition-colors">
         <VoteColumn
           targetType="post"
           targetId={post.id}
@@ -51,19 +55,19 @@ export default function PostItem({
         />
       </div>
 
-      <div className="flex-1 min-w-0 p-3 sm:p-4">
+      <div className="flex-1 min-w-0 p-5 sm:p-6">
         {/* Header Metadata */}
-        <div className="flex items-center text-xs text-gray-500 mb-2 gap-2">
-             <div className="flex items-center gap-1 hover:bg-gray-100 p-1 -ml-1 rounded transition-colors">
-                <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={20} />
-                <span className="font-bold text-gray-900 hover:underline">u/{post.author?.username || 'Anonymous'}</span>
+        <div className="flex items-center text-xs text-muted-foreground mb-3 gap-3">
+             <div className="flex items-center gap-2 hover:bg-yellow-500/5 p-1.5 -ml-1.5 rounded-lg transition-colors cursor-pointer group/user">
+                <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={24} />
+                <span className="font-medium text-white group-hover/user:text-yellow-200 underline-offset-4 group-hover/user:underline">u/{post.author?.username || 'Anonymous'}</span>
              </div>
-             <span>•</span>
+             <span className="text-white/20">•</span>
              <span>{formatTime(post.created_at)}</span>
              {post.tags && post.tags.length > 0 && (
                 <>
-                  <span>•</span>
-                  <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  <span className="text-white/20">•</span>
+                  <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-yellow-500/30 hover:text-yellow-200 hover:bg-yellow-500/5 transition-all">
                     {post.tags[0]}
                   </span>
                 </>
@@ -71,19 +75,19 @@ export default function PostItem({
         </div>
 
         {/* Content Link */}
-        <Link href={`/posts/${post.id}`} className="block group">
-            <h2 className="text-lg font-heading font-bold text-gray-900 mb-2 leading-snug group-hover:text-primary transition-colors">
+        <Link href={`/posts/${post.id}`} className="block group/title">
+            <h2 className="text-xl font-heading font-semibold text-white mb-3 leading-snug group-hover/title:text-yellow-50 transition-colors">
               {post.title}
             </h2>
             {post.body && (
-              <div className="text-sm text-gray-600 line-clamp-3 mb-3 font-sans leading-relaxed">
+              <div className="text-sm text-muted-foreground line-clamp-3 mb-4 font-sans leading-relaxed group-hover/title:text-white/80 transition-colors">
                 {post.body}
               </div>
             )}
         </Link>
 
         {/* Mobile Vote & Actions */}
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
             <div className="sm:hidden">
                 <VoteColumn
                   targetType="post"
@@ -95,12 +99,15 @@ export default function PostItem({
                 />
             </div>
 
-            <div className="flex items-center text-gray-500 font-bold text-xs">
+            <div className="flex items-center text-muted-foreground font-medium text-xs">
                 <PostActions
                   commentCount={commentCount}
                   onToggleComments={onToggleComments}
                   isExpanded={isExpanded}
                   postId={post.id}
+                  authorId={post.author_id}
+                  currentUserId={currentUserId}
+                  onDelete={onDelete}
                 />
             </div>
         </div>

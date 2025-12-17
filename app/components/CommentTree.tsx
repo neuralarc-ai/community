@@ -59,7 +59,7 @@ const CommentTree = memo(function CommentTree({
           ))}
         </div>
       ) : (
-        <div className="text-center text-gray-500 py-4">
+        <div className="text-center text-muted-foreground py-4">
           <p>No comments yet. Be the first to share your thoughts!</p>
         </div>
       )}
