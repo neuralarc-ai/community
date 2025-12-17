@@ -32,7 +32,7 @@ const CommentTree = memo(function CommentTree({
   const displayComments = useMemo(() => {
     return comments.map(comment => ({
       ...comment,
-      children: comment.children || comment.replies || []
+      children: (comment as any).children || comment.replies || []
     }))
   }, [comments])
 
