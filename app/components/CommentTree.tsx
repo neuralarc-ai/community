@@ -32,7 +32,7 @@ const CommentTree = memo(function CommentTree({
   const displayComments = useMemo(() => {
     return comments.map(comment => ({
       ...comment,
-      children: comment.children || comment.replies || []
+      children: (comment as any).children || comment.replies || []
     }))
   }, [comments])
 
@@ -66,7 +66,7 @@ const CommentTree = memo(function CommentTree({
           ))}
         </div>
       ) : (
-        <div className="text-center text-gray-500 py-4">
+        <div className="text-center text-muted-foreground py-4">
           <p>No comments yet. Be the first to share your thoughts!</p>
         </div>
       )}

@@ -41,7 +41,7 @@ export default function WorkshopsPage() {
   }
 
   return (
-    <div className="container max-w-4xl py-8 mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="container max-w-[1400px] py-8 mx-auto px-6">
       <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Workshops</h1>
@@ -54,16 +54,16 @@ export default function WorkshopsPage() {
         </div>
 
         {/* Workshops Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {workshops.map((workshop) => (
-            <Card key={workshop.id} className="overflow-hidden border-border shadow-sm hover:shadow-md transition-all duration-200">
+            <Card key={workshop.id} className="overflow-hidden border-green-500/20 shadow-sm hover:shadow-[0_0_20px_rgba(34,197,94,0.1)] hover:border-green-500/40 transition-all duration-300 bg-card/40 backdrop-blur-sm group">
               {/* Colored Header Area */}
-              <div className="bg-muted/50 p-6 border-b border-border">
-                <div className="flex items-center gap-2 mb-3 text-primary font-medium">
+              <div className="bg-green-500/5 p-6 border-b border-green-500/10 group-hover:bg-green-500/10 transition-colors">
+                <div className="flex items-center gap-2 mb-3 text-green-400 font-medium">
                   <Calendar size={16} />
                   <span className="text-sm">{formatDate(workshop.date)} at {workshop.time}</span>
                 </div>
-                <h3 className="text-xl font-bold text-foreground">{workshop.title}</h3>
+                <h3 className="text-xl font-bold text-foreground group-hover:text-green-100 transition-colors">{workshop.title}</h3>
               </div>
 
               <CardContent className="p-6">

@@ -33,8 +33,8 @@ export default function MeetingsPage() {
   if (loading) {
     return (
       <div className="text-center py-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading meetings...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Loading meetings...</p>
       </div>
     )
   }
@@ -43,10 +43,10 @@ export default function MeetingsPage() {
     <div className="container py-8">
       <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Online Meetings</h1>
-            <p className="text-gray-600">Schedule and manage community meetings</p>
+            <h1 className="text-3xl font-semibold text-foreground mb-2">Online Meetings</h1>
+            <p className="text-muted-foreground">Schedule and manage community meetings</p>
           </div>
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+          <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium transition-colors">
             Schedule Meeting
           </button>
         </div>
@@ -54,33 +54,33 @@ export default function MeetingsPage() {
         {/* Meetings Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {meetings.map((meeting) => (
-            <div key={meeting.id} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow border-l-4 border-l-yellow-400">
+            <div key={meeting.id} className="bg-card/40 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-pink-500/20 hover:border-pink-500/40 hover:shadow-[0_0_20px_rgba(236,72,153,0.1)] hover:bg-pink-500/5 transition-all duration-300 group">
               <div className="flex justify-between items-start mb-4">
-                <span className="px-3 py-1 bg-yellow-400 text-gray-900 rounded-full text-xs font-medium">
+                <span className="px-3 py-1 bg-pink-500/10 text-pink-200 rounded-full text-xs font-medium border border-pink-500/20">
                   {meeting.type}
                 </span>
               </div>
 
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{meeting.title}</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed">{meeting.agenda}</p>
+              <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-pink-100 transition-colors">{meeting.title}</h3>
+              <p className="text-muted-foreground mb-6 leading-relaxed">{meeting.agenda}</p>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm group-hover:text-pink-200/70 transition-colors">
                   <Calendar size={16} />
                   <span>{formatDate(meeting.date)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm group-hover:text-pink-200/70 transition-colors">
                   <Clock size={16} />
                   <span>{meeting.time} ({meeting.duration} min)</span>
                 </div>
               </div>
 
               <div className="flex gap-3">
-                <button className="flex-1 flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+                <button className="flex-1 flex items-center justify-center gap-2 bg-pink-500/20 hover:bg-pink-500/30 text-pink-100 px-4 py-2 rounded-lg font-medium transition-colors border border-pink-500/20 hover:border-pink-500/30">
                   <Video size={16} />
                   Join Meeting
                 </button>
-                <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                <button className="flex items-center gap-2 bg-transparent hover:bg-pink-500/10 text-pink-200/80 hover:text-pink-100 px-4 py-2 rounded-lg font-medium transition-colors border border-pink-500/20 hover:border-pink-500/30">
                   <Edit size={16} />
                   Edit
                 </button>

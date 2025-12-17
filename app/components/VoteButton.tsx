@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/app/lib/supabaseClient'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 
@@ -26,7 +26,13 @@ export default function VoteButton({
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
 
-  // ... handleVote and handleVoteClick logic remains the same ...
+  useEffect(() => {
+    setScore(initialScore)
+  }, [initialScore])
+
+  useEffect(() => {
+    setCurrentVote(userVote)
+  }, [userVote])
 
   const handleVoteClick = async (voteValue: 1 | -1) => {
       if (isLoading) return
@@ -76,10 +82,10 @@ export default function VoteButton({
   }
 
   const containerClasses = orientation === 'vertical'
-    ? "flex flex-col items-center space-y-1"
-    : "flex items-center space-x-1";
+    ? "flex flex-col items-center gap-1"
+    : "flex items-center gap-2";
 
-  const iconSize = orientation === 'vertical' ? 24 : 16;
+  const iconSize = orientation === 'vertical' ? 20 : 16;
   const textSize = orientation === 'vertical' ? "text-sm" : "text-xs";
 
   return (
@@ -87,18 +93,18 @@ export default function VoteButton({
       <button
         onClick={() => handleVoteClick(1)}
         disabled={isLoading}
-        className={`p-1 rounded hover:bg-black/5 transition-colors ${
-          currentVote === 1 ? 'text-primary bg-primary/10' : 'text-gray-500'
+        className={`p-1.5 rounded-lg transition-all duration-200 ${
+          currentVote === 1 
+            ? 'text-white bg-white/10' 
+            : 'text-muted-foreground hover:text-white hover:bg-white/5'
         }`}
         aria-label="Upvote"
       >
         <ArrowUp size={iconSize} strokeWidth={2.5} />
       </button>
       
-      <span className={`${textSize} font-bold min-w-[1ch] text-center ${
-        currentVote === 1 ? 'text-primary' :
-        currentVote === -1 ? 'text-blue-600' :
-        'text-gray-700'
+      <span className={`${textSize} font-bold min-w-[1ch] text-center tabular-nums ${
+        currentVote !== 0 ? 'text-white' : 'text-muted-foreground'
       }`}>
         {score}
       </span>
@@ -106,8 +112,10 @@ export default function VoteButton({
       <button
         onClick={() => handleVoteClick(-1)}
         disabled={isLoading}
-        className={`p-1 rounded hover:bg-black/5 transition-colors ${
-          currentVote === -1 ? 'text-blue-600 bg-blue-50' : 'text-gray-500'
+        className={`p-1.5 rounded-lg transition-all duration-200 ${
+          currentVote === -1 
+            ? 'text-white bg-white/10' 
+            : 'text-muted-foreground hover:text-white hover:bg-white/5'
         }`}
         aria-label="Downvote"
       >
