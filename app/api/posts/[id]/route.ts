@@ -8,6 +8,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const supabase = await createServerClient()
     const { id: postId } = await params
 
+    // Get the authenticated user
+    const { data: { user } } = await supabase.auth.getUser()
+
     // Fetch the post
     const { data: post, error: postError } = await supabase
       .from('posts')
@@ -33,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Fetch the post author profile
     const { data: postProfile } = await supabase
       .from('profiles')
-      .select('username, full_name')
+      .select('username, full_name, avatar_url')
       .eq('id', post.author_id)
       .single()
 
@@ -56,6 +59,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json(
         { error: 'Failed to fetch comments' },
         { status: 500 }
+      )
+    }
+
+    // Fetch user votes if authenticated
+    let userVotesMap = new Map<string, -1 | 0 | 1>()
+    if (user) {
+      const targetIds = [postId, ...comments.map(comment => comment.id)]
+      const { data: userVotes } = await supabase
+        .from('votes')
+        .select('target_type, target_id, value')
+        .eq('user_id', user.id)
+        .in('target_id', targetIds)
+
+      userVotesMap = new Map(
+        userVotes?.map(vote => [`${vote.target_type}:${vote.target_id}`, vote.value as -1 | 1]) || []
       )
     }
 
@@ -90,6 +108,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           full_name: profile?.full_name || 'Anonymous'
         },
         vote_score: commentVoteScores[index],
+        user_vote: userVotesMap.get(`comment:${comment.id}`) || 0,
         replies: []
       })
     })
@@ -107,13 +126,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }
     })
 
-    const postWithDetails: Post & { comments: Comment[] } = {
+    const postWithDetails: Post & { comments: Comment[], user_vote?: number } = {
       ...post,
       author: {
         username: postProfile?.username || 'Anonymous',
-        full_name: postProfile?.full_name || 'Anonymous'
+        full_name: postProfile?.full_name || 'Anonymous',
+        avatar_url: postProfile?.avatar_url || ''
       },
       vote_score: postVoteScore,
+      user_vote: userVotesMap.get(`post:${postId}`) || 0,
       comments: rootComments
     }
 
