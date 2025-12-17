@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import GlobalLayout from '@/app/components/GlobalLayout';
+import TwoColumnLayout from '@/app/components/TwoColumnLayout';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Avatar from '@/app/components/Avatar';
@@ -67,7 +67,7 @@ export default function ProfilePage() {
   );
 
   return (
-    <GlobalLayout rightSidebar={ProfileSidebar}>
+    <TwoColumnLayout rightSidebar={ProfileSidebar}>
       {/* Profile Header */}
       <div className="space-y-4">
         {/* Navigation Tabs */}
@@ -113,6 +113,6 @@ export default function ProfilePage() {
             </Button>
         </div>
       </div>
-    </GlobalLayout>
+    </TwoColumnLayout>
   );
 }

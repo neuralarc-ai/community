@@ -32,23 +32,16 @@ export default function MeetingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading meetings...</p>
-          </div>
-        </main>
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading meetings...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="container py-8">
-        <div className="flex justify-between items-start mb-8">
+    <div className="container py-8">
+      <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-3xl font-semibold text-gray-900 mb-2">Online Meetings</h1>
             <p className="text-gray-600">Schedule and manage community meetings</p>
@@ -95,7 +88,6 @@ export default function MeetingsPage() {
             </div>
           ))}
         </div>
-      </main>
     </div>
   )
 }

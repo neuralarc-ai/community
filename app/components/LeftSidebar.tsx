@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, MessageSquare, Presentation, Video, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Presentation, Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -20,17 +20,17 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/posts', label: 'Posts', icon: MessageSquare },
     { href: '/workshops', label: 'Workshops', icon: Presentation },
-    { href: '/meetings', label: 'Meetings', icon: Video },
+    { href: '/meetings', label: 'Meetings', icon: Calendar },
     { href: '/profile', label: 'Profile', icon: User },
   ];
 
   const sidebarClasses = cn(
     "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col",
     {
-      "w-64": isOpen && !isMobile,
-      "w-16": !isOpen && !isMobile,
-      "translate-x-0 w-64 shadow-xl": isOpen && isMobile,
-      "-translate-x-full w-64": !isOpen && isMobile,
+      "w-60": isOpen && !isMobile,
+      "w-20": !isOpen && !isMobile,
+      "translate-x-0 w-60 shadow-xl": isOpen && isMobile,
+      "-translate-x-full w-60": !isOpen && isMobile,
     }
   );
 

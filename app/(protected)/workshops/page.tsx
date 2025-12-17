@@ -34,20 +34,15 @@ export default function WorkshopsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container py-8 flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        </main>
+      <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Header />
-      <main className="container max-w-4xl py-8 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-start mb-8">
+    <div className="container max-w-4xl py-8 mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Workshops</h1>
             <p className="text-muted-foreground">Schedule and manage online workshops</p>
@@ -105,7 +100,6 @@ export default function WorkshopsPage() {
                <p className="text-muted-foreground text-lg">No workshops scheduled yet.</p>
              </div>
         )}
-      </main>
     </div>
   )
 }

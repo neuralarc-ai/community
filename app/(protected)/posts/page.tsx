@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Header from '@/app/components/Header'
 import PostList from '@/app/components/PostList'
 import PostItem from '@/app/components/PostItem'
 import CommentTree from '@/app/components/CommentTree'
@@ -14,6 +13,7 @@ import Avatar from '@/app/components/Avatar'
 import { createClient } from '@/app/lib/supabaseClient'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 import { Profile } from '@/app/types'
+import TwoColumnLayout from '@/app/components/TwoColumnLayout'
 
 export default function PostsPage() {
   const router = useRouter()
@@ -178,20 +178,14 @@ export default function PostsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container py-8 flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-        </main>
+      <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Header />
-      <main className="container max-w-4xl py-6 mx-auto px-4 sm:px-6 lg:px-8">
-        
+    <TwoColumnLayout>
         {/* Create Post Input & Filter Bar */}
         <Card className="mb-6 shadow-sm border-border p-2">
             <div className="flex items-center space-x-2 p-2">
@@ -260,7 +254,6 @@ export default function PostsPage() {
             ))
           )}
         </PostList>
-      </main>
-    </div>
+    </TwoColumnLayout>
   )
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import GlobalLayout from '@/app/components/GlobalLayout'
+import TwoColumnLayout from '@/app/components/TwoColumnLayout'
 import CommentTree from '@/app/components/CommentTree'
 import VoteColumn from '@/app/components/VoteColumn'
 import { Post, Comment } from '@/app/types'
@@ -137,29 +137,29 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <GlobalLayout>
+      <TwoColumnLayout>
         <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
         </div>
-      </GlobalLayout>
+      </TwoColumnLayout>
     )
   }
 
   if (!post) {
     return (
-      <GlobalLayout>
+      <TwoColumnLayout>
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg mb-4">Post not found</p>
             <Link href="/posts" className="text-primary hover:underline inline-block font-medium">
               ← Back to posts
             </Link>
           </div>
-      </GlobalLayout>
+      </TwoColumnLayout>
     )
   }
 
   return (
-    <GlobalLayout>
+    <TwoColumnLayout>
         {/* Back Link */}
         <div className="mb-4">
             <Link href="/posts" className="text-gray-500 hover:text-primary flex items-center gap-2 text-sm font-medium transition-colors">
@@ -272,6 +272,6 @@ export default function PostDetailPage() {
               onReplyToggle={onReplyToggle}
             />
         </div>
-    </GlobalLayout>
+    </TwoColumnLayout>
   )
 }
