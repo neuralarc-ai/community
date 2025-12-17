@@ -40,7 +40,7 @@ export default function ReplyInput({
         mt-2 w-full
       `}
     >
-      <div className="bg-gray-50 rounded-md p-3 border border-gray-200">
+      <div className="bg-card rounded-md p-3 border border-border">
         <CommentForm
           postId={postId}
           parentCommentId={parentCommentId}

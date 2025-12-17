@@ -63,39 +63,40 @@ const CommentItem = memo(function CommentItem({
   const hasChildren = comment.children && comment.children.length > 0;
 
   return (
-    <div className="flex gap-3 relative">
-      {/* Thread Line - strictly following example structure */}
+    <div className="flex gap-4 relative group/comment">
+      {/* Thread Line - Refined for NebulaMax */}
       {hasChildren && (
         <div 
-          className="w-px absolute left-4 top-10 h-[calc(100%-2.5rem)] bg-border hover:bg-primary transition-colors cursor-pointer" 
+          className="w-px absolute left-[19px] top-10 h-[calc(100%-2rem)] bg-white/10 group-hover/comment:bg-white/20 transition-colors duration-300" 
           aria-hidden="true"
         />
       )}
 
       {/* Avatar Column */}
-      <div className="flex flex-col items-center z-10 w-8 flex-shrink-0">
-         <div className="w-8 h-8">
-            <Avatar src={comment.author?.avatar_url || null} alt={`${comment.author?.username || 'Anonymous'}'s avatar`} size={32} />
+      <div className="flex flex-col items-center z-10 flex-shrink-0">
+         <div className="w-10 h-10 rounded-full p-0.5 bg-[#0A0A0A] ring-1 ring-white/10">
+            <Avatar src={comment.author?.avatar_url || null} alt={`${comment.author?.username || 'Anonymous'}'s avatar`} size={36} className="rounded-full" />
          </div>
       </div>
 
       {/* Content Column */}
-      <div className="flex-grow min-w-0">
+      <div className="flex-grow min-w-0 pt-1">
         {/* Header */}
-        <div className="flex items-center text-sm mb-1">
-          <span className="font-semibold text-foreground mr-2">
+        <div className="flex items-center text-sm mb-1.5 gap-2">
+          <span className="font-semibold text-white hover:underline cursor-pointer">
             u/{comment.author?.username || 'Anonymous'}
           </span>
-          <span className="text-muted-foreground">{formatTime(comment.created_at)}</span>
+          <span className="text-muted-foreground text-xs">•</span>
+          <span className="text-muted-foreground text-xs">{formatTime(comment.created_at)}</span>
         </div>
 
         {/* Body */}
-        <div className="text-base mb-2 text-foreground/90 whitespace-pre-wrap leading-relaxed">
+        <div className="text-sm mb-3 text-white/90 whitespace-pre-wrap leading-relaxed">
           {comment.body}
         </div>
 
         {/* Actions Footer */}
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-3 mb-2">
            <VoteButton
               targetType="comment"
               targetId={comment.id}
@@ -107,16 +108,16 @@ const CommentItem = memo(function CommentItem({
            
            <button 
              onClick={handleReplyClick}
-             className="flex items-center gap-2 px-2 py-1 h-8 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+             className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:bg-white/10 hover:text-white transition-all"
            >
-              <MessageSquare className="w-4 h-4" />
+              <MessageSquare className="w-3.5 h-3.5" />
               <span>Reply</span>
            </button>
         </div>
 
         {/* Reply Input */}
         {isReplyInputVisible && (
-          <div className="mt-4 mb-4">
+          <div className="mt-4 mb-4 pl-2">
             <ReplyInput
               postId={comment.post_id}
               parentCommentId={comment.id}
@@ -130,7 +131,7 @@ const CommentItem = memo(function CommentItem({
 
         {/* Nested Children */}
         {hasChildren && (
-          <div className="mt-4 space-y-6">
+          <div className="mt-4 space-y-5">
             <CommentTree
               postId={comment.post_id}
               comments={comment.children || []}

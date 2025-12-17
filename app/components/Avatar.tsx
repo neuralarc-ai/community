@@ -1,3 +1,4 @@
+import React from 'react';
 import Image from 'next/image';
 
 interface AvatarProps {
@@ -9,8 +10,8 @@ interface AvatarProps {
 
 const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 28, className }) => {
   // Use UI Avatars service as a fallback if no source is provided
-  // It generates an image with the user's initials
-  const avatarSrc = src || `https://ui-avatars.com/api/?name=${encodeURIComponent(alt || 'User')}&background=facc15&color=000000&size=${size}`;
+  // Monochrome: White background, Black text
+  const avatarSrc = src || `https://ui-avatars.com/api/?name=${encodeURIComponent(alt || 'User')}&background=FFFFFF&color=000000&size=${size}`;
 
   return (
     <div
@@ -21,7 +22,7 @@ const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 28, className }) => {
         src={avatarSrc}
         alt={alt || 'Avatar'}
         fill
-        className="rounded-full object-cover"
+        className="rounded-full object-cover grayscale"
         sizes={`${size}px`}
         unoptimized={!src} // Skip optimization for external fallback URLs if needed
       />
