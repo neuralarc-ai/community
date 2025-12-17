@@ -9,6 +9,7 @@ interface VoteButtonProps {
   initialScore: number
   userVote: -1 | 0 | 1
   onVoteChange?: (newScore: number, newUserVote: -1 | 0 | 1) => void
+  orientation?: 'vertical' | 'horizontal' // Added orientation prop
 }
 
 export default function VoteButton({
@@ -16,7 +17,8 @@ export default function VoteButton({
   targetId,
   initialScore,
   userVote,
-  onVoteChange
+  onVoteChange,
+  orientation = 'vertical' // Default to vertical
 }: VoteButtonProps) {
   const [score, setScore] = useState(initialScore)
   const [currentVote, setCurrentVote] = useState(userVote)
@@ -46,7 +48,6 @@ export default function VoteButton({
 
       const result = await response.json()
 
-      // Calculate new score and vote state based on the action
       let newScore = score
       let newVote: -1 | 0 | 1 = 0
 
@@ -66,14 +67,17 @@ export default function VoteButton({
       onVoteChange?.(newScore, newVote)
     } catch (error) {
       console.error('Vote error:', error)
-      // Could add toast notification here
     } finally {
       setIsLoading(false)
     }
   }
 
+  const containerClasses = orientation === 'vertical'
+    ? "flex flex-col items-center"
+    : "flex items-center space-x-1"; // Adjusted for horizontal layout
+
   return (
-    <div className="flex flex-col items-center space-y-1">
+    <div className={containerClasses}>
       <button
         onClick={() => handleVote(1)}
         disabled={isLoading}
@@ -84,7 +88,7 @@ export default function VoteButton({
       >
         ▲
       </button>
-      <span className={`text-sm font-medium ${
+      <span className={`text-xs font-medium ${
         score > 0 ? 'text-green-600' :
         score < 0 ? 'text-red-600' :
         'text-gray-500'

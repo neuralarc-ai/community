@@ -10,8 +10,12 @@ export interface Post {
   author?: {
     username: string;
     full_name: string;
+    avatar_url: string;
   };
   vote_score?: number;
+  comment_count?: number;
+  user_vote?: -1 | 0 | 1;
+  comments?: Comment[];
 }
 
 // Database-backed Comment interface
@@ -28,6 +32,7 @@ export interface Comment {
   };
   vote_score?: number;
   replies?: Comment[];
+  user_vote?: -1 | 0 | 1;
 }
 
 // Database-backed Vote interface
