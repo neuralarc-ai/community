@@ -14,6 +14,7 @@ import { createClient } from '@/app/lib/supabaseClient'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 import { Profile } from '@/app/types'
 import TwoColumnLayout from '@/app/components/TwoColumnLayout'
+import FilterSection from '@/app/components/FilterSection'
 
 export default function PostsPage() {
   const router = useRouter()
@@ -24,6 +25,7 @@ export default function PostsPage() {
   const [userCommentVotes, setUserCommentVotes] = useState<Record<string, Record<string, -1 | 0 | 1>>>({})
   const [activeReplyIds, setActiveReplyIds] = useState<Record<string, string | null>>({})
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPosts()
@@ -176,6 +178,12 @@ export default function PostsPage() {
     }))
   }
 
+  // Derived state for tags and filtered posts
+  const allTags = Array.from(new Set(posts.flatMap(post => post.tags || []))).sort()
+  const filteredPosts = selectedTag 
+    ? posts.filter(post => post.tags?.includes(selectedTag)) 
+    : posts
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -186,7 +194,7 @@ export default function PostsPage() {
 
   return (
     <TwoColumnLayout>
-        {/* Create Post Input & Filter Bar */}
+        {/* Create Post Input */}
         <Card className="mb-6 shadow-sm border-border p-2">
             <div className="flex items-center space-x-2 p-2">
                 <div className="flex-shrink-0">
@@ -217,14 +225,23 @@ export default function PostsPage() {
             </div>
         </Card>
 
+        {/* Filter Section */}
+        <FilterSection 
+            tags={allTags}
+            selectedTag={selectedTag}
+            onSelectTag={setSelectedTag}
+        />
+
         {/* Posts List */}
         <PostList>
-          {posts.length === 0 && !loading ? (
+          {filteredPosts.length === 0 && !loading ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">No posts yet. Be the first to start a discussion!</p>
+              <p className="text-muted-foreground text-lg">
+                {selectedTag ? `No posts found with tag "${selectedTag}"` : "No posts yet. Be the first to start a discussion!"}
+              </p>
             </div>
           ) : (
-            posts.map((post) => (
+            filteredPosts.map((post) => (
               <div key={post.id}>
                 <PostItem
                   post={post}
