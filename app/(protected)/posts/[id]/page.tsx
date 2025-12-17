@@ -162,17 +162,17 @@ export default function PostDetailPage() {
     <TwoColumnLayout>
         {/* Back Link */}
         <div className="mb-4">
-            <Link href="/posts" className="text-gray-500 hover:text-primary flex items-center gap-2 text-sm font-medium transition-colors">
+            <Link href="/posts" className="text-muted-foreground hover:text-primary flex items-center gap-2 text-sm font-medium transition-colors">
                 <ArrowLeft size={16} />
                 Back to Feed
             </Link>
         </div>
 
         {/* Main Post Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl shadow-sm overflow-hidden mb-6">
             <div className="flex">
                 {/* Vote Column - Hidden on mobile, shown on SM+ */}
-                <div className="hidden sm:flex w-14 bg-gray-50/50 border-r border-gray-100 flex-col items-center py-4 gap-1">
+                <div className="hidden sm:flex w-14 bg-white/[0.02] border-r border-white/5 flex-col items-center py-4 gap-1">
                     <VoteColumn
                         targetType="post"
                         targetId={post.id}
@@ -186,22 +186,22 @@ export default function PostDetailPage() {
                 {/* Content */}
                 <div className="flex-1 p-4 sm:p-6">
                     {/* Metadata */}
-                    <div className="flex items-center text-xs text-gray-500 mb-3 gap-2">
+                    <div className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
                         <div className="flex items-center gap-1">
-                            <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={24} />
-                            <span className="font-bold text-gray-900">u/{post.author?.username || 'Anonymous'}</span>
+                            <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
+                            <span className="font-bold text-white">u/{post.author?.username || 'Anonymous'}</span>
                         </div>
                         <span>•</span>
                         <span>{formatTime(post.created_at)}</span>
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-2xl font-heading font-bold text-gray-900 mb-4 leading-tight">
+                    <h1 className="text-2xl font-heading font-bold text-white mb-4 leading-tight">
                         {post.title}
                     </h1>
                     
                     {/* Body */}
-                    <div className="text-gray-800 leading-relaxed whitespace-pre-wrap font-sans mb-6 text-[15px]">
+                    <div className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans mb-6 text-[15px]">
                         {post.body}
                     </div>
 
@@ -209,7 +209,7 @@ export default function PostDetailPage() {
                     {post.tags && post.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
                         {post.tags.map((tag, index) => (
-                            <span key={index} className="px-2.5 py-0.5 bg-gray-100 text-gray-700 text-xs font-bold rounded-full">
+                            <span key={index} className="px-2.5 py-0.5 bg-white/5 text-muted-foreground border border-white/5 text-xs font-bold rounded-full">
                                 {tag}
                             </span>
                         ))}
@@ -217,7 +217,7 @@ export default function PostDetailPage() {
                     )}
 
                     {/* Action Bar */}
-                    <div className="flex items-center gap-2 sm:gap-4 border-t border-gray-100 pt-4 flex-wrap">
+                    <div className="flex items-center gap-2 sm:gap-4 border-t border-white/5 pt-4 flex-wrap">
                         {/* Mobile Vote Buttons */}
                         <div className="sm:hidden mr-2">
                              <VoteColumn
@@ -230,15 +230,15 @@ export default function PostDetailPage() {
                             />
                         </div>
 
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-full h-8">
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:bg-white/5 hover:text-white rounded-full h-8">
                             <MessageSquare className="w-4 h-4 mr-2" />
                             <span className="text-xs font-bold">{post.comment_count || 0} Comments</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-full h-8">
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:bg-white/5 hover:text-white rounded-full h-8">
                             <Share2 className="w-4 h-4 mr-2" />
                             <span className="text-xs font-bold">Share</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-500 hover:bg-gray-100 hover:text-gray-900 rounded-full h-8">
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:bg-white/5 hover:text-white rounded-full h-8">
                             <Bookmark className="w-4 h-4 mr-2" />
                             <span className="text-xs font-bold">Save</span>
                         </Button>
@@ -256,10 +256,10 @@ export default function PostDetailPage() {
         */}
         
         {/* Comments Tree */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl p-4 sm:p-6">
             <h3 className="font-heading font-bold text-lg mb-6 flex items-center gap-2">
                 Comments 
-                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">{post.comment_count || 0}</span>
+                <span className="bg-white/5 text-muted-foreground border border-white/5 px-2 py-0.5 rounded-full text-xs">{post.comment_count || 0}</span>
             </h3>
             <CommentTree
               postId={post.id}

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MessageSquare, Share2, MoreHorizontal, Trash2 } from 'lucide-react';
+import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface PostActionsProps {
@@ -10,6 +10,8 @@ interface PostActionsProps {
   authorId: string;
   currentUserId?: string;
   onDelete?: (postId: string) => void;
+  isSaved?: boolean;
+  onToggleSave?: (postId: string) => void;
 }
 
 export default function PostActions({ 
@@ -19,7 +21,9 @@ export default function PostActions({
   postId,
   authorId,
   currentUserId,
-  onDelete
+  onDelete,
+  isSaved = false,
+  onToggleSave
 }: PostActionsProps) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -76,6 +80,21 @@ export default function PostActions({
       <button className="flex items-center space-x-2 hover:bg-white/5 text-muted-foreground hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 group">
         <Share2 size={16} className="group-hover:text-white transition-colors" />
         <span>Share</span>
+      </button>
+
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleSave?.(postId);
+        }}
+        className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all duration-200 group ${
+          isSaved 
+            ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20' 
+            : 'text-muted-foreground hover:bg-white/5 hover:text-white'
+        }`}
+      >
+        <Bookmark size={16} className={`transition-colors ${isSaved ? 'fill-current' : 'group-hover:text-white'}`} />
+        <span>{isSaved ? 'Saved' : 'Save'}</span>
       </button>
 
       <div className="relative" ref={menuRef}>

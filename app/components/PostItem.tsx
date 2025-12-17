@@ -13,6 +13,8 @@ interface PostItemProps {
   onToggleComments: () => void;
   currentUserId?: string;
   onDelete?: (postId: string) => void;
+  isSaved?: boolean;
+  onToggleSave?: (postId: string) => void;
 }
 
 const formatTime = (dateString: string) => {
@@ -35,7 +37,9 @@ export default function PostItem({
   isExpanded,
   onToggleComments,
   currentUserId,
-  onDelete
+  onDelete,
+  isSaved = false,
+  onToggleSave
 }: PostItemProps) {
   const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange(post.id, newScore, newUserVote);
@@ -59,7 +63,7 @@ export default function PostItem({
         {/* Header Metadata */}
         <div className="flex items-center text-xs text-muted-foreground mb-3 gap-3">
              <div className="flex items-center gap-2 hover:bg-yellow-500/5 p-1.5 -ml-1.5 rounded-lg transition-colors cursor-pointer group/user">
-                <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={24} />
+                <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
                 <span className="font-medium text-white group-hover/user:text-yellow-200 underline-offset-4 group-hover/user:underline">u/{post.author?.username || 'Anonymous'}</span>
              </div>
              <span className="text-white/20">•</span>
@@ -108,6 +112,8 @@ export default function PostItem({
                   authorId={post.author_id}
                   currentUserId={currentUserId}
                   onDelete={onDelete}
+                  isSaved={isSaved}
+                  onToggleSave={onToggleSave}
                 />
             </div>
         </div>
