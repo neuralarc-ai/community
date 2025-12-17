@@ -6,7 +6,7 @@ interface PostListProps {
 
 export default function PostList({ children }: PostListProps) {
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 overflow-hidden">
       {children}
     </div>
   );

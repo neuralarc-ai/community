@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Comment } from '@/app/types'
 import CommentForm from './CommentForm'
+import type { Comment } from '@/app/types'
 
 interface ReplyInputProps {
   postId: string
@@ -23,38 +22,30 @@ export default function ReplyInput({
   depth,
   isVisible
 }: ReplyInputProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
 
   const handleReplyAdded = (newComment: Comment) => {
     onReplyAdded(newComment)
-    setIsExpanded(false)
-  }
-
-  const handleCancel = () => {
-    setIsExpanded(false)
-    onCancel()
   }
 
   // Calculate responsive indentation for reply input
-  const indentClass = depth > 0 ? `ml-4 sm:ml-6` : 'ml-4 sm:ml-6'
+  // On mobile, stop increasing indent after depth 2
+  const effectiveDepth = depth > 2 ? 2 : depth;
+  const indentClass = `pl-${effectiveDepth * 4}`;
 
   return (
     <div
       className={`
         ${indentClass}
-        transition-all duration-300 ease-in-out transform
-        ${isVisible
-          ? 'max-h-96 opacity-100 scale-100 mt-3 mb-4'
-          : 'max-h-0 opacity-0 scale-95 overflow-hidden'
-        }
+        ${isVisible ? 'block' : 'hidden'}
+        mt-2 w-full
       `}
     >
-      <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border-l-2 border-gray-300 shadow-sm">
+      <div className="bg-gray-50 rounded-md p-3 border border-gray-200">
         <CommentForm
           postId={postId}
           parentCommentId={parentCommentId}
           onCommentAdded={handleReplyAdded}
-          onCancel={handleCancel}
+          onCancel={onCancel}
           placeholder={placeholder}
         />
       </div>

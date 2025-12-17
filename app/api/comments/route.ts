@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Fetch the author profile separately
     const { data: profile } = await supabase
       .from('profiles')
-      .select('username, full_name')
+      .select('username, full_name, avatar_url')
       .eq('id', user.id)
       .single()
 
@@ -103,7 +103,8 @@ export async function POST(request: NextRequest) {
       ...newComment,
       author: {
         username: profile?.username || 'Anonymous',
-        full_name: profile?.full_name || 'Anonymous'
+        full_name: profile?.full_name || 'Anonymous',
+        avatar_url: profile?.avatar_url || ''
       },
       vote_score: 0
     }

@@ -29,6 +29,7 @@ export interface Comment {
   author?: {
     username: string;
     full_name: string;
+    avatar_url: string;
   };
   vote_score?: number;
   replies?: Comment[];
@@ -105,6 +106,7 @@ export interface Profile {
   username: string;
   dob: string;
   role: 'user' | 'admin';
+  avatar_url?: string;
   created_at: string;
   updated_at: string;
 }

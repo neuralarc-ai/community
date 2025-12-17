@@ -6,18 +6,38 @@ import PostList from '@/app/components/PostList'
 import PostItem from '@/app/components/PostItem'
 import CommentTree from '@/app/components/CommentTree'
 import { Post, Comment } from '@/app/types'
+import { Plus, Image as ImageIcon, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent } from '@/app/components/ui/card'
+import Avatar from '@/app/components/Avatar'
+import { createClient } from '@/app/lib/supabaseClient'
+import { getCurrentUserProfile } from '@/app/lib/getProfile'
+import { Profile } from '@/app/types'
 
 export default function PostsPage() {
+  const router = useRouter()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set())
   const [postComments, setPostComments] = useState<Record<string, Comment[]>>({})
   const [userCommentVotes, setUserCommentVotes] = useState<Record<string, Record<string, -1 | 0 | 1>>>({})
+  const [activeReplyIds, setActiveReplyIds] = useState<Record<string, string | null>>({})
+  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
     fetchPosts()
+    fetchUserProfile()
   }, [])
+
+  const fetchUserProfile = async () => {
+    try {
+      const profile = await getCurrentUserProfile()
+      setCurrentUserProfile(profile)
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    }
+  }
 
   const fetchPosts = async () => {
     try {
@@ -149,39 +169,65 @@ export default function PostsPage() {
     }))
   }
 
+  const handleReplyToggle = (postId: string, commentId: string | null) => {
+    setActiveReplyIds(prev => ({
+      ...prev,
+      [postId]: commentId
+    }))
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
-        <main className="container py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading posts...</p>
-          </div>
+        <main className="container py-8 flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
         </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="container py-8">
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Community Posts</h1>
-            <p className="text-gray-600">Share ideas and engage in discussions</p>
-          </div>
-          <Link href="/posts/new" className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
-            New Post
-          </Link>
-        </div>
+      <main className="container max-w-4xl py-6 mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Create Post Input & Filter Bar */}
+        <Card className="mb-6 shadow-sm border-border p-2">
+            <div className="flex items-center space-x-2 p-2">
+                <div className="flex-shrink-0">
+                    <Avatar 
+                        src={currentUserProfile?.avatar_url} 
+                        alt={currentUserProfile?.username || 'User'} 
+                        size={38} 
+                    />
+                </div>
+                <input 
+                    type="text" 
+                    placeholder="Create Post" 
+                    className="bg-muted hover:bg-background border border-transparent hover:border-primary/50 rounded-md px-4 py-2 flex-grow text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all cursor-text"
+                    onFocus={() => router.push('/posts/new')}
+                />
+                <button 
+                    onClick={() => router.push('/posts/new')}
+                    className="text-muted-foreground hover:bg-muted p-2 rounded transition-colors"
+                >
+                    <ImageIcon size={20} />
+                </button>
+                <button 
+                    onClick={() => router.push('/posts/new')}
+                    className="text-muted-foreground hover:bg-muted p-2 rounded transition-colors"
+                >
+                    <LinkIcon size={20} />
+                </button>
+            </div>
+        </Card>
 
         {/* Posts List */}
         <PostList>
           {posts.length === 0 && !loading ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No posts yet. Be the first to start a discussion!</p>
+              <p className="text-muted-foreground text-lg">No posts yet. Be the first to start a discussion!</p>
             </div>
           ) : (
             posts.map((post) => (
@@ -195,7 +241,7 @@ export default function PostsPage() {
                   commentCount={post.comment_count || 0}
                 />
                 {expandedPosts.has(post.id) && (
-                  <div className="ml-12 mt-4">
+                  <div className="ml-0 mt-2 bg-card rounded-b-xl border-x border-b border-border p-4 animate-in fade-in slide-in-from-top-2 shadow-sm">
                     <CommentTree
                       postId={post.id}
                       comments={postComments[post.id] || []}
@@ -205,6 +251,8 @@ export default function PostsPage() {
                       onVoteChange={(commentId, newScore, newUserVote) =>
                         handleCommentVoteChange(post.id, commentId, newScore, newUserVote)
                       }
+                      activeReplyId={activeReplyIds[post.id] || null}
+                      onReplyToggle={(commentId) => handleReplyToggle(post.id, commentId)}
                     />
                   </div>
                 )}

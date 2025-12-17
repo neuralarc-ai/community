@@ -89,7 +89,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const authorIds = [...new Set(comments.map(comment => comment.author_id))]
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, username, full_name')
+      .select('id, username, full_name, avatar_url')
       .in('id', authorIds)
 
     const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
@@ -105,7 +105,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         ...comment,
         author: {
           username: profile?.username || 'Anonymous',
-          full_name: profile?.full_name || 'Anonymous'
+          full_name: profile?.full_name || 'Anonymous',
+          avatar_url: profile?.avatar_url || ''
         },
         vote_score: commentVoteScores[index],
         user_vote: userVotesMap.get(`comment:${comment.id}`) || 0,

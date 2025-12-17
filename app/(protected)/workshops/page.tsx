@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import Header from '@/app/components/Header'
 import { Workshop } from '@/app/types'
-import { Calendar, Clock, Users, Video, Edit } from 'lucide-react'
+import { Calendar, Clock, Users, Video, Edit, Plus } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 export default function WorkshopsPage() {
   const [workshops, setWorkshops] = useState<Workshop[]>([])
@@ -32,72 +34,77 @@ export default function WorkshopsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <Header />
-        <main className="container py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading workshops...</p>
-          </div>
+        <main className="container py-8 flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
         </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="container py-8">
+      <main className="container max-w-4xl py-8 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Workshops</h1>
-            <p className="text-gray-600">Schedule and manage online workshops</p>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Workshops</h1>
+            <p className="text-muted-foreground">Schedule and manage online workshops</p>
           </div>
-          <button className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+          <Button className="gap-2">
+            <Plus size={16} />
             Schedule Workshop
-          </button>
+          </Button>
         </div>
 
         {/* Workshops Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {workshops.map((workshop) => (
-            <div key={workshop.id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="bg-gradient-to-r from-yellow-400 to-green-400 p-6 text-gray-900">
-                <div className="flex items-center gap-2 mb-3">
+            <Card key={workshop.id} className="overflow-hidden border-border shadow-sm hover:shadow-md transition-all duration-200">
+              {/* Colored Header Area */}
+              <div className="bg-muted/50 p-6 border-b border-border">
+                <div className="flex items-center gap-2 mb-3 text-primary font-medium">
                   <Calendar size={16} />
-                  <span className="text-sm font-medium">{formatDate(workshop.date)} at {workshop.time}</span>
+                  <span className="text-sm">{formatDate(workshop.date)} at {workshop.time}</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{workshop.title}</h3>
+                <h3 className="text-xl font-bold text-foreground">{workshop.title}</h3>
               </div>
 
-              <div className="p-6">
-                <p className="text-gray-600 mb-4 leading-relaxed">{workshop.description}</p>
+              <CardContent className="p-6">
+                <p className="text-muted-foreground mb-6 leading-relaxed line-clamp-3">{workshop.description}</p>
 
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
                     <Clock size={16} />
                     <span>{workshop.duration} hours</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
                     <Users size={16} />
                     <span>{workshop.enrolled}/{workshop.maxParticipants} enrolled</span>
                   </div>
                 </div>
 
                 <div className="flex gap-3">
-                  <button className="flex-1 flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors">
+                  <Button className="flex-1 gap-2" variant="default">
                     <Video size={16} />
-                    Join Workshop
-                  </button>
-                  <button className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                    Join
+                  </Button>
+                  <Button variant="outline" className="gap-2 bg-background">
                     <Edit size={16} />
                     Edit
-                  </button>
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
+        
+        {workshops.length === 0 && !loading && (
+             <div className="text-center py-12">
+               <p className="text-muted-foreground text-lg">No workshops scheduled yet.</p>
+             </div>
+        )}
       </main>
     </div>
   )

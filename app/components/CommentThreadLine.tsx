@@ -15,8 +15,9 @@ export default function CommentThreadLine({
 
   return (
     <div
-      className={`absolute top-0 left-0 bottom-0 w-0.5 bg-gray-200 ml-[-26px] sm:ml-[-30px] ${className}`}
+      className={`absolute top-0 w-0.5 bg-gray-200 ${className}`}
       style={{
+        left: `${(depth - 1) * 24 + 20}px`, // Adjusted for avatar size and vote column
         height: isLastReply ? 'calc(50% + 1.25rem)' : '100%',
       }}
       aria-hidden="true"
