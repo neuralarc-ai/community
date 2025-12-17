@@ -18,8 +18,8 @@ export default function VoteColumn({
   orientation = 'vertical',
 }: VoteColumnProps) {
   const containerClasses = orientation === 'vertical'
-    ? "flex flex-col items-center w-10 py-2 bg-gray-50 rounded-l-md"
-    : "flex items-center space-x-1"; // Adjusted for horizontal layout
+    ? "flex flex-col items-center py-2" // Removed bg-gray-50 and w-10 (width handled by parent)
+    : "flex items-center space-x-1";
 
   return (
     <div className={containerClasses}>

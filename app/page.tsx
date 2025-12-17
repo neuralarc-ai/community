@@ -2,13 +2,24 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/app/lib/supabaseClient'
 
 export default function HomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to login page immediately
-    router.push('/login')
+    const checkSession = async () => {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session) {
+        router.push('/dashboard')
+      } else {
+        router.push('/login')
+      }
+    }
+
+    checkSession()
   }, [router])
 
   return (
@@ -17,6 +28,6 @@ export default function HomePage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto"></div>
         <p className="mt-4 text-gray-600">Redirecting...</p>
       </div>
-    // </div>
+    </div>
   )
 }

@@ -32,7 +32,6 @@ export default function DashboardPage() {
         }
         setLoading(false)
       } catch (err: any) {
-        console.error("Error fetching user profile for dashboard:", err);
         // Only redirect to complete-profile if it's specifically a "no profile" error
         // For other errors (like permissions), show the dashboard anyway
         if (err?.code === 'PGRST116') {
@@ -69,7 +68,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="container py-8">
+      <main className="container mx-auto px-4 py-8 max-w-3xl">
         <Dashboard />
       </main>
     </div>

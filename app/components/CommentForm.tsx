@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Comment } from '@/app/types'
+import type { Comment } from '@/app/types'
 
 interface CommentFormProps {
   postId: string
@@ -47,7 +47,6 @@ export default function CommentForm({
       setBody('')
       onCommentAdded?.(newComment)
     } catch (error) {
-      console.error('Comment creation error:', error)
       // Could add toast notification here
     } finally {
       setIsSubmitting(false)
