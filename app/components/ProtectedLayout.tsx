@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import LeftSidebar from './LeftSidebar';
+import ClickSpark from '@/components/ClickSpark';
 
 interface ProtectedLayoutProps {
   children: React.ReactNode;
@@ -39,29 +40,37 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans flex flex-col">
-      <Header onMenuClick={toggleSidebar} />
-      
-      <div className="flex flex-1 pt-0">
-        <LeftSidebar 
-            isOpen={isMobile ? isMobileMenuOpen : isSidebarOpen} 
-            onToggle={toggleSidebar}
-            isMobile={isMobile}
-            onCloseMobile={() => setIsMobileMenuOpen(false)}
-        />
+    <ClickSpark
+      sparkColor='#ffffff'
+      sparkSize={10}
+      sparkRadius={15}
+      sparkCount={8}
+      duration={400}
+    >
+      <div className="min-h-screen bg-background font-sans flex flex-col">
+        <Header onMenuClick={toggleSidebar} />
         
-        <main 
-            className={`
-                flex-1 px-4 py-6 transition-all duration-300 ease-in-out pl-8
-                ${!isMobile && isSidebarOpen ? 'ml-64' : ''}
-                ${!isMobile && !isSidebarOpen ? 'ml-24' : ''}
-                ${isMobile ? 'ml-0 pl-4' : ''}
-            `}
-        >
-          {children}
-        </main>
+        <div className="flex flex-1 pt-0">
+          <LeftSidebar 
+              isOpen={isMobile ? isMobileMenuOpen : isSidebarOpen} 
+              onToggle={toggleSidebar}
+              isMobile={isMobile}
+              onCloseMobile={() => setIsMobileMenuOpen(false)}
+          />
+          
+          <main 
+              className={`
+                  flex-1 px-4 py-6 transition-all duration-300 ease-in-out pl-8
+                  ${!isMobile && isSidebarOpen ? 'ml-64' : ''}
+                  ${!isMobile && !isSidebarOpen ? 'ml-24' : ''}
+                  ${isMobile ? 'ml-0 pl-4' : ''}
+              `}
+          >
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </ClickSpark>
   );
 }
 
