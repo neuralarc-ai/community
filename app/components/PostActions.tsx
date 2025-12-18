@@ -3,6 +3,22 @@ import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark } from 'lucide-
 import { useState, useRef, useEffect } from 'react';
 import VoteColumn from './VoteColumn';
 
+interface PostActionsProps {
+  commentCount: number;
+  onToggleComments?: () => void;
+  isExpanded?: boolean;
+  postId: string;
+  authorId: string;
+  currentUserId?: string | null;
+  isAdmin?: boolean;
+  onDelete?: (postId: string) => void;
+  isSaved?: boolean;
+  onToggleSave?: (postId: string) => void;
+  initialVoteScore: number;
+  userVote: -1 | 0 | 1;
+  onVoteChange: (newScore: number, newUserVote: -1 | 0 | 1) => void;
+}
+
 export default function PostActions({
   commentCount,
   onToggleComments,
