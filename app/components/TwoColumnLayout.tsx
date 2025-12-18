@@ -38,7 +38,7 @@ export default function TwoColumnLayout({ children, rightSidebar }: TwoColumnLay
               <Card className="bg-transparent border-none shadow-none">
                 <CardContent className="pt-0 px-0">
                   <div className="text-xs text-muted-foreground/60 text-center">
-                    © 2025 Community Portal. All rights reserved.
+                    © 2025 Sphere Portal. All rights reserved.
                   </div>
                 </CardContent>
               </Card>

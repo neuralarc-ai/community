@@ -15,7 +15,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Community Management Portal",
+  title: "Sphere Management Portal",
   description: "Manage your community with posts, workshops, and meetings",
 };
 
