@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import CreateWorkshopModal from '@/app/components/CreateWorkshopModal'
 import WorkshopCard from '@/app/components/WorkshopCard'
 import { createClient } from '@/app/lib/supabaseClient'
