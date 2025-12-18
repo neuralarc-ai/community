@@ -60,10 +60,13 @@ export default function WorkshopsPage() {
     <div className="container max-w-[1400px] py-8 mx-auto px-6 space-y-12">
       <div className="flex justify-between items-start">
           <div className="flex flex-col gap-2">
-            <h1 className="text-4xl font-bold text-white tracking-tight">Community Conclave</h1>
-            <p className="text-lg text-muted-foreground">Twitter Spaces meets YouTube Live. Learn together.</p>
+            <h1 className="text-4xl font-bold text-white tracking-tight">Conclave</h1>
+            <p className="text-lg text-muted-foreground">Schedule and manage online conclaves</p>
           </div>
-          <CreateWorkshopModal onWorkshopCreated={fetchWorkshops} />
+          <Button className="gap-2 bg-[#27584F]/80 hover:bg-[#27584F] text-white shadow-sm hover:shadow-[0_0_20px_rgba(39,88,79,0.2)]">
+            <Plus size={16} />
+            Schedule Conclave
+          </Button>
         </div>
 
         {/* Workshops Grid */}
@@ -78,9 +81,8 @@ export default function WorkshopsPage() {
         </div>
         
         {workshops.length === 0 && !loading && (
-             <div className="text-center py-20 bg-card/20 rounded-xl border border-dashed border-[#27584F]/30">
-               <p className="text-muted-foreground text-lg mb-4">No conclaves scheduled yet.</p>
-               <p className="text-muted-foreground text-sm">Be the first to host a conclave and share your knowledge!</p>
+             <div className="text-center py-12">
+               <p className="text-muted-foreground text-lg">No conclaves scheduled yet.</p>
              </div>
         )}
     </div>

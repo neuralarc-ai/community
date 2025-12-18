@@ -207,7 +207,7 @@ export default function SettingsPage() {
           <div className="p-6 rounded-2xl bg-gradient-to-br from-[#A69CBE]/20 to-transparent border border-[#A69CBE]/10 hover:border-[#A69CBE]/40 transition-all group">
             <Globe className="w-8 h-8 text-[#A69CBE] mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="font-bold text-white mb-2 font-heading">Global Community</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed font-sans">Connect with people worldwide through workshops and real-time meetings.</p>
+            <p className="text-xs text-muted-foreground leading-relaxed font-sans">Connect with people worldwide through conclaves and real-time meetings.</p>
           </div>
           <div className="p-6 rounded-2xl bg-gradient-to-br from-[#A69CBE]/20 to-transparent border border-[#A69CBE]/10 hover:border-[#A69CBE]/40 transition-all group">
             <MessageSquare className="w-8 h-8 text-[#A69CBE] mb-4 group-hover:scale-110 transition-transform" />

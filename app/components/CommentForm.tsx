@@ -59,7 +59,7 @@ export default function CommentForm({
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder={placeholder}
-        className="w-full p-3 bg-input border border-border rounded-md resize-y min-h-[100px] text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+        className="w-full p-4 bg-input border border-border rounded-full resize-y min-h-[60px] text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
         required
       />
 
