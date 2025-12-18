@@ -240,8 +240,7 @@ export default function ProfilePage() {
                    userVote={(post as any).user_vote || 0}
                    onVoteChange={() => {}}
                    commentCount={post.comment_count || 0}
-                   isExpanded={false}
-                   onToggleComments={() => {}}
+                   currentUserId={profile.id}
                  />
                ))}
              </PostList>
@@ -291,8 +290,7 @@ export default function ProfilePage() {
                    userVote={(post as any).user_vote || 0}
                    onVoteChange={() => {}} // Read-only or implement vote logic if needed
                    commentCount={post.comment_count || 0}
-                   isExpanded={false}
-                   onToggleComments={() => {}}
+                   currentUserId={profile.id}
                    isSaved={true}
                    onToggleSave={handleToggleSave}
                  />
@@ -328,8 +326,7 @@ export default function ProfilePage() {
                       userVote={item.user_vote || 0}
                       onVoteChange={() => {}}
                       commentCount={item.comment_count || 0}
-                      isExpanded={false}
-                      onToggleComments={() => {}}
+                      currentUserId={profile.id}
                       typeTag="Post"
                     />
                   ) : (
