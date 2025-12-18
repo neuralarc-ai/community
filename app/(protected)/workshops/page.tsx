@@ -47,7 +47,7 @@ export default function WorkshopsPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Workshops</h1>
             <p className="text-muted-foreground">Schedule and manage online workshops</p>
           </div>
-          <Button className="gap-2">
+          <Button className="gap-2 bg-[#27584F]/80 hover:bg-[#27584F] text-white shadow-sm hover:shadow-[0_0_20px_rgba(39,88,79,0.2)]">
             <Plus size={16} />
             Schedule Workshop
           </Button>
@@ -56,14 +56,14 @@ export default function WorkshopsPage() {
         {/* Workshops Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {workshops.map((workshop) => (
-            <Card key={workshop.id} className="overflow-hidden border-green-500/20 shadow-sm hover:shadow-[0_0_20px_rgba(34,197,94,0.1)] hover:border-green-500/40 transition-all duration-300 bg-card/40 backdrop-blur-sm group">
+            <Card key={workshop.id} className="overflow-hidden border-[#27584F]/50 shadow-sm hover:shadow-[0_0_20px_rgba(39,88,79,0.15)] hover:border-[#27584F]/50 transition-all duration-300 bg-card/40 backdrop-blur-sm group">
               {/* Colored Header Area */}
-              <div className="bg-green-500/5 p-6 border-b border-green-500/10 group-hover:bg-green-500/10 transition-colors">
-                <div className="flex items-center gap-2 mb-3 text-green-400 font-medium">
+              <div className="bg-[#27584F]/5 p-6 border-b border-[#27584F]/10 group-hover:bg-[#27584F]/10 transition-colors">
+                <div className="flex items-center gap-2 mb-3 text-[#27584F] font-medium">
                   <Calendar size={16} />
                   <span className="text-sm">{formatDate(workshop.date)} at {workshop.time}</span>
                 </div>
-                <h3 className="text-xl font-bold text-foreground group-hover:text-green-100 transition-colors">{workshop.title}</h3>
+                <h3 className="text-xl font-bold text-foreground group-hover:text-[#27584F] transition-colors">{workshop.title}</h3>
               </div>
 
               <CardContent className="p-6">
@@ -81,11 +81,11 @@ export default function WorkshopsPage() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1 gap-2" variant="default">
+                  <Button className="flex-1 gap-2 bg-[#27584F]/80 hover:bg-[#27584F] text-white shadow-sm hover:shadow-[0_0_20px_rgba(39,88,79,0.2)]" variant="default">
                     <Video size={16} />
                     Join
                   </Button>
-                  <Button variant="outline" className="gap-2 bg-background">
+                  <Button variant="outline" className="gap-2 bg-background border border-[#27584F]/30 text-[#27584F] hover:bg-[#27584F]/10 hover:text-[#27584F]">
                     <Edit size={16} />
                     Edit
                   </Button>

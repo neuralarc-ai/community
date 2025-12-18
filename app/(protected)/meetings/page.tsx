@@ -46,7 +46,7 @@ export default function MeetingsPage() {
             <h1 className="text-3xl font-semibold text-foreground mb-2">Online Meetings</h1>
             <p className="text-muted-foreground">Schedule and manage community meetings</p>
           </div>
-          <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg font-medium transition-colors">
+          <button className="px-4 py-2 rounded-lg font-medium transition-colors bg-[#EFB3AF]/80 hover:bg-[#EFB3AF] text-white shadow-sm hover:shadow-[0_0_20px_rgba(239,179,175,0.2)]">
             Schedule Meeting
           </button>
         </div>
@@ -54,33 +54,33 @@ export default function MeetingsPage() {
         {/* Meetings Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {meetings.map((meeting) => (
-            <div key={meeting.id} className="bg-card/40 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-pink-500/20 hover:border-pink-500/40 hover:shadow-[0_0_20px_rgba(236,72,153,0.1)] hover:bg-pink-500/5 transition-all duration-300 group">
+            <div key={meeting.id} className="bg-card/40 backdrop-blur-sm rounded-xl p-6 shadow-sm border border-[#EFB3AF]/20 hover:border-[#EFB3AF]/40 hover:shadow-[0_0_20px_rgba(239,179,175,0.1)] hover:bg-[#EFB3AF]/5 transition-all duration-300 group">
               <div className="flex justify-between items-start mb-4">
-                <span className="px-3 py-1 bg-pink-500/10 text-pink-200 rounded-full text-xs font-medium border border-pink-500/20">
+                <span className="px-3 py-1 bg-[#EFB3AF]/10 text-[#EFB3AF] rounded-full text-xs font-medium border border-[#EFB3AF]/20">
                   {meeting.type}
                 </span>
               </div>
 
-              <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-pink-100 transition-colors">{meeting.title}</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-3 group-hover:text-[#EFB3AF] transition-colors">{meeting.title}</h3>
               <p className="text-muted-foreground mb-6 leading-relaxed">{meeting.agenda}</p>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm group-hover:text-pink-200/70 transition-colors">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm group-hover:text-[#EFB3AF]/70 transition-colors">
                   <Calendar size={16} />
                   <span>{formatDate(meeting.date)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm group-hover:text-pink-200/70 transition-colors">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm group-hover:text-[#EFB3AF]/70 transition-colors">
                   <Clock size={16} />
                   <span>{meeting.time} ({meeting.duration} min)</span>
                 </div>
               </div>
 
               <div className="flex gap-3">
-                <button className="flex-1 flex items-center justify-center gap-2 bg-pink-500/20 hover:bg-pink-500/30 text-pink-100 px-4 py-2 rounded-lg font-medium transition-colors border border-pink-500/20 hover:border-pink-500/30">
+                <button className="flex-1 flex items-center justify-center gap-2 bg-[#EFB3AF]/20 hover:bg-[#EFB3AF]/30 text-[#EFB3AF] px-4 py-2 rounded-lg font-medium transition-colors border border-[#EFB3AF]/20 hover:border-[#EFB3AF]/30">
                   <Video size={16} />
                   Join Meeting
                 </button>
-                <button className="flex items-center gap-2 bg-transparent hover:bg-pink-500/10 text-pink-200/80 hover:text-pink-100 px-4 py-2 rounded-lg font-medium transition-colors border border-pink-500/20 hover:border-pink-500/30">
+                <button className="flex items-center gap-2 bg-transparent hover:bg-[#EFB3AF]/10 text-[#EFB3AF]/80 hover:text-[#EFB3AF] px-4 py-2 rounded-lg font-medium transition-colors border border-[#EFB3AF]/20 hover:border-[#EFB3AF]/30">
                   <Edit size={16} />
                   Edit
                 </button>

@@ -11,6 +11,11 @@ module.exports = {
       fontFamily: {
         sans: ["var(--font-manrope)", "sans-serif"],
         heading: ["var(--font-sora)", "sans-serif"],
+        mono: ['Fira Code', 'monospace'],
+      },
+      boxShadow: {
+          'glow': '0 0 18px rgba(0, 240, 192, 0.4)',
+          'glow-hover': '0 0 35px rgba(0, 240, 192, 0.6)'
       },
   		colors: {
   			border: 'hsl(var(--border))',
@@ -18,6 +23,17 @@ module.exports = {
   			ring: 'hsl(var(--ring))',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+        cyber: {
+            bg: '#0a0c12',
+            component: '#181c27',
+            input: 'rgba(30, 35, 50, 0.6)',
+            accent: '#00f0c0',
+            accentHover: '#00ffde',
+            text: '#e0e7ff',
+            secondary: '#a0aed0',
+            muted: '#707a95',
+            border: '#3a3f5e'
+        },
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'

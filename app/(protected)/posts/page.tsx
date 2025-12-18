@@ -338,7 +338,7 @@ export default function PostsPage() {
   return (
     <TwoColumnLayout>
         {/* Create Post Input & Filter Bar */}
-        <Card className="mb-6 shadow-sm border-yellow-500/20 bg-card/50 backdrop-blur-sm p-2 hover:border-yellow-500/40 hover:shadow-[0_0_20px_rgba(234,179,8,0.05)] transition-all">
+            <Card className="mb-6 shadow-sm border-yellow-500/50 bg-card/50 backdrop-blur-sm p-2 hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(234,179,8,0.15)] hover:bg-yellow-500/5 transition-all">
             <div className="flex items-center space-x-2 p-2">
                 <div className="flex-shrink-0">
                     <Avatar 
@@ -350,7 +350,7 @@ export default function PostsPage() {
                 <input 
                     type="text" 
                     placeholder="Create Post" 
-                    className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-yellow-500/30 rounded-lg px-4 py-2.5 flex-grow text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-yellow-500/20 transition-all cursor-text"
+                    className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-yellow-500/50 rounded-lg px-4 py-2.5 flex-grow text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-yellow-500/20 transition-all cursor-text"
                     onFocus={() => router.push('/posts/new')}
                 />
                 <button 
@@ -373,6 +373,8 @@ export default function PostsPage() {
             tags={allTags}
             selectedTag={selectedTag}
             onSelectTag={setSelectedTag}
+            activeColor="bg-yellow-500/10 text-white shadow-sm border border-yellow-500/20"
+            hoverColor="hover:bg-yellow-500/5 hover:text-white"
         />
 
         {/* Posts List */}
