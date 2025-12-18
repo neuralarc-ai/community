@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from './ui/card';
 import { Shield } from 'lucide-react';
+import TrendingSection from '@/app/components/TrendingSection';
 
 interface TwoColumnLayoutProps {
   children: React.ReactNode;

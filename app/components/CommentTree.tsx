@@ -2,6 +2,7 @@
 
 import { useState, useMemo, memo } from 'react'
 import CommentItem from './CommentItem'
+import CommentForm from './CommentForm'
 import { Comment } from '@/app/types'
 
 interface CommentTreeProps {
@@ -28,24 +29,30 @@ const CommentTree = memo(function CommentTree({
   depth = 0,
 }: CommentTreeProps) {
 
-  const buildCommentTree = useMemo(() => {
-    const build = (commentList: Comment[], parentId: string | null = null, depth: number = 0): Comment[] => {
-      return commentList
-        .filter(comment => comment.parent_comment_id === parentId)
-        .map(comment => ({
-          ...comment,
-          children: build(commentList, comment.id, depth + 1)
-        }))
-    }
-    return build(comments, null, 0)
+  const displayComments = useMemo(() => {
+    return comments.map(comment => ({
+      ...comment,
+      children: (comment as any).children || comment.replies || []
+    }))
   }, [comments])
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
+      {/* Top-level Comment Form */}
+      {depth === 0 && (
+        <div className="mb-6">
+           <CommentForm 
+             postId={postId}
+             onCommentAdded={onCommentAdded}
+             placeholder="What are your thoughts?"
+           />
+        </div>
+      )}
+
       {/* Comments list */}
-      {buildCommentTree.length > 0 ? (
-        <div className="">
-          {buildCommentTree.map((comment) => (
+      {displayComments.length > 0 ? (
+        <div className="space-y-6">
+          {displayComments.map((comment) => (
             <CommentItem
               key={comment.id}
               comment={comment}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/app/lib/supabaseClient'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 
@@ -25,6 +25,14 @@ export default function VoteButton({
   const [currentVote, setCurrentVote] = useState(userVote)
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
+
+  useEffect(() => {
+    setScore(initialScore)
+  }, [initialScore])
+
+  useEffect(() => {
+    setCurrentVote(userVote)
+  }, [userVote])
 
   const handleVoteClick = async (voteValue: 1 | -1) => {
       if (isLoading) return
