@@ -394,6 +394,7 @@ export default function PostsPage() {
                   onToggleComments={() => togglePostComments(post.id)}
                   commentCount={post.comment_count || 0}
                   currentUserId={currentUserProfile?.id}
+                  isAdmin={currentUserProfile?.role === 'admin'}
                   onDelete={handleDeletePost}
                   isSaved={savedPostIds.has(post.id)}
                   onToggleSave={handleToggleSave}

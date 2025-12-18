@@ -35,6 +35,17 @@ export default function ProfilePage() {
     if (activeTab === 'saved') fetchSavedPosts();
     if (activeTab === 'posts') fetchMyPosts();
     if (activeTab === 'comments') fetchMyComments();
+    if (activeTab === 'overview') {
+        setLoadingData(true);
+        Promise.all([
+            fetch('/api/posts/user').then(res => res.ok ? res.json() : []),
+            fetch('/api/comments/user').then(res => res.ok ? res.json() : [])
+        ]).then(([posts, comments]) => {
+            setMyPosts(posts);
+            setMyComments(comments);
+            setLoadingData(false);
+        }).catch(() => setLoadingData(false));
+    }
   }, [activeTab]);
 
   const fetchMyPosts = async () => {
@@ -91,9 +102,14 @@ export default function ProfilePage() {
     }
   };
 
-  const CommentItem = ({ comment }: { comment: any }) => (
+  const CommentItem = ({ comment, showTag = false }: { comment: any, showTag?: boolean }) => (
     <div className="bg-card/40 backdrop-blur-sm border border-white/5 rounded-xl p-4 mb-4 hover:border-white/10 transition-all">
       <div className="text-xs text-muted-foreground mb-2 flex items-center gap-2">
+        {showTag && (
+          <span className="bg-red-500/10 text-red-400 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border border-red-500/20 mr-1">
+            Comment
+          </span>
+        )}
         <MessageCircle size={12} />
         <span>Commented on:</span>
         <Link href={`/posts/${comment.post.id}`} className="text-primary hover:underline truncate max-w-[300px]">
@@ -289,7 +305,37 @@ export default function ProfilePage() {
            )
         ) : (
           /* Overview Tab (Default) */
-          <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors group">
+          loadingData ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (myPosts.length > 0 || myComments.length > 0) ? (
+            <div className="space-y-4">
+              {[
+                ...myPosts.map(p => ({ ...p, type: 'post' as const })),
+                ...myComments.map(c => ({ ...c, type: 'comment' as const }))
+              ]
+                .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                .map((item: any) => (
+                  item.type === 'post' ? (
+                    <PostItem
+                      key={item.id}
+                      post={item}
+                      userVote={item.user_vote || 0}
+                      onVoteChange={() => {}}
+                      commentCount={item.comment_count || 0}
+                      isExpanded={false}
+                      onToggleComments={() => {}}
+                      typeTag="Post"
+                    />
+                  ) : (
+                    <CommentItem key={item.id} comment={item} showTag={true} />
+                  )
+                ))
+              }
+            </div>
+          ) : (
+            <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors group">
               <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-white/5">
                   <Plus className="w-8 h-8 text-muted-foreground group-hover:text-white transition-colors" />
               </div>
@@ -299,7 +345,8 @@ export default function ProfilePage() {
               <p className="text-muted-foreground max-w-sm mb-8 text-base leading-relaxed">
                   Check out your posts, comments, and saved items using the tabs above.
               </p>
-          </div>
+            </div>
+          )
         )}
       </div>
       {showAvatarEditor && (

@@ -25,9 +25,15 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && user) {
-    // If user is logged in and on auth pages, redirect to dashboard
+    // If user is logged in and on auth pages, redirect based on role
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = profile?.role === 'admin' ? '/dashboard' : '/posts'
     return NextResponse.redirect(url)
   }
 
@@ -36,7 +42,7 @@ export async function middleware(request: NextRequest) {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, role')
         .eq('id', user.id)
         .single()
 
@@ -49,8 +55,13 @@ export async function middleware(request: NextRequest) {
       } else if (error) {
         // For other errors (connection, permissions, etc.), log and allow access
         console.error("Error checking profile in middleware:", error);
-        // Don't redirect - allow the user to access the route
-        // This prevents false positives from blocking legitimate users
+      }
+
+      // If profile exists, check dashboard access
+      if (profile && request.nextUrl.pathname.startsWith('/dashboard') && profile.role !== 'admin') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/posts' // Redirect non-admins to posts
+        return NextResponse.redirect(url)
       }
       // If profile exists, continue normally
     } catch (error) {
@@ -59,19 +70,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // If user has a profile and tries to access complete-profile page, redirect to dashboard
+  // If user has a profile and tries to access complete-profile page, redirect to their main page
   if (user && request.nextUrl.pathname === '/complete-profile') {
     try {
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, role')
         .eq('id', user.id)
         .single()
 
-      // If profile exists, redirect to dashboard
+      // If profile exists, redirect based on role
       if (profile && !error) {
         const url = request.nextUrl.clone()
-        url.pathname = '/dashboard'
+        url.pathname = profile.role === 'admin' ? '/dashboard' : '/posts'
         return NextResponse.redirect(url)
       }
       // If no profile or error, allow access to complete-profile page
