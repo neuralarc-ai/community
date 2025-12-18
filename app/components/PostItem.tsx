@@ -51,18 +51,6 @@ export default function PostItem({
 
   return (
     <div className="flex bg-card/40 backdrop-blur-sm border border-white/5 rounded-2xl mb-6 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02] overflow-hidden group">
-      {/* Vote Column - Hidden on mobile */}
-      <div className="hidden sm:flex bg-white/[0.02] w-14 border-r border-white/5 flex-col items-center pt-4 gap-2 group-hover:border-yellow-500/10 transition-colors">
-        <VoteColumn
-          targetType="post"
-          targetId={post.id}
-          initialScore={post.vote_score || 0}
-          userVote={userVote}
-          onVoteChange={handleVoteChange}
-          orientation="vertical"
-        />
-      </div>
-
       <div className="flex-1 min-w-0 p-5 sm:p-6">
         {/* Header Metadata */}
         <div className="flex items-center text-xs text-muted-foreground mb-3 gap-3">
@@ -101,17 +89,7 @@ export default function PostItem({
 
         {/* Mobile Vote & Actions */}
         <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
-            <div className="sm:hidden">
-                <VoteColumn
-                  targetType="post"
-                  targetId={post.id}
-                  initialScore={post.vote_score || 0}
-                  userVote={userVote}
-                  onVoteChange={handleVoteChange}
-                  orientation="horizontal"
-                />
-            </div>
-
+            {/* Removed mobile VoteColumn, now handled in PostActions */}
             <div className="flex items-center text-muted-foreground font-medium text-xs">
                 <PostActions
                   commentCount={commentCount}
@@ -124,6 +102,9 @@ export default function PostItem({
                   onDelete={onDelete}
                   isSaved={isSaved}
                   onToggleSave={onToggleSave}
+                  initialVoteScore={post.vote_score || 0}
+                  userVote={userVote}
+                  onVoteChange={handleVoteChange}
                 />
             </div>
         </div>
