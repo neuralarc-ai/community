@@ -1,12 +1,11 @@
 import Link from 'next/link';
-import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark } from 'lucide-react';
+import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark, ChevronUp, ChevronDown } from 'lucide-react';
+import { createClient } from '@/app/lib/supabaseClient'; // Assuming supabase client is needed for votes
 import { useState, useRef, useEffect } from 'react';
 import VoteColumn from './VoteColumn';
 
 interface PostActionsProps {
   commentCount: number;
-  onToggleComments?: () => void;
-  isExpanded?: boolean;
   postId: string;
   authorId: string;
   currentUserId?: string | null;
@@ -21,8 +20,6 @@ interface PostActionsProps {
 
 export default function PostActions({
   commentCount,
-  onToggleComments,
-  isExpanded,
   postId,
   authorId,
   currentUserId,
@@ -35,8 +32,18 @@ export default function PostActions({
   onVoteChange
 }: PostActionsProps) {
   const [showMenu, setShowMenu] = useState(false);
-  const [showCopiedMessage, setShowCopiedMessage] = useState(false); // New state for copied message
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [currentScore, setCurrentScore] = useState(initialVoteScore);
+  const [currentUserVote, setCurrentUserVote] = useState(userVote);
+
+  useEffect(() => {
+    setCurrentScore(initialVoteScore);
+  }, [initialVoteScore]);
+
+  useEffect(() => {
+    setCurrentUserVote(userVote);
+  }, [userVote]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -71,41 +78,83 @@ export default function PostActions({
     }
   };
 
-  const CommentsButton = () => (
-    <button
-      className="flex items-center space-x-2 hover:bg-white/5 text-muted-foreground hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 group"
-      onClick={(e) => {
-        if (onToggleComments) {
-          e.preventDefault();
-          onToggleComments();
-        }
-      }}
-    >
-      <MessageSquare size={16} className="group-hover:text-white transition-colors" />
-      <span>{commentCount} Comments</span>
-    </button>
-  );
+  const handleVote = async (voteType: 1 | -1, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!currentUserId) {
+      alert('You must be logged in to vote.');
+      return;
+    }
+
+    const supabase = createClient();
+    let newVote = 0;
+    let newScore = currentScore;
+
+    if (currentUserVote === voteType) {
+      // User is undoing their vote
+      newVote = 0;
+      newScore -= voteType;
+    } else {
+      // User is changing their vote or casting a new vote
+      newVote = voteType;
+      newScore += voteType - (currentUserVote || 0);
+    }
+
+    setCurrentScore(newScore);
+    setCurrentUserVote(newVote as -1 | 0 | 1);
+    onVoteChange(newScore, newVote as -1 | 0 | 1);
+
+    const { error } = await supabase.from('votes').upsert(
+      {
+        user_id: currentUserId,
+        target_id: postId,
+        target_type: 'post',
+        vote_type: newVote,
+      },
+      { onConflict: 'user_id,target_id,target_type' }
+    );
+
+    if (error) {
+      console.error('Error submitting vote:', error);
+      // Revert optimistic update if there's an error
+      setCurrentScore(initialVoteScore);
+      setCurrentUserVote(userVote);
+      onVoteChange(initialVoteScore, userVote);
+      alert('Failed to cast vote.');
+    }
+  };
 
   return (
     <div className="flex items-center space-x-2 text-xs font-medium relative">
-      <VoteColumn
-        targetType="post"
-        targetId={postId}
-        initialScore={initialVoteScore}
-        userVote={userVote}
-        onVoteChange={onVoteChange}
-        orientation="horizontal"
-      />
-      {onToggleComments ? (
-        <CommentsButton />
-      ) : (
-        <Link href={`/posts/${postId}#comments`} passHref className="no-underline">
-           <div className="flex items-center space-x-2 hover:bg-white/5 text-muted-foreground hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 group">
+      <div className="flex items-center space-x-1 bg-white/5 rounded-full px-2 py-1 transition-all duration-200 group">
+        <button
+          onClick={(e) => handleVote(1, e)}
+          className={`p-1 rounded-full transition-colors ${
+            currentUserVote === 1
+              ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
+              : 'text-muted-foreground hover:bg-white/10 hover:text-white'
+          }`}
+        >
+          <ChevronUp size={16} />
+        </button>
+        <span className="text-white font-semibold min-w-[20px] text-center">{currentScore}</span>
+        <button
+          onClick={(e) => handleVote(-1, e)}
+          className={`p-1 rounded-full transition-colors ${
+            currentUserVote === -1
+              ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
+              : 'text-muted-foreground hover:bg-white/10 hover:text-white'
+          }`}
+        >
+          <ChevronDown size={16} />
+        </button>
+      </div>
+
+      <Link href={`/posts/${postId}#comments`} passHref className="no-underline">
+           <div className="flex items-center space-x-1 hover:bg-white/5 text-muted-foreground hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 group">
              <MessageSquare size={16} className="group-hover:text-white transition-colors" />
-             <span>{commentCount} Comments</span>
+             <span>{commentCount}</span>
            </div>
         </Link>
-      )}
 
       <button 
         className="flex items-center space-x-2 hover:bg-white/5 text-muted-foreground hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 group"

@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import TwoColumnLayout from '@/app/components/TwoColumnLayout'
 import CommentTree from '@/app/components/CommentTree'
-import VoteColumn from '@/app/components/VoteColumn'
+import PostActions from '@/app/components/PostActions'
 import { Post, Comment } from '@/app/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import Avatar from '@/app/components/Avatar'
@@ -14,6 +14,7 @@ import { MessageSquare, Share2, ArrowLeft, Bookmark } from 'lucide-react'
 
 export default function PostDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const postId = params.id as string
 
   const [post, setPost] = useState<Post | null>(null)
@@ -160,28 +161,22 @@ export default function PostDetailPage() {
 
   return (
     <TwoColumnLayout>
-        {/* Back Link */}
-        <div className="mb-4">
-            <Link href="/posts" className="text-muted-foreground hover:text-primary flex items-center gap-2 text-sm font-medium transition-colors">
-                <ArrowLeft size={16} />
-                Back to Feed
-            </Link>
+<div className="flex items-center gap-4 mb-8">
+            <button 
+              onClick={() => router.back()}
+              className="p-2 rounded-full bg-white/5 hover:bg-yellow-500/20 text-muted-foreground hover:text-white transition-all border border-white/5"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <div>
+              <h1 className="text-3xl font-heading font-bold text-white tracking-tight">Post Details</h1>
+              <p className="text-muted-foreground font-sans">Dive into the discussion and insights of this post</p>
+            </div>
         </div>
 
         {/* Main Post Card */}
         <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl shadow-sm overflow-hidden mb-6">
-            <div className="flex">
-                {/* Vote Column - Hidden on mobile, shown on SM+ */}
-                <div className="hidden sm:flex w-14 bg-white/[0.02] border-r border-white/5 flex-col items-center py-4 gap-1">
-                    <VoteColumn
-                        targetType="post"
-                        targetId={post.id}
-                        initialScore={post.vote_score || 0}
-                        userVote={post.user_vote || 0}
-                        onVoteChange={handleVoteChange}
-                        orientation="vertical"
-                    />
-                </div>
+            <div className="flex flex-col">
                 
                 {/* Content */}
                 <div className="flex-1 p-4 sm:p-6">
@@ -217,31 +212,17 @@ export default function PostDetailPage() {
                     )}
 
                     {/* Action Bar */}
-                    <div className="flex items-center gap-2 sm:gap-4 border-t border-white/5 pt-4 flex-wrap">
-                        {/* Mobile Vote Buttons */}
-                        <div className="sm:hidden mr-2">
-                             <VoteColumn
-                                targetType="post"
-                                targetId={post.id}
-                                initialScore={post.vote_score || 0}
-                                userVote={post.user_vote || 0}
-                                onVoteChange={handleVoteChange}
-                                orientation="horizontal"
-                            />
-                        </div>
-
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:bg-white/5 hover:text-white rounded-full h-8">
-                            <MessageSquare className="w-4 h-4 mr-2" />
-                            <span className="text-xs font-bold">{post.comment_count || 0} Comments</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:bg-white/5 hover:text-white rounded-full h-8">
-                            <Share2 className="w-4 h-4 mr-2" />
-                            <span className="text-xs font-bold">Share</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:bg-white/5 hover:text-white rounded-full h-8">
-                            <Bookmark className="w-4 h-4 mr-2" />
-                            <span className="text-xs font-bold">Save</span>
-                        </Button>
+                    <div className="border-t border-white/5 pt-4">
+                        <PostActions
+                            postId={post.id}
+                            commentCount={post.comment_count || 0}
+                            initialVoteScore={post.vote_score || 0}
+                            userVote={post.user_vote || 0}
+                            onVoteChange={handleVoteChange}
+                            isExpanded={true}
+                            onToggleComments={() => {}} 
+                            typeTag="Post"
+                        />
                     </div>
                 </div>
             </div>

@@ -15,8 +15,8 @@ export const mockStats = [
     icon: 'MessageSquare'
   },
   {
-    id: '3',
-    title: 'Workshops This Month',
+    id: 'conclaves',
+    title: 'Conclave This Month',
     value: '12',
     change: '+8%',
     icon: 'Presentation'
@@ -27,6 +27,34 @@ export const mockStats = [
     value: '6',
     change: '+2%',
     icon: 'Video'
+  },
+  {
+    id: '5',
+    title: 'Total Likes',
+    value: '5,432',
+    change: '+15%',
+    icon: 'Heart'
+  },
+  {
+    id: '6',
+    title: 'Total Comments',
+    value: '2,105',
+    change: '+10%',
+    icon: 'MessageSquare'
+  },
+  {
+    id: '7',
+    title: 'Posts Shared',
+    value: '876',
+    change: '+7%',
+    icon: 'Share2'
+  },
+  {
+    id: '8',
+    title: 'Posts Saved',
+    value: '1,502',
+    change: '+18%',
+    icon: 'Bookmark'
   }
 ]
 
@@ -42,8 +70,8 @@ export const mockActivity = [
   {
     id: 2,
     type: 'workshop' as const,
-    title: 'React Advanced Patterns Workshop',
-    description: 'Mike Chen is hosting a workshop on advanced React patterns',
+    title: 'React Advanced Patterns Conclave',
+    description: 'Mike Chen is hosting a conclave on advanced React patterns',
     time: '1 hour ago',
     author: 'Mike Chen'
   },

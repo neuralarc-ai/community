@@ -37,7 +37,7 @@ const CommentTree = memo(function CommentTree({
   }, [comments])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-0">
       {/* Top-level Comment Form */}
       {depth === 0 && (
         <div className="mb-6">
@@ -51,7 +51,7 @@ const CommentTree = memo(function CommentTree({
 
       {/* Comments list */}
       {displayComments.length > 0 ? (
-        <div className="space-y-6">
+        <div className="space-y-0">
           {displayComments.map((comment) => (
             <CommentItem
               key={comment.id}

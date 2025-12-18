@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Users, MessageSquare, Presentation, Video, MessageCircle, Calendar, UserPlus, Activity, ShieldAlert, Mail, Clock } from 'lucide-react'
+import { Users, MessageSquare, Presentation, Video, MessageCircle, Calendar, UserPlus, Activity, ShieldAlert, Mail, Clock, Heart, Share2, Bookmark } from 'lucide-react'
 import { mockStats, mockActivity } from '@/app/data/mockData'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Profile } from '@/app/types'
@@ -80,13 +80,17 @@ export default function Dashboard() {
                   <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
                     {stat.id === 'members' && <Users size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
                     {stat.id === 'posts' && <MessageSquare size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                    {stat.id === 'workshops' && <Presentation size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.id === 'conclaves' && <Presentation size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
                     {stat.id === 'meetings' && <Video size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.id === '5' && <Heart size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.id === '6' && <MessageSquare size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.id === '7' && <Share2 size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.id === '8' && <Bookmark size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col gap-2 pt-2">
-                    <span className="text-4xl font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
+                    <span className="text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
                         {stat.value}
                     </span>
                     <div className="flex items-center gap-2">
