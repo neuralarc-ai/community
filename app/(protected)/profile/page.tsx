@@ -104,21 +104,23 @@ export default function ProfilePage() {
 
   const CommentItem = ({ comment, showTag = false }: { comment: any, showTag?: boolean }) => (
     <div className="bg-card/40 backdrop-blur-sm border border-white/5 rounded-xl p-4 mb-4 hover:border-white/10 transition-all">
-      <div className="text-xs text-muted-foreground mb-2 flex items-center gap-2">
+      <div className="text-xs flex items-center gap-2 mb-3">
         {showTag && (
-          <span className="bg-red-500/10 text-red-400 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border border-red-500/20 mr-1">
+          <span className="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border border-red-500/20 mr-1 font-heading">
             Comment
           </span>
         )}
-        <MessageCircle size={12} />
-        <span>Commented on:</span>
-        <Link href={`/posts/${comment.post.id}`} className="text-primary hover:underline truncate max-w-[300px]">
-           {comment.post.title}
-        </Link>
-        <span className="text-white/20">•</span>
-        <span>{new Date(comment.created_at).toLocaleDateString()}</span>
+        <div className="flex items-center gap-2 font-sans">
+          <MessageCircle size={14} className="text-muted-foreground" />
+          <span className="font-medium text-muted-foreground">Commented on:</span>
+          <Link href={`/posts/${comment.post.id}`} className="text-[#A6C8D5] hover:text-[#A6C8D5]/80 hover:underline transition-colors font-bold truncate max-w-[250px] md:max-w-[400px]">
+             {comment.post.title}
+          </Link>
+          <span className="text-white/20">•</span>
+          <span className="text-muted-foreground font-mono">{new Date(comment.created_at).toLocaleDateString()}</span>
+        </div>
       </div>
-      <p className="text-sm text-white/90">{comment.body}</p>
+      <p className="text-sm text-white/90 leading-relaxed font-sans pl-2 border-l border-white/5">{comment.body}</p>
     </div>
   );
 
@@ -165,26 +167,28 @@ export default function ProfilePage() {
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-6 py-5 border-y border-white/5 w-full">
                         <div className="flex flex-col items-center">
-                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Flux</p>
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Flux</p>
                             <div className="flex items-center gap-2">
                                 <Award className="w-4 h-4 text-white" />
-                                <span className="font-bold text-lg text-white">1,240</span>
+                                <span className="font-heading font-bold text-lg text-white">1,240</span>
                             </div>
                         </div>
                         <div className="flex flex-col items-center">
-                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Joined</p>
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Joined</p>
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-white" />
-                                <span className="font-bold text-lg text-white">{new Date(profile.created_at).toLocaleDateString()}</span>
+                                <span className="font-heading font-bold text-lg text-white">{new Date(profile.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Profile Settings
-                    </Button>
+                    <Link href="/profile/settings" className="w-full">
+                        <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Profile Settings
+                        </Button>
+                    </Link>
                 </div>
             </CardContent>
         </Card>
@@ -236,8 +240,7 @@ export default function ProfilePage() {
                    userVote={(post as any).user_vote || 0}
                    onVoteChange={() => {}}
                    commentCount={post.comment_count || 0}
-                   isExpanded={false}
-                   onToggleComments={() => {}}
+                   currentUserId={profile.id}
                  />
                ))}
              </PostList>
@@ -287,8 +290,7 @@ export default function ProfilePage() {
                    userVote={(post as any).user_vote || 0}
                    onVoteChange={() => {}} // Read-only or implement vote logic if needed
                    commentCount={post.comment_count || 0}
-                   isExpanded={false}
-                   onToggleComments={() => {}}
+                   currentUserId={profile.id}
                    isSaved={true}
                    onToggleSave={handleToggleSave}
                  />
@@ -324,8 +326,7 @@ export default function ProfilePage() {
                       userVote={item.user_vote || 0}
                       onVoteChange={() => {}}
                       commentCount={item.comment_count || 0}
-                      isExpanded={false}
-                      onToggleComments={() => {}}
+                      currentUserId={profile.id}
                       typeTag="Post"
                     />
                   ) : (

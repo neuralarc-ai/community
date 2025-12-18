@@ -103,7 +103,7 @@ export default function VoteButton({
         <ArrowUp size={iconSize} strokeWidth={2.5} />
       </button>
       
-      <span className={`${textSize} font-bold min-w-[1ch] text-center tabular-nums ${
+      <span className={`${textSize} font-heading font-bold min-w-[1ch] text-center tabular-nums ${
         currentVote !== 0 ? 'text-white' : 'text-muted-foreground'
       }`}>
         {score}

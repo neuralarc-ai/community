@@ -16,7 +16,7 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "Sphere Management Portal",
-  description: "Manage your community with posts, workshops, and meetings",
+  description: "Manage your community with posts, conclaves, and meetings",
 };
 
 export default function RootLayout({

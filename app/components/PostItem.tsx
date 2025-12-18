@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Post } from '@/app/types';
-import VoteColumn from './VoteColumn';
 import PostActions from './PostActions';
 import Avatar from './Avatar';
 
@@ -9,8 +8,6 @@ interface PostItemProps {
   userVote: -1 | 0 | 1;
   onVoteChange: (postId: string, newScore: number, newUserVote: -1 | 0 | 1) => void;
   commentCount: number;
-  isExpanded: boolean;
-  onToggleComments: () => void;
   currentUserId?: string;
   isAdmin?: boolean;
   onDelete?: (postId: string) => void;
@@ -36,8 +33,6 @@ export default function PostItem({
   userVote,
   onVoteChange,
   commentCount,
-  isExpanded,
-  onToggleComments,
   currentUserId,
   isAdmin,
   onDelete,
@@ -93,8 +88,6 @@ export default function PostItem({
             <div className="flex items-center text-muted-foreground font-medium text-xs">
                 <PostActions
                   commentCount={commentCount}
-                  onToggleComments={onToggleComments}
-                  isExpanded={isExpanded}
                   postId={post.id}
                   authorId={post.author_id}
                   currentUserId={currentUserId}
