@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, MessageSquare, Presentation, Calendar, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, MessageSquare, Presentation, Calendar, User, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -22,6 +22,7 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
     { href: '/workshops', label: 'Workshops', icon: Presentation, color: 'hover:border-[#27584F]/50 hover:shadow-[0_0_20px_rgba(39,88,79,0.15)] hover:bg-[#27584F]/5', activeColor: 'border-[#27584F]/50 shadow-[0_0_20px_rgba(39,88,79,0.15)] bg-[#27584F]/10' },
     { href: '/meetings', label: 'Meetings', icon: Calendar, color: 'hover:border-[#EFB3AF]/50 hover:shadow-[0_0_20px_rgba(239,179,175,0.15)] hover:bg-[#EFB3AF]/5', activeColor: 'border-[#EFB3AF]/50 shadow-[0_0_20px_rgba(239,179,175,0.15)] bg-[#EFB3AF]/10' },
     { href: '/profile', label: 'Profile', icon: User, color: 'hover:border-[#A6C8D5]/50 hover:shadow-[0_0_20px_rgba(166,200,213,0.15)] hover:bg-[#A6C8D5]/5', activeColor: 'border-[#A6C8D5]/50 shadow-[0_0_20px_rgba(166,200,213,0.15)] bg-[#A6C8D5]/10' },
+    { href: '/profile/settings', label: 'Settings', icon: Settings, color: 'hover:border-[#A69CBE]/50 hover:shadow-[0_0_20px_rgba(166,156,190,0.15)] hover:bg-[#A69CBE]/5', activeColor: 'border-[#A69CBE]/50 shadow-[0_0_20px_rgba(166,156,190,0.15)] bg-[#A69CBE]/10' },
   ];
 
   const sidebarClasses = cn(
@@ -85,8 +86,8 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
                 </div>
                 
                 <span className={cn(
-                  "whitespace-nowrap transition-all duration-300 font-medium",
-                  !isOpen && !isMobile ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"
+                  "whitespace-nowrap transition-all duration-300 font-bold tracking-tight font-heading",
+                  !isOpen && !isMobile ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto text-sm"
                 )}>
                   {item.label}
                 </span>

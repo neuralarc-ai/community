@@ -18,7 +18,7 @@ export default function Dashboard() {
         {mockStats.map((stat) => (
           <Card key={stat.id} className="bg-card/40 backdrop-blur-md border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] transition-all duration-300 group cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-orange-200 transition-colors duration-300">
+              <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground group-hover:text-orange-200 transition-colors duration-300">
                 {stat.title}
               </CardTitle>
               <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
@@ -30,7 +30,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-2 pt-2">
-                <span className="text-4xl font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
+                <span className="text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
                     {stat.value}
                 </span>
                 <div className="flex items-center gap-2">

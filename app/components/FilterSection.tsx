@@ -13,7 +13,7 @@ export default function FilterSection({ tags, selectedTag, onSelectTag, activeCo
   return (
     <div className="mb-6 overflow-x-auto pb-2 scrollbar-hide">
       <div className="flex items-center space-x-2">
-        <div className="flex items-center text-xs font-bold text-muted-foreground uppercase tracking-widest mr-2">
+        <div className="flex items-center text-xs font-bold text-muted-foreground uppercase tracking-widest mr-2 font-heading">
             <Tag size={14} className="mr-1.5" />
             Filters:
         </div>

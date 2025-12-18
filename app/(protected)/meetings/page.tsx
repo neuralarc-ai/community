@@ -40,11 +40,11 @@ export default function MeetingsPage() {
   }
 
   return (
-    <div className="container py-8">
-      <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-3xl font-semibold text-foreground mb-2">Online Meetings</h1>
-            <p className="text-muted-foreground">Schedule and manage community meetings</p>
+    <div className="container py-8 space-y-12 px-6">
+      <div className="flex justify-between items-start">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl font-bold text-white tracking-tight">Online Meetings</h1>
+            <p className="text-lg text-muted-foreground">Schedule and manage community meetings</p>
           </div>
           <button className="px-4 py-2 rounded-lg font-medium transition-colors bg-[#EFB3AF]/80 hover:bg-[#EFB3AF] text-white shadow-sm hover:shadow-[0_0_20px_rgba(239,179,175,0.2)]">
             Schedule Meeting

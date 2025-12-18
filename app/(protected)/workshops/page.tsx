@@ -41,11 +41,11 @@ export default function WorkshopsPage() {
   }
 
   return (
-    <div className="container max-w-[1400px] py-8 mx-auto px-6">
-      <div className="flex justify-between items-start mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Workshops</h1>
-            <p className="text-muted-foreground">Schedule and manage online workshops</p>
+    <div className="container max-w-[1400px] py-8 mx-auto px-6 space-y-12">
+      <div className="flex justify-between items-start">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-4xl font-bold text-white tracking-tight">Workshops</h1>
+            <p className="text-lg text-muted-foreground">Schedule and manage online workshops</p>
           </div>
           <Button className="gap-2 bg-[#27584F]/80 hover:bg-[#27584F] text-white shadow-sm hover:shadow-[0_0_20px_rgba(39,88,79,0.2)]">
             <Plus size={16} />

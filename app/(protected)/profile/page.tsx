@@ -149,26 +149,28 @@ export default function ProfilePage() {
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-6 py-5 border-y border-white/5 w-full">
                         <div className="flex flex-col items-center">
-                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Flux</p>
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Flux</p>
                             <div className="flex items-center gap-2">
                                 <Award className="w-4 h-4 text-white" />
-                                <span className="font-bold text-lg text-white">1,240</span>
+                                <span className="font-heading font-bold text-lg text-white">1,240</span>
                             </div>
                         </div>
                         <div className="flex flex-col items-center">
-                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Joined</p>
+                            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Joined</p>
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-white" />
-                                <span className="font-bold text-lg text-white">{new Date(profile.created_at).toLocaleDateString()}</span>
+                                <span className="font-heading font-bold text-lg text-white">{new Date(profile.created_at).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Profile Settings
-                    </Button>
+                    <Link href="/profile/settings" className="w-full">
+                        <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
+                            <Settings className="w-4 h-4 mr-2" />
+                            Profile Settings
+                        </Button>
+                    </Link>
                 </div>
             </CardContent>
         </Card>
