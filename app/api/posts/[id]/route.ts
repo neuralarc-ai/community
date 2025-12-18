@@ -164,12 +164,19 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       )
     }
 
-    // Check post ownership
-    const { data: post, error: fetchError } = await supabase
-      .from('posts')
-      .select('author_id')
-      .eq('id', postId)
-      .single()
+    // Check post ownership AND user role
+    const [{ data: post, error: fetchError }, { data: profile }] = await Promise.all([
+      supabase
+        .from('posts')
+        .select('author_id')
+        .eq('id', postId)
+        .single(),
+      supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+    ])
 
     if (fetchError || !post) {
       return NextResponse.json(
@@ -178,9 +185,12 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       )
     }
 
-    if (post.author_id !== user.id) {
+    const isAdmin = profile?.role === 'admin'
+    const isAuthor = post.author_id === user.id
+
+    if (!isAuthor && !isAdmin) {
       return NextResponse.json(
-        { error: 'Forbidden: You can only delete your own posts' },
+        { error: 'Forbidden: You do not have permission to delete this post' },
         { status: 403 }
       )
     }

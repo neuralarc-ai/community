@@ -34,12 +34,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
     router.push('/login')
   }
 
+  const logoHref = profile?.role === 'admin' ? '/dashboard' : '/posts'
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between h-16 px-6 max-w-[1400px] mx-auto">
         {/* Left: Logo */}
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2 group">
+          <Link href={logoHref} className="flex items-center gap-2 group">
             <div className="relative w-8 h-8 group-hover:opacity-80 transition-all">
                <Image 
                  src="/helium logo offwhite.png"

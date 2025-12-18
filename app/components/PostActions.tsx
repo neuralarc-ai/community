@@ -9,6 +9,7 @@ interface PostActionsProps {
   postId: string;
   authorId: string;
   currentUserId?: string;
+  isAdmin?: boolean;
   onDelete?: (postId: string) => void;
   isSaved?: boolean;
   onToggleSave?: (postId: string) => void;
@@ -21,6 +22,7 @@ export default function PostActions({
   postId,
   authorId,
   currentUserId,
+  isAdmin,
   onDelete,
   isSaved = false,
   onToggleSave
@@ -110,7 +112,7 @@ export default function PostActions({
 
         {showMenu && (
           <div className="absolute right-0 bottom-full mb-2 w-32 bg-[#1A1A1A] rounded-lg shadow-xl shadow-black/50 border border-white/10 py-1 z-10 backdrop-blur-md">
-            {currentUserId === authorId && onDelete ? (
+            {(currentUserId === authorId || isAdmin) && onDelete ? (
               <button
                 onClick={handleDeleteClick}
                 className="w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/10 flex items-center gap-2 text-xs font-medium transition-colors"
@@ -119,7 +121,7 @@ export default function PostActions({
                 <span>Delete</span>
               </button>
             ) : null}
-            {!currentUserId || currentUserId !== authorId ? (
+            {!currentUserId || (currentUserId !== authorId && !isAdmin) ? (
                 <div className="px-4 py-2 text-muted-foreground text-xs text-center">
                     No actions
                 </div>
