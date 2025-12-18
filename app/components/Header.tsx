@@ -46,10 +46,10 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <div className="flex items-center gap-6 min-w-max">
           <Link href="/dashboard" className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-all">
-               <span className="text-white font-bold font-heading">C</span>
+               <span className="text-white font-bold font-heading">S</span>
             </div>
             <span className="text-lg font-bold font-heading text-white hidden md:block tracking-tight">
-              Community
+              Sphere
             </span>
           </Link>
 
