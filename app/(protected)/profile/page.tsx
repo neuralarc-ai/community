@@ -112,16 +112,16 @@ export default function ProfilePage() {
   // Sidebar specific for Profile
   const ProfileSidebar = (
     <div className="space-y-4">
-        <Card className="overflow-hidden border border-red-500/20 shadow-xl bg-card/60 backdrop-blur-md hover:border-red-500/30 hover:shadow-[0_0_30px_rgba(239,68,68,0.1)] transition-all duration-300">
+        <Card className="overflow-hidden border border-[#A6C8D5]/20 shadow-xl bg-card/60 backdrop-blur-md hover:border-[#A6C8D5]/30 hover:shadow-[0_0_30px_rgba(166,200,213,0.1)] transition-all duration-300">
             {/* Card Header Background - Removed height to allow flex growth if needed, but keeping for visual */}
-            <div className="h-24 bg-red-950/20 relative border-b border-red-500/10">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(239,68,68,0.1)_1px,transparent_1px)] [background-size:24px_24px] opacity-50"></div>
+            <div className="h-24 bg-[#A6C8D5]/20 relative border-b border-[#A6C8D5]/10">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(166,200,213,0.1)_1px,transparent_1px)] [background-size:24px_24px] opacity-50"></div>
             </div>
             
             <CardContent className="pt-0 px-6 pb-6 flex flex-col items-center">
                 {/* Avatar - Centered with negative margin to pull it up */}
                 <div className="-mt-12 mb-4 relative group">
-                    <div className="rounded-full p-1.5 bg-[#141414] ring-1 ring-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
+                    <div className="rounded-full p-1.5 bg-[#141414] ring-1 ring-[#A6C8D5]/30 shadow-[0_0_20px_rgba(166,200,213,0.2)]">
                         <Avatar 
                             src={profile.avatar_url} 
                             alt={profile.full_name} 
@@ -130,9 +130,9 @@ export default function ProfilePage() {
                         />
                     </div>
                     {/* Edit Button */}
-                    <button 
+                        <button 
                         onClick={() => setShowAvatarEditor(true)}
-                        className="absolute bottom-0 right-0 p-2 bg-red-600 rounded-full text-white shadow-lg hover:bg-red-700 transition-transform hover:scale-105"
+                        className="absolute bottom-0 right-0 p-2 bg-[#A6C8D5] rounded-full text-white shadow-lg hover:bg-[#A6C8D5]/80 transition-transform hover:scale-105"
                         title="Edit Avatar"
                     >
                         <Edit2 size={14} />
@@ -149,14 +149,14 @@ export default function ProfilePage() {
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-6 py-5 border-y border-white/5 w-full">
                         <div className="flex flex-col items-center">
-                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Karma</p>
+                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Flux</p>
                             <div className="flex items-center gap-2">
                                 <Award className="w-4 h-4 text-white" />
                                 <span className="font-bold text-lg text-white">1,240</span>
                             </div>
                         </div>
                         <div className="flex flex-col items-center">
-                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Cake Day</p>
+                            <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">Joined</p>
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-white" />
                                 <span className="font-bold text-lg text-white">{new Date(profile.created_at).toLocaleDateString()}</span>
@@ -165,7 +165,7 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Actions */}
-                    <Button className="w-full rounded-lg font-medium border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-100 transition-all shadow-sm hover:shadow-[0_0_15px_rgba(239,68,68,0.1)]" variant="outline">
+                    <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
                         <Settings className="w-4 h-4 mr-2" />
                         Profile Settings
                     </Button>
@@ -180,7 +180,7 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <div className="space-y-6">
         {/* Navigation Tabs */}
-        <div className="bg-card/40 backdrop-blur-md rounded-xl border border-red-500/20 p-1.5">
+        <div className="bg-card/40 backdrop-blur-md rounded-xl border border-[#A6C8D5]/20 p-1.5">
             <div className="flex items-center space-x-1">
                 {[
                     { id: 'overview', label: 'Overview', icon: FileText },
@@ -194,8 +194,8 @@ export default function ProfilePage() {
                         className={`
                             flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1 justify-center
                             ${activeTab === tab.id 
-                                ? 'bg-red-500/10 text-white shadow-sm border border-red-500/20' 
-                                : 'text-muted-foreground hover:bg-red-500/5 hover:text-white'}
+                                ? 'bg-[#A6C8D5]/10 text-white shadow-sm border border-[#A6C8D5]/20' 
+                                : 'text-muted-foreground hover:bg-[#A6C8D5]/5 hover:text-white'}
                         `}
                     >
                         <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : 'text-muted-foreground'}`} />
