@@ -16,7 +16,7 @@ export const mockStats = [
   },
   {
     id: '3',
-    title: 'Workshops This Month',
+    title: 'Conclaves This Month',
     value: '12',
     change: '+8%',
     icon: 'Presentation'
@@ -42,8 +42,8 @@ export const mockActivity = [
   {
     id: 2,
     type: 'workshop' as const,
-    title: 'React Advanced Patterns Workshop',
-    description: 'Mike Chen is hosting a workshop on advanced React patterns',
+    title: 'React Advanced Patterns Conclave',
+    description: 'Mike Chen is hosting a conclave on advanced React patterns',
     time: '1 hour ago',
     author: 'Mike Chen'
   },

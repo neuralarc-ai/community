@@ -61,15 +61,15 @@ export interface LegacyPost {
 }
 
 export interface Workshop {
-  id: number;
+  id: string;
+  host_id: string;
   title: string;
-  description: string;
-  date: string;
-  time: string;
-  duration: number;
-  maxParticipants: number;
-  enrolled: number;
-  link: string;
+  description: string | null;
+  start_time: string;
+  status: 'SCHEDULED' | 'LIVE' | 'ENDED';
+  recording_url?: string | null;
+  ended_at?: string | null;
+  created_at: string;
 }
 
 export interface Meeting {
