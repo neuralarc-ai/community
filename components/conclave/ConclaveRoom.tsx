@@ -1,0 +1,58 @@
+'use client'
+
+import { LiveKitRoom } from '@livekit/components-react'
+import { useMemo } from 'react'
+import AudioStage from './stages/AudioStage'
+import VideoStage from './stages/VideoStage'
+import ConclaveControls from './controls/ConclaveControls'
+import '@livekit/components-styles'
+
+interface ConclaveRoomProps {
+  token: string
+  serverUrl: string
+  workshop: {
+    id: string
+    title: string
+    type: 'AUDIO' | 'VIDEO'
+    host_id: string
+  }
+  userId: string
+}
+
+export default function ConclaveRoom({ 
+  token, 
+  serverUrl, 
+  workshop, 
+  userId 
+}: ConclaveRoomProps) {
+  const isHost = workshop.host_id === userId
+  const roomName = `conclave-${workshop.id}`
+
+  return (
+    <div className="relative w-full h-[700px] flex flex-col gap-4">
+      <LiveKitRoom
+        token={token}
+        serverUrl={serverUrl}
+        data-lk-theme="default"
+        connect={true}
+        className="flex-1 flex flex-col"
+      >
+        <div className="flex-1 relative">
+          {workshop.type === 'AUDIO' ? (
+            <AudioStage />
+          ) : (
+            <VideoStage />
+          )}
+        </div>
+
+        <ConclaveControls 
+          workshopId={workshop.id} 
+          roomName={roomName}
+          isHost={isHost}
+          type={workshop.type}
+        />
+      </LiveKitRoom>
+    </div>
+  )
+}
+

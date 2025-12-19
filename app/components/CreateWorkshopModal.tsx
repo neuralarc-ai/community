@@ -9,6 +9,7 @@ import { Textarea } from '@/app/components/ui/textarea'
 import { Label } from '@/app/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/app/components/ui/radio-group'
 import { createClient } from '@/app/lib/supabaseClient'
+import GoLiveConfirmationModal from './GoLiveConfirmationModal'
 
 interface CreateWorkshopModalProps {
   onWorkshopCreated: () => void
@@ -18,12 +19,24 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [meetingType, setMeetingType] = useState<'schedule' | 'live'>('schedule')
+  const [conclaveType, setConclaveType] = useState<'AUDIO' | 'VIDEO'>('VIDEO')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [scheduledDate, setScheduledDate] = useState('')
   const [scheduledTime, setScheduledTime] = useState('')
 
+  const [showGoLiveConfirmModal, setShowGoLiveConfirmModal] = useState(false)
+  const [currentWorkshopId, setCurrentWorkshopId] = useState<string | null>(null)
+  const [currentWorkshopTitle, setCurrentWorkshopTitle] = useState('')
+  const [currentWorkshopDescription, setCurrentWorkshopDescription] = useState('')
+
   const supabase = createClient()
+
+  const handleGoLiveConfirm = () => {
+    if (currentWorkshopId) {
+      window.location.href = `/conclave/${currentWorkshopId}`
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,6 +71,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
           description,
           start_time: startTime,
           status,
+          type: conclaveType,
         }),
       })
 
@@ -68,9 +82,13 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
 
       const workshop = await response.json()
 
-      // If going live immediately, redirect to the live room
+      // If going live immediately, open confirmation modal
       if (status === 'LIVE') {
-        window.location.href = `/workshops/${workshop.id}/live`
+        setCurrentWorkshopId(workshop.id)
+        setCurrentWorkshopTitle(title)
+        setCurrentWorkshopDescription(description)
+        setShowGoLiveConfirmModal(true)
+        setOpen(false) // Close the create modal
       } else {
         // Reset form and close modal
         setTitle('')
@@ -89,11 +107,12 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2 bg-[#27584F]/80 hover:bg-[#27584F] text-white shadow-sm hover:shadow-[0_0_20px_rgba(39,88,79,0.2)]">
           <Plus size={16} />
-          Schedule New Event
+          Schedule Conclave
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] bg-card border-[#27584F]/30 text-foreground">
@@ -105,9 +124,34 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Conclave Type Selection */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold text-foreground">Conclave Format</Label>
+            <RadioGroup value={conclaveType} onValueChange={(value: 'AUDIO' | 'VIDEO') => setConclaveType(value)} className="flex gap-6">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="VIDEO" id="video-type" className="border-[#27584F] text-[#27584F]" />
+                <Label htmlFor="video-type" className="cursor-pointer">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">Video Workshop</span>
+                    <span className="text-sm text-muted-foreground">Zoom-style webinar</span>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="AUDIO" id="audio-type" className="border-[#27584F] text-[#27584F]" />
+                <Label htmlFor="audio-type" className="cursor-pointer">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">Audio Space</span>
+                    <span className="text-sm text-muted-foreground">Twitter-style space</span>
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           {/* Meeting Type Selection */}
           <div className="space-y-3">
-            <Label className="text-base font-semibold text-foreground">How would you like to proceed?</Label>
+            <Label className="text-base font-semibold text-foreground">Timing</Label>
             <RadioGroup value={meetingType} onValueChange={(value: 'schedule' | 'live') => setMeetingType(value)} className="flex gap-6">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="schedule" id="schedule" className="border-[#27584F] text-[#27584F]" />
@@ -222,6 +266,17 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
         </form>
       </DialogContent>
     </Dialog>
+
+      {/* Go Live Confirmation Modal */}
+      {currentWorkshopId && (
+        <GoLiveConfirmationModal
+          open={showGoLiveConfirmModal}
+          onClose={() => setShowGoLiveConfirmModal(false)}
+          onConfirm={handleGoLiveConfirm}
+          workshopTitle={currentWorkshopTitle}
+          workshopDescription={currentWorkshopDescription}
+        />
+      )}
+    </>
   )
 }
-

@@ -26,8 +26,8 @@ export default function WorkshopsPage() {
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUserId(session?.user?.id || null)
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
     getSession()
     fetchWorkshops()
@@ -64,10 +64,7 @@ export default function WorkshopsPage() {
             <h1 className="text-4xl font-bold text-white tracking-tight">Conclave</h1>
             <p className="text-lg text-muted-foreground">Schedule and manage online conclaves</p>
           </div>
-          <Button className="gap-2 bg-[#27584F]/80 hover:bg-[#27584F] text-white shadow-sm hover:shadow-[0_0_20px_rgba(39,88,79,0.2)]">
-            <Plus size={16} />
-            Schedule Conclave
-          </Button>
+          <CreateWorkshopModal onWorkshopCreated={fetchWorkshops} />
         </div>
 
         {/* Workshops Grid */}

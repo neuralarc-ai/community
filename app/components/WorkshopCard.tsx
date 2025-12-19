@@ -228,7 +228,7 @@ export default function WorkshopCard({ workshop, isHost }: WorkshopCardProps) {
         <div className="flex gap-3">
           {workshop.status === 'LIVE' ? (
             <Button className="flex-1 gap-2 bg-[#EF4444] hover:bg-[#DC2626] text-white shadow-lg shadow-red-500/20 py-6 text-lg font-bold" asChild>
-              <a href={`/workshops/${workshop.id}/live`}>
+              <a href={`/conclave/${workshop.id}`}>
                 <Video size={20} />
                 Join Live Now
               </a>
