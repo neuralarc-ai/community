@@ -38,11 +38,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
             isMobile={false}
             onCloseMobile={handleCloseMobileSidebar}
           />
-          <div
+            <div
             className={`flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-20' : 'lg:ml-0'}`}
           >
             <Header onMenuClick={handleToggleSidebar} />
-            <main className="flex-1 bg-background p-6">
+            <main className="flex-1 bg-background p-4 lg:max-w-[1600px] lg:mx-auto">
               {children}
             </main>
           </div>
@@ -57,7 +57,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             isMobile={true}
             onCloseMobile={handleCloseMobileSidebar}
           />
-          <main className="flex-1 bg-background p-4 mt-16">
+          <main className="flex-1 bg-background p-2 mt-16">
             {children}
           </main>
         </>
