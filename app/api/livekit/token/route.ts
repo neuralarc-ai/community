@@ -1,6 +1,7 @@
 import { AccessToken } from 'livekit-server-sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
+import { awardFlux } from '@/lib/flux'
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,10 @@ export async function POST(request: NextRequest) {
     })
 
     const token = await at.toJwt()
+
+    // Award flux points for joining a conclave
+    const fluxAwardResult = await awardFlux(user.id, 'CONCLAVE')
+    console.log('Flux award result for conclave join:', fluxAwardResult)
 
     return NextResponse.json({
       token,

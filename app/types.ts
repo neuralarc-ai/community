@@ -110,6 +110,10 @@ export interface Profile {
   avatar_url?: string;
   created_at: string;
   updated_at: string;
+  total_flux?: number;
+  posts_count?: number;
+  comments_count?: number;
+  conclaves_attended?: number;
 }
 
 export interface User {
