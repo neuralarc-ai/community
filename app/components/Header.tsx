@@ -44,7 +44,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <Link href={logoHref} className="flex items-center gap-2 group">
             <div className="relative w-8 h-8 group-hover:opacity-80 transition-all">
                <Image 
-                 src="/helium logo offwhite.png"
+                 src="/logo Sphere.png"
                  alt="Sphere Logo"
                  fill
                  className="object-contain"
