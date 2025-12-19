@@ -17,8 +17,8 @@ export default function DashboardPage() {
     setSupabase(client)
 
     const checkUserAndProfile = async () => {
-      const { data: { session } } = await client.auth.getSession()
-      if (!session) {
+      const { data: { user } } = await client.auth.getUser()
+      if (!user) {
         router.push('/login')
         return
       }

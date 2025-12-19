@@ -10,9 +10,9 @@ export default function HomePage() {
   useEffect(() => {
     const checkSession = async () => {
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { user } } = await supabase.auth.getUser()
       
-      if (session) {
+      if (user) {
         router.push('/posts')
       } else {
         router.push('/login')

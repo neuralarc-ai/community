@@ -24,9 +24,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createServerClient()
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, start_time, status } = body
+    const { title, description, start_time, status, type } = body
 
     if (!title || !start_time) {
       return NextResponse.json(
@@ -46,11 +46,12 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('workshops')
       .insert([{
-        host_id: session.user.id,
+        host_id: user.id,
         title,
         description,
         start_time,
-        status: status || 'SCHEDULED'
+        status: status || 'SCHEDULED',
+        type: type || 'VIDEO'
       }])
       .select()
       .single()

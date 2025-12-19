@@ -67,6 +67,7 @@ export interface Workshop {
   description: string | null;
   start_time: string;
   status: 'SCHEDULED' | 'LIVE' | 'ENDED';
+  type: 'AUDIO' | 'VIDEO';
   recording_url?: string | null;
   ended_at?: string | null;
   created_at: string;

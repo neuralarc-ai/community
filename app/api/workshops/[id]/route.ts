@@ -8,9 +8,9 @@ export async function PATCH(
   try {
     const { id } = await params
     const supabase = await createServerClient()
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (!session) {
+    if (authError || !user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -41,7 +41,7 @@ export async function PATCH(
       )
     }
 
-    if (workshop.host_id !== session.user.id) {
+    if (workshop.host_id !== user.id) {
       return NextResponse.json(
         { error: 'Forbidden: Only the host can update the workshop' },
         { status: 403 }

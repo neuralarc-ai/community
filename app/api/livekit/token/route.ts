@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Check if user is the host of this workshop
     const { data: workshop, error: workshopError } = await supabase
       .from('workshops')
-      .select('host_id, status')
+      .select('host_id, status, type')
       .eq('id', workshopId)
       .single()
 
@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
     }
 
     const isHost = workshop.host_id === user.id
-    const canPublish = isHost || workshop.status === 'LIVE' // Hosts can always publish, participants can when live
+    
+    // In Conclave mode, listeners start with canPublish: false
+    // They must be promoted by the host to speak
+    const canPublish = isHost
 
     // Create LiveKit access token
     const at = new AccessToken(
@@ -48,6 +51,10 @@ export async function POST(request: NextRequest) {
       {
         identity: user.id,
         name: participantName,
+        metadata: JSON.stringify({
+          role: isHost ? 'host' : 'listener',
+          handRaised: false
+        })
       }
     )
 
@@ -56,6 +63,7 @@ export async function POST(request: NextRequest) {
       room: roomName,
       canPublish,
       canSubscribe: true,
+      canPublishData: true, // Required for "Raise Hand" data packets
     })
 
     const token = await at.toJwt()
@@ -64,6 +72,7 @@ export async function POST(request: NextRequest) {
       token,
       serverUrl: process.env.LIVEKIT_URL,
       canPublish,
+      type: workshop.type
     })
 
   } catch (error) {
