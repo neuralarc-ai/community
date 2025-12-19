@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Verify user is the host of this workshop
     const { data: workshop, error: workshopError } = await supabase
       .from('workshops')
-      .select('host_id, status')
+      .select('host_id, status, type')
       .eq('id', workshopId)
       .eq('host_id', user.id)
       .single()
@@ -48,14 +48,14 @@ export async function POST(request: NextRequest) {
 
     // Initialize LiveKit Egress client
     const egressClient = new EgressClient(
-      process.env.LIVEKIT_URL!, // Base URL for Egress client
+      process.env.LIVEKIT_URL!,
       process.env.LIVEKIT_API_KEY!,
       process.env.LIVEKIT_API_SECRET!
     )
 
     // Generate unique filename
     const timestamp = Date.now()
-    const filename = `workshop-${workshopId}-${timestamp}.mp4`
+    const filename = `conclaves/${workshopId}/${timestamp}.mp4`
 
     // Extract project ref from Supabase URL
     const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL!.split('.')[0].replace('https://', '')
@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
       output: {
         case: 's3',
         value: new S3Upload({
-          accessKey: projectRef, // Supabase S3 uses project ref as access key
-          secret: process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service role for S3 access
-          region: 'us-east-1', // Supabase S3 region is always us-east-1
+          accessKey: projectRef,
+          secret: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          region: 'us-east-1',
           bucket: 'recordings',
           endpoint: `${projectRef}.supabase.co/storage/v1/s3`,
           forcePathStyle: true,
@@ -76,14 +76,14 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Start recording
+    // Start recording with layout specific to Conclave type
     const egressInfo = await egressClient.startRoomCompositeEgress(
       roomName,
       {
         file: fileOutput,
       },
       {
-        layout: 'grid', // You can customize layout: 'grid', 'speaker', etc.
+        layout: workshop.type === 'AUDIO' ? 'speaker' : 'grid',
       }
     )
 

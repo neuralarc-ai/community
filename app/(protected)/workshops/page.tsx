@@ -28,8 +28,8 @@ function WorkshopsContent() {
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUserId(session?.user?.id || null)
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
     }
     getSession()
     fetchWorkshops()

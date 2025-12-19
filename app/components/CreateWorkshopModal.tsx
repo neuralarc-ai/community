@@ -19,6 +19,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [meetingType, setMeetingType] = useState<'schedule' | 'live'>('schedule')
+  const [conclaveType, setConclaveType] = useState<'AUDIO' | 'VIDEO'>('VIDEO')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [scheduledDate, setScheduledDate] = useState('')
@@ -33,7 +34,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
 
   const handleGoLiveConfirm = () => {
     if (currentWorkshopId) {
-      window.location.href = `/workshops/${currentWorkshopId}/live`
+      window.location.href = `/conclave/${currentWorkshopId}`
     }
   }
 
@@ -70,6 +71,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
           description,
           start_time: startTime,
           status,
+          type: conclaveType,
         }),
       })
 
@@ -122,9 +124,34 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Conclave Type Selection */}
+          <div className="space-y-3">
+            <Label className="text-base font-semibold text-foreground">Conclave Format</Label>
+            <RadioGroup value={conclaveType} onValueChange={(value: 'AUDIO' | 'VIDEO') => setConclaveType(value)} className="flex gap-6">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="VIDEO" id="video-type" className="border-[#27584F] text-[#27584F]" />
+                <Label htmlFor="video-type" className="cursor-pointer">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">Video Workshop</span>
+                    <span className="text-sm text-muted-foreground">Zoom-style webinar</span>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="AUDIO" id="audio-type" className="border-[#27584F] text-[#27584F]" />
+                <Label htmlFor="audio-type" className="cursor-pointer">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-foreground">Audio Space</span>
+                    <span className="text-sm text-muted-foreground">Twitter-style space</span>
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           {/* Meeting Type Selection */}
           <div className="space-y-3">
-            <Label className="text-base font-semibold text-foreground">How would you like to proceed?</Label>
+            <Label className="text-base font-semibold text-foreground">Timing</Label>
             <RadioGroup value={meetingType} onValueChange={(value: 'schedule' | 'live') => setMeetingType(value)} className="flex gap-6">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="schedule" id="schedule" className="border-[#27584F] text-[#27584F]" />

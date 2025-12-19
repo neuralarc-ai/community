@@ -25,14 +25,19 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false }, { status: 400 })
       }
 
-      // Extract workshop ID from filename (format: workshop-{workshopId}-{timestamp}.mp4)
-      const filenameParts = file.filename.split('-')
-      if (filenameParts.length < 2 || filenameParts[0] !== 'workshop') {
-        console.error('Invalid filename format:', file.filename)
+      // Extract workshop ID from room_name (format: workshop-{id})
+      // Or from filename (format: conclaves/{id}/{timestamp}.mp4)
+      let workshopId = ''
+      if (room_name && room_name.startsWith('workshop-')) {
+        workshopId = room_name.replace('workshop-', '')
+      } else if (file.filename.startsWith('conclaves/')) {
+        workshopId = file.filename.split('/')[1]
+      }
+
+      if (!workshopId) {
+        console.error('Could not extract workshop ID from webhook', { room_name, filename: file.filename })
         return NextResponse.json({ success: false }, { status: 400 })
       }
-      
-      const workshopId = filenameParts[1]
       
       // Extract project ref from Supabase URL
       const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL!.split('.')[0].replace('https://', '')
