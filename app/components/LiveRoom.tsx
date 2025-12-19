@@ -11,11 +11,13 @@ import {
   ControlBar,
   useTracks,
   AudioConference,
+  useRoomContext,
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 import { Track } from 'livekit-client'
 import { Button } from '@/components/ui/button'
 import { Mic, MicOff, Video, VideoOff, Circle, Square, Mail } from 'lucide-react'
+import ConclaveControls from '@/components/conclave/controls/ConclaveControls'
 
 interface LiveRoomProps {
   workshopId: string
@@ -23,6 +25,7 @@ interface LiveRoomProps {
   participantName: string
   isHost: boolean
   mode: 'video' | 'audio'
+  onWorkshopEnded: () => void
 }
 
 export default function LiveRoom({
@@ -31,6 +34,7 @@ export default function LiveRoom({
   participantName,
   isHost,
   mode,
+  onWorkshopEnded,
 }: LiveRoomProps) {
   const [token, setToken] = useState<string | null>(null)
   const [serverUrl, setServerUrl] = useState<string | null>(null)
@@ -39,6 +43,14 @@ export default function LiveRoom({
   const [isNotifying, setIsNotifying] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
   const router = useRouter()
+  const room = useRoomContext()
+
+  const handleDisconnectAndNotifyParent = async () => {
+    if (room) {
+      await room.disconnect()
+    }
+    onWorkshopEnded()
+  }
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -106,41 +118,6 @@ export default function LiveRoom({
     }
   }
 
-  const handleEndWorkshop = async () => {
-    if (!confirm('Are you sure you want to end this conclave? This will stop the live session for everyone.')) {
-      return
-    }
-
-    setIsEnding(true)
-    try {
-      // 1. Stop recording if it's active
-      if (isRecording && egressId) {
-        await fetch(`/api/livekit/start-recording?egressId=${egressId}&workshopId=${workshopId}`, {
-          method: 'DELETE',
-        })
-      }
-
-      // 2. Update workshop status to ENDED
-      const response = await fetch(`/api/workshops/${workshopId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'ENDED' }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to end workshop')
-      }
-
-      // 3. Redirect back to workshops page
-      router.push('/workshops')
-      router.refresh()
-    } catch (error) {
-      console.error('Error ending workshop:', error)
-      alert('Failed to end workshop. Please try again.')
-    } finally {
-      setIsEnding(false)
-    }
-  }
 
   if (!token || !serverUrl) {
     return (

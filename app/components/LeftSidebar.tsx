@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FloatingDock } from '@/components/ui/floating-dock';
@@ -13,6 +14,8 @@ import {
   IconNewSection,
   IconTerminal2,
 } from "@tabler/icons-react";
+import { createClient } from '@/app/lib/supabaseClient'
+import { Profile } from '@/app/types'
 
 interface LeftSidebarProps {
   isOpen: boolean;
@@ -23,9 +26,26 @@ interface LeftSidebarProps {
 
 export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile }: LeftSidebarProps) {
   const pathname = usePathname();
+  const [userRole, setUserRole] = useState<Profile['role'] | null>(null)
+  const supabase = createClient()
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        setUserRole(profile?.role || null)
+      }
+    }
+    fetchUserRole()
+  }, [supabase])
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: DashboardIcon, hoverColor: 'text-orange-400' },
+    ...(userRole === 'admin' ? [{ href: '/dashboard', label: 'Dashboard', icon: DashboardIcon, hoverColor: 'text-orange-400' }] : []),
     { href: '/posts', label: 'Posts', icon: MessageSquare, hoverColor: 'text-yellow-400' },
     { href: '/workshops', label: 'Conclave', icon: Presentation, hoverColor: 'text-conclave-green' },
     { href: '/meetings', label: 'Meetings', icon: Calendar, hoverColor: 'text-meetings-pink' },

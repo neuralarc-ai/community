@@ -95,9 +95,9 @@ function FluxDashboardContent() {
           <Link href="/profile" className="text-muted-foreground hover:text-white transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </Link>
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
             <h1 className="text-4xl font-heading font-bold text-white tracking-tight">Flux Leaderboard</h1>
-            <p className="text-lg text-muted-foreground">Track your community impact</p>
+          <p className="text-lg text-muted-foreground">Track your community impact</p>
           </div>
         </div>
         

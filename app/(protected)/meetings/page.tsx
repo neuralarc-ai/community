@@ -44,7 +44,7 @@ function MeetingsContent() {
   }
 
   return (
-    <div className="container py-8 space-y-12 px-6">
+    <div className="container py-8 space-y-12 pl-24 pr-6 mx-auto">
       <div className="flex justify-between items-start">
           <div className="flex flex-col gap-2">
             <h1 className="text-4xl font-bold text-white tracking-tight">Online Meetings</h1>

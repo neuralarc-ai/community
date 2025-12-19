@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 import Header from '@/app/components/Header';
 import LeftSidebar from '@/app/components/LeftSidebar';
@@ -8,8 +9,8 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
   const logoHref = '/dashboard'; // Assuming default logo href for now
 
   const handleToggleSidebar = () => {
@@ -41,7 +42,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             className={`flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-20' : 'lg:ml-0'}`}
           >
             <Header onMenuClick={handleToggleSidebar} />
-            <main className="p-6">
+            <main className="flex-1 bg-background p-6">
               {children}
             </main>
           </div>
@@ -56,7 +57,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             isMobile={true}
             onCloseMobile={handleCloseMobileSidebar}
           />
-          <main className="flex-1 p-4 mt-16">
+          <main className="flex-1 bg-background p-4 mt-16">
             {children}
           </main>
         </>

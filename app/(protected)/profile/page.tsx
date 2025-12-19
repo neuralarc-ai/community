@@ -207,7 +207,7 @@ export default function ProfilePage() {
                             Flux Leaderboard
                         </Button>
                     </Link>
-                    <div className="h-4"></div>
+                    <div className="h-1"></div>
                     <Link href="/profile/settings" className="w-full">
                         <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
                             <Settings className="w-4 h-4 mr-2" />
@@ -346,13 +346,13 @@ export default function ProfilePage() {
                   { id: 'total-saved', title: 'Total Saved Posts', value: totalSavedPosts, icon: Bookmark, color: 'yellow' },
                   { id: 'total-shares', title: 'Total Shares', value: totalShares, icon: Share2, color: 'purple' }, // Placeholder
                 ].map((stat) => (
-                  <Card key={stat.id} className={`bg-card/40 backdrop-blur-md border-${stat.color}-500/20 hover:border-[#A6C8D5]/40 hover:bg-[#A6C8D5]/5 hover:shadow-xl transition-all duration-300 group cursor-pointer`}>
+                  <Card key={stat.id} className="bg-card/40 backdrop-blur-md border border-[#A6C8D5]/20 hover:border-[#A6C8D5]/40 hover:bg-[#A6C8D5]/5 hover:shadow-xl transition-all duration-300 group cursor-pointer">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className={`text-sm font-medium text-muted-foreground group-hover:text-[#A6C8D5] transition-colors duration-300`}>
+                      <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-[#A6C8D5] transition-colors duration-300">
                         {stat.title}
                       </CardTitle>
-                      <div className={`p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-[#A6C8D5]/10 group-hover:border-[#A6C8D5]/20 group-hover:shadow-md transition-all duration-300`}>
-                        <stat.icon size={18} className={`text-muted-foreground group-hover:text-[#A6C8D5] transition-colors`} />
+                      <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-[#A6C8D5]/10 group-hover:border-[#A6C8D5]/20 group-hover:shadow-md transition-all duration-300">
+                        <stat.icon size={18} className="text-muted-foreground group-hover:text-[#A6C8D5] transition-colors" />
                       </div>
                     </CardHeader>
                     <CardContent>

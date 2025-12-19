@@ -52,6 +52,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Fetch user profile to check role
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || profile?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden - Only admins can create workshops' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { title, description, start_time, status, type } = body
 

@@ -22,13 +22,20 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname()
   const [supabase, setSupabase] = useState<any>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [loadingProfile, setLoadingProfile] = useState(true)
   const [search, setSearch] = useState('')
   const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   useEffect(() => {
     const client = createClient()
     setSupabase(client)
-    getCurrentUserProfile().then(setProfile).catch(console.error)
+    getCurrentUserProfile().then(data => {
+      setProfile(data)
+      setLoadingProfile(false)
+    }).catch(error => {
+      console.error(error)
+      setLoadingProfile(false)
+    })
   }, [])
 
   const handleLogout = async () => {
@@ -111,7 +118,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
             <div className="h-6 w-px bg-white/10 mx-1" />
 
-            {profile ? (
+            {loadingProfile ? (
+              <div className="w-24 h-8 bg-white/5 rounded-md animate-pulse" /> 
+            ) : profile ? (
               <div className="flex items-center gap-3">
                 <Link href="/profile" className="flex items-center gap-3 group">
                     <div className="relative">

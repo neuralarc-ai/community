@@ -13,7 +13,6 @@ import Avatar from '@/app/components/Avatar'
 import { createClient } from '@/app/lib/supabaseClient'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 import { Profile } from '@/app/types'
-import TwoColumnLayout from '@/app/components/TwoColumnLayout'
 import FilterSection from '@/app/components/FilterSection'
 
 function PostsContent() {
@@ -93,16 +92,21 @@ function PostsContent() {
   }
 
   const fetchPosts = async () => {
+    setLoading(true)
+    console.log("Fetching posts...")
     try {
       const searchQuery = searchParams.get('search')
       const url = searchQuery ? `/api/posts?search=${encodeURIComponent(searchQuery)}` : '/api/posts'
+      console.log("Posts API URL:", url)
       const response = await fetch(url)
       const data = await response.json()
+      console.log("Posts API response data:", data)
       setPosts(data.posts)
     } catch (error) {
       console.error('Failed to fetch posts:', error)
     } finally {
       setLoading(false)
+      console.log("Posts loading finished.")
     }
   }
 
@@ -221,7 +225,7 @@ function PostsContent() {
   }
 
   return (
-    <TwoColumnLayout>
+    <div className="container max-w-[1400px] mx-auto py-8 px-6 space-y-12">
         {/* Create Post Input & Filter Bar */}
             <Card className="mb-6 shadow-sm border-yellow-500/50 bg-card/50 backdrop-blur-sm p-2 hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(234,179,8,0.15)] hover:bg-yellow-500/5 transition-all">
             <div className="flex items-center space-x-2 p-2">
@@ -288,7 +292,7 @@ function PostsContent() {
             ))
           )}
         </PostList>
-    </TwoColumnLayout>
+    </div>
   )
 }
 
