@@ -25,7 +25,7 @@ interface LiveRoomProps {
   participantName: string
   isHost: boolean
   mode: 'video' | 'audio'
-  onWorkshopEnded: () => void
+  onEndLive: () => Promise<boolean>
 }
 
 export default function LiveRoom({
@@ -34,7 +34,7 @@ export default function LiveRoom({
   participantName,
   isHost,
   mode,
-  onWorkshopEnded,
+  onEndLive,
 }: LiveRoomProps) {
   const [token, setToken] = useState<string | null>(null)
   const [serverUrl, setServerUrl] = useState<string | null>(null)
@@ -49,7 +49,7 @@ export default function LiveRoom({
     if (room) {
       await room.disconnect()
     }
-    onWorkshopEnded()
+    onEndLive()
   }
 
   useEffect(() => {
@@ -115,6 +115,23 @@ export default function LiveRoom({
       alert('Failed to send notifications.')
     } finally {
       setIsNotifying(false)
+    }
+  }
+
+  const handleEndWorkshop = async () => {
+    setIsEnding(true)
+    try {
+      const success = await onEndLive()
+      if (success) {
+        // Disconnect from the room if ending was successful
+        if (room) {
+          await room.disconnect()
+        }
+      }
+    } catch (error) {
+      console.error('Error ending workshop:', error)
+    } finally {
+      setIsEnding(false)
     }
   }
 

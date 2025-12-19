@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 
 export default function CreateAvatarPage() {
-  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(null)
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
@@ -29,7 +29,7 @@ export default function CreateAvatarPage() {
         return
       }
       
-      setCurrentAvatarUrl(profile?.avatar_url || null)
+      setCurrentAvatarUrl(profile?.avatar_url || undefined)
       setLoading(false)
     }
     fetchProfile()

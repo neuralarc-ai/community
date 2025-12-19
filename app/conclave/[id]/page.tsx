@@ -15,6 +15,11 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
   const [userId, setUserId] = useState<string | null>(null)
   const supabase = createClient()
 
+  const handleEndLive = async () => {
+    // For now, just return true - this can be enhanced later
+    return true
+  }
+
   useEffect(() => {
     const initSession = async () => {
       try {
@@ -104,11 +109,12 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
         </div>
 
         {/* The LiveKit Room */}
-        <ConclaveRoom 
-          token={token} 
-          serverUrl={serverUrl} 
-          workshop={workshop} 
-          userId={userId} 
+        <ConclaveRoom
+          token={token}
+          serverUrl={serverUrl}
+          workshop={workshop}
+          userId={userId}
+          onEndLive={handleEndLive}
         />
       </div>
     </main>
