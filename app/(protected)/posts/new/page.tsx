@@ -48,7 +48,7 @@ export default function NewPostPage() {
 
   return (
     <div className="min-h-full py-12 px-6">
-        <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="max-w-2xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6">

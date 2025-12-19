@@ -64,7 +64,7 @@ const FloatingDockMobile = ({
                 <a
                   href={item.href}
                   key={item.title}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 dark:bg-neutral-900"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-background/20 dark:bg-background/20"
                 >
                   <div className="h-4 w-4">{item.icon}</div>
                 </a>
@@ -171,7 +171,7 @@ function IconContainer({
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={cn("group relative flex aspect-square items-center justify-center rounded-full bg-gray-900 dark:bg-neutral-800 transition-all duration-300",
+        className={cn("group relative flex aspect-square items-center justify-center rounded-full bg-background/20 dark:bg-background/20 transition-all duration-300",
           isActive ? `bg-${hoverColor.replace('text-', '')}/10 border-${hoverColor.replace('text-', '')}/20` : `hover:bg-${hoverColor.replace('text-', '')}/10 hover:border-${hoverColor.replace('text-', '')}/20`)}
       >
         <AnimatePresence>
