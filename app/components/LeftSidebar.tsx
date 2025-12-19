@@ -57,7 +57,6 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
           "translate-x-0 w-20": isOpen && !isMobile,
           "-translate-x-full w-20": !isOpen && !isMobile,
           "translate-x-0 w-20 shadow-2xl shadow-black/50": isOpen && isMobile,
-          "-translate-x-full w-20": !isOpen && isMobile,
         }
       )}>
         <FloatingDock
