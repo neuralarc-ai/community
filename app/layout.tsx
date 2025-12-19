@@ -15,7 +15,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Sphere Management Portal",
+  title: "Sphere Community Portal",
   description: "Manage your community with posts, conclaves, and meetings",
 };
 
@@ -26,6 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body
         className={`${sora.variable} ${manrope.variable} antialiased bg-background text-foreground font-sans`}
       >

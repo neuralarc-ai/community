@@ -108,13 +108,13 @@ export default function PostActions({
         user_id: currentUserId,
         target_id: postId,
         target_type: 'post',
-        vote_type: newVote,
+        value: newVote,
       },
       { onConflict: 'user_id,target_id,target_type' }
     );
 
     if (error) {
-      console.error('Error submitting vote:', error);
+      console.error('Error submitting vote:', error.message || error);
       // Revert optimistic update if there's an error
       setCurrentScore(initialVoteScore);
       setCurrentUserVote(userVote);
