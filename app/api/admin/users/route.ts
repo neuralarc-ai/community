@@ -22,18 +22,17 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Fetch all profiles
-    const { data: users, error: fetchError } = await supabase
+    // Fetch all profiles and count them
+    const { count: totalUsers, error: fetchError } = await supabase
       .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false })
+      .select('id', { count: 'exact', head: true })
 
     if (fetchError) {
-      console.error('Error fetching users:', fetchError)
-      return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
+      console.error('Error fetching user count:', fetchError)
+      return NextResponse.json({ error: 'Failed to fetch user count' }, { status: 500 })
     }
 
-    return NextResponse.json(users)
+    return NextResponse.json({ totalUsers })
   } catch (error) {
     console.error('Server error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

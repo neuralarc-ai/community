@@ -120,6 +120,7 @@ function IconContainer({
   icon: React.ReactNode;
   href: string;
   isActive: boolean;
+  hoverColor: string;
 }) {
   let ref = useRef<HTMLDivElement>(null);
 

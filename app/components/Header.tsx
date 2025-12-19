@@ -9,8 +9,9 @@ import Avatar from './Avatar'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 import { Profile } from '@/app/types'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, useMediaQuery } from '@/lib/utils'
 import Image from 'next/image'
+
 
 interface HeaderProps {
     onMenuClick?: () => void;
@@ -21,6 +22,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname()
   const [supabase, setSupabase] = useState<any>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [search, setSearch] = useState('')
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
 
   useEffect(() => {
     const client = createClient()
@@ -34,14 +37,40 @@ export default function Header({ onMenuClick }: HeaderProps) {
     router.push('/login')
   }
 
-  const logoHref = profile?.role === 'admin' ? '/dashboard' : '/posts'
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    let currentPath = pathname
+
+    if (search.trim() === '') {
+      router.push(currentPath)
+    } else {
+      let targetPath = '/'
+      if (currentPath.startsWith('/posts')) {
+        targetPath = '/posts'
+      } else if (currentPath.startsWith('/workshops')) {
+        targetPath = '/workshops'
+      } else if (currentPath.startsWith('/meetings')) {
+        targetPath = '/meetings'
+      } else if (currentPath.startsWith('/dashboard')) {
+        targetPath = '/dashboard'
+      } else {
+        targetPath = '/posts' // Default search to posts
+      }
+      router.push(`${targetPath}?search=${encodeURIComponent(search)}`)
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center justify-between h-16 px-6 max-w-[1400px] mx-auto">
-        {/* Left: Logo */}
-        <div className="flex items-center gap-6">
-          <Link href={logoHref} className="flex items-center gap-2 group">
+      <div className="flex items-center justify-between h-16 px-4">
+        {/* Left: Logo and App Name */}
+        <div className="flex items-center gap-2">
+          {onMenuClick && !isDesktop && (
+            <Button variant="ghost" size="icon" className="text-muted-foreground lg:hidden" onClick={onMenuClick}>
+                <Menu size={20} />
+            </Button>
+          )}
+          <Link href="/dashboard" className="flex items-center gap-2 group">
             <div className="relative w-8 h-8 group-hover:opacity-80 transition-all">
                <Image 
                  src="/logo Sphere.png"
@@ -50,14 +79,14 @@ export default function Header({ onMenuClick }: HeaderProps) {
                  className="object-contain"
                />
             </div>
-            <span className="text-lg font-bold font-heading text-white hidden md:block tracking-tight">
+            <span className="text-xl font-bold font-heading text-white tracking-tight hidden md:block">
               Sphere
             </span>
           </Link>
         </div>
 
         {/* Center: Search Bar */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-8">
+        <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4 lg:mx-8 hidden md:flex">
           <div className="relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-white transition-colors" />
@@ -66,9 +95,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
               type="text"
               className="block w-full pl-10 pr-3 py-2 bg-white/5 border border-white/5 rounded-lg text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/10 transition-all"
               placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-        </div>
+        </form>
 
         {/* Right: Actions & Profile */}
         <div className="flex items-center gap-4 min-w-max">
@@ -98,13 +129,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
               </div>
             ) : (
                 <Button onClick={() => router.push('/login')} className="bg-white text-black hover:bg-white/90">Log In</Button>
-            )}
-            
-            {/* Mobile Menu Toggle */}
-            {onMenuClick && (
-              <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground" onClick={onMenuClick}>
-                  <Menu size={20} />
-              </Button>
             )}
         </div>
       </div>

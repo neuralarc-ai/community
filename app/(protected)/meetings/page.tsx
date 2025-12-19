@@ -1,21 +1,25 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Header from '@/app/components/Header'
 import { Meeting } from '@/app/types'
 import { Calendar, Clock, Video, Edit } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 
-export default function MeetingsPage() {
+function MeetingsContent() {
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     fetchMeetings()
-  }, [])
+  }, [searchParams])
 
   const fetchMeetings = async () => {
     try {
-      const response = await fetch('/api/events')
+      const searchQuery = searchParams.get('search')
+      const url = searchQuery ? `/api/events?search=${encodeURIComponent(searchQuery)}` : '/api/events'
+      const response = await fetch(url)
       const data = await response.json()
       setMeetings(data.meetings)
     } catch (error) {
@@ -89,5 +93,13 @@ export default function MeetingsPage() {
           ))}
         </div>
     </div>
+  )
+}
+
+export default function MeetingsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MeetingsContent />
+    </Suspense>
   )
 }

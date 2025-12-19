@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import CreateWorkshopModal from '@/app/components/CreateWorkshopModal'
 import WorkshopCard from '@/app/components/WorkshopCard'
 import { createClient } from '@/app/lib/supabaseClient'
+import { useSearchParams } from 'next/navigation'
 
 interface Workshop {
   id: string
@@ -18,11 +19,12 @@ interface Workshop {
   ended_at?: string
 }
 
-export default function WorkshopsPage() {
+function WorkshopsContent() {
   const [workshops, setWorkshops] = useState<Workshop[]>([])
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const supabase = createClient()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     const getSession = async () => {
@@ -31,17 +33,15 @@ export default function WorkshopsPage() {
     }
     getSession()
     fetchWorkshops()
-  }, [])
+  }, [searchParams])
 
   const fetchWorkshops = async () => {
     try {
-      const { data, error } = await supabase
-        .from('workshops')
-        .select('*')
-        .order('start_time', { ascending: true })
-
-      if (error) throw error
-      setWorkshops(data || [])
+      const searchQuery = searchParams.get('search')
+      const url = searchQuery ? `/api/workshops?search=${encodeURIComponent(searchQuery)}` : '/api/workshops'
+      const response = await fetch(url)
+      const data = await response.json()
+      setWorkshops(data.workshops || [])
     } catch (error) {
       console.error('Failed to fetch workshops:', error)
     } finally {
@@ -84,5 +84,13 @@ export default function WorkshopsPage() {
              </div>
         )}
     </div>
+  )
+}
+
+export default function WorkshopsPage() {
+  return (
+    <Suspense fallback={<div>Loading workshops...</div>}>
+      <WorkshopsContent />
+    </Suspense>
   )
 }
