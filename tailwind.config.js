@@ -18,7 +18,10 @@ module.exports = {
           'glow-hover': '0 0 35px rgba(0, 240, 192, 0.6)'
       },
   		colors: {
-  			border: 'hsl(var(--border))',
+          'conclave-green': '#27584F',
+          'meetings-pink': '#EFB3AF',
+          'profile-blue': '#A6C8D5',
+          'settings-purple': '#A69CBE',  			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
   			background: 'hsl(var(--background))',

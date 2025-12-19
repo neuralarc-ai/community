@@ -25,12 +25,12 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: DashboardIcon },
-    { href: '/posts', label: 'Posts', icon: MessageSquare },
-    { href: '/workshops', label: 'Conclave', icon: Presentation },
-    { href: '/meetings', label: 'Meetings', icon: Calendar },
-    { href: '/profile', label: 'Profile', icon: User },
-    { href: '/profile/settings', label: 'Settings', icon: Settings },
+    { href: '/dashboard', label: 'Dashboard', icon: DashboardIcon, hoverColor: 'text-orange-400' },
+    { href: '/posts', label: 'Posts', icon: MessageSquare, hoverColor: 'text-yellow-400' },
+    { href: '/workshops', label: 'Conclave', icon: Presentation, hoverColor: 'text-conclave-green' },
+    { href: '/meetings', label: 'Meetings', icon: Calendar, hoverColor: 'text-meetings-pink' },
+    { href: '/profile', label: 'Profile', icon: User, hoverColor: 'text-profile-blue' },
+    { href: '/profile/settings', label: 'Settings', icon: Settings, hoverColor: 'text-settings-purple' },
   ];
 
   const links = navItems.map(item => {
@@ -38,7 +38,9 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
     return {
       title: item.label,
       href: item.href,
-      icon: <item.icon className={cn("h-full w-full", isActive ? "text-white" : "text-neutral-500 dark:text-neutral-300")} />,
+      icon: <item.icon className="h-full w-full" />,
+      isActive,
+      hoverColor: item.hoverColor,
     };
   });
 
@@ -55,9 +57,8 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
         "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] transition-all duration-300 ease-in-out flex flex-col bg-[#0F0F0F] border-r border-white/5 backdrop-blur-xl",
         {
           "translate-x-0 w-20": isOpen && !isMobile,
-          "-translate-x-full w-20": !isOpen && !isMobile,
           "translate-x-0 w-20 shadow-2xl shadow-black/50": isOpen && isMobile,
-          "-translate-x-full w-20": !isOpen && isMobile,
+          "-translate-x-full w-20": !isOpen,
         }
       )}>
         <FloatingDock

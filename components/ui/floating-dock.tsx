@@ -16,7 +16,7 @@ export const FloatingDock = ({
   desktopClassName,
   mobileClassName,
 }: {
-  items: { title: string; icon: React.ReactNode; href: string }[];
+  items: { title: string; icon: React.ReactNode; href: string; isActive: boolean; hoverColor: string }[];
   desktopClassName?: string;
   mobileClassName?: string;
 }) => {
@@ -32,7 +32,7 @@ const FloatingDockMobile = ({
   items,
   className,
 }: {
-  items: { title: string; icon: React.ReactNode; href: string }[];
+  items: { title: string; icon: React.ReactNode; href: string; isActive: boolean; hoverColor: string }[];
   className?: string;
 }) => {
   const [open, setOpen] = useState(false);
@@ -87,7 +87,7 @@ const FloatingDockDesktop = ({
   items,
   className,
 }: {
-  items: { title: string; icon: React.ReactNode; href: string }[];
+  items: { title: string; icon: React.ReactNode; href: string; isActive: boolean; hoverColor: string }[];
   className?: string;
 }) => {
   let mouseX = useMotionValue(Infinity);
@@ -101,7 +101,7 @@ const FloatingDockDesktop = ({
       )}
     >
       {items.map((item) => (
-        <IconContainer mouseX={mouseX} key={item.title} {...item} />
+        <IconContainer mouseX={mouseX} key={item.title} {...item} isActive={item.isActive} />
       ))}
     </motion.div>
   );
@@ -112,11 +112,14 @@ function IconContainer({
   title,
   icon,
   href,
+  isActive,
+  hoverColor,
 }: {
   mouseX: MotionValue;
   title: string;
   icon: React.ReactNode;
   href: string;
+  isActive: boolean;
 }) {
   let ref = useRef<HTMLDivElement>(null);
 
@@ -167,15 +170,16 @@ function IconContainer({
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-900 dark:bg-neutral-800"
+        className={cn("group relative flex aspect-square items-center justify-center rounded-full bg-gray-900 dark:bg-neutral-800 transition-all duration-300",
+          isActive ? `bg-${hoverColor.replace('text-', '')}/10 border-${hoverColor.replace('text-', '')}/20` : `hover:bg-${hoverColor.replace('text-', '')}/10 hover:border-${hoverColor.replace('text-', '')}/20`)}
       >
         <AnimatePresence>
           {hovered && (
             <motion.div
-              initial={{ opacity: 0, y: 10, x: "-50%" }}
-              animate={{ opacity: 1, y: 0, x: "-50%" }}
-              exit={{ opacity: 0, y: 2, x: "-50%" }}
-              className="absolute -top-8 left-1/2 w-fit rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs whitespace-pre text-neutral-700 dark:border-neutral-900 dark:bg-neutral-800 dark:text-white"
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 2 }}
+              className="absolute top-[10px] left-full -translate-y-1/2 ml-2 w-fit rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs whitespace-pre text-neutral-700 dark:border-neutral-900 dark:bg-neutral-800 dark:text-white"
             >
               {title}
             </motion.div>
@@ -183,8 +187,7 @@ function IconContainer({
         </AnimatePresence>
         <motion.div
           style={{ width: widthIcon, height: heightIcon }}
-          className="flex items-center justify-center"
-        >
+          className={cn("flex items-center justify-center", isActive ? hoverColor : "text-neutral-500 dark:text-neutral-300", hovered && hoverColor)}        >
           {icon}
         </motion.div>
       </motion.div>
