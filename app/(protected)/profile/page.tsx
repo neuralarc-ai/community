@@ -188,7 +188,7 @@ export default function ProfilePage() {
                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Flux</p>
                             <div className="flex items-center gap-2">
                                 <Award className="w-4 h-4 text-white" />
-                                <span className="font-heading font-bold text-lg text-white">1,240</span>
+                                <span className="font-heading font-bold text-lg text-white">{profile.total_flux !== undefined ? profile.total_flux.toLocaleString() : '0'}</span>
                             </div>
                         </div>
                         <div className="flex flex-col items-center">

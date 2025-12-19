@@ -23,16 +23,17 @@ export async function GET() {
     }
 
     // Fetch all profiles and count them
-    const { count: totalUsers, error: fetchError } = await supabase
+    const { data: users, count: totalUsers, error: fetchError } = await supabase
       .from('profiles')
-      .select('id', { count: 'exact', head: true })
+      .select('id, full_name, username, avatar_url, role, created_at', { count: 'exact' })
+      .order('created_at', { ascending: false })
 
     if (fetchError) {
-      console.error('Error fetching user count:', fetchError)
-      return NextResponse.json({ error: 'Failed to fetch user count' }, { status: 500 })
+      console.error('Error fetching users:', fetchError)
+      return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
     }
 
-    return NextResponse.json({ totalUsers })
+    return NextResponse.json({ users, totalUsers })
   } catch (error) {
     console.error('Server error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

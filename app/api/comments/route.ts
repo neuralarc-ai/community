@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
 import { Comment } from '@/app/types'
+import { awardFlux } from '@/lib/flux'
 
 export async function POST(request: NextRequest) {
   try {
@@ -98,6 +99,10 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Award flux points for creating a comment
+    const fluxAwardResult = await awardFlux(user.id, 'COMMENT')
+    console.log('Flux award result for comment creation:', fluxAwardResult)
 
     const commentWithAuthor: Comment = {
       ...newComment,

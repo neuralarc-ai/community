@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
 import { Post } from '@/app/types'
 import { getVoteScore } from '@/app/lib/voteUtils'
+import { awardFlux } from '@/lib/flux'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -171,6 +172,10 @@ export async function POST(request: NextRequest) {
       .select('username, full_name, avatar_url')
       .eq('id', user.id)
       .single()
+
+    // Award flux points for creating a post
+    const fluxAwardResult = await awardFlux(user.id, 'POST')
+    console.log('Flux award result for post creation:', fluxAwardResult)
 
     const postWithAuthor = {
       ...newPost,
