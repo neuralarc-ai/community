@@ -17,13 +17,15 @@ interface ConclaveRoomProps {
     host_id: string
   }
   userId: string
+  onEndLive: () => Promise<boolean | void>
 }
 
-export default function ConclaveRoom({ 
-  token, 
-  serverUrl, 
-  workshop, 
-  userId 
+export default function ConclaveRoom({
+  token,
+  serverUrl,
+  workshop,
+  userId,
+  onEndLive
 }: ConclaveRoomProps) {
   const isHost = workshop.host_id === userId
   const roomName = `conclave-${workshop.id}`
@@ -45,11 +47,12 @@ export default function ConclaveRoom({
           )}
         </div>
 
-        <ConclaveControls 
-          workshopId={workshop.id} 
+        <ConclaveControls
+          workshopId={workshop.id}
           roomName={roomName}
           isHost={isHost}
           type={workshop.type}
+          onEndLive={onEndLive}
         />
       </LiveKitRoom>
     </div>

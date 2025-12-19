@@ -1,12 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { mockWorkshops, mockMeetings } from '@/app/data/mockData'
 
-export async function GET() {
-  try {
-    const workshops = mockWorkshops
-    const meetings = mockMeetings
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const searchQuery = searchParams.get('search')
 
-    return NextResponse.json({ workshops, meetings })
+  try {
+    let workshops = mockWorkshops
+    let meetings = mockMeetings
+
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase()
+      workshops = mockWorkshops.filter(
+        (workshop) =>
+          workshop.title.toLowerCase().includes(searchLower) ||
+          workshop.description.toLowerCase().includes(searchLower)
+      )
+      meetings = mockMeetings.filter(
+        (meeting) =>
+          meeting.title.toLowerCase().includes(searchLower) ||
+          meeting.agenda.toLowerCase().includes(searchLower)
+      )
+    }
+
+    return NextResponse.json({ workshops, meetings, totalWorkshopsCount: workshops.length, totalMeetingsCount: meetings.length })
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch events' },

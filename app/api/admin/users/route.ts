@@ -22,10 +22,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Fetch all profiles
-    const { data: users, error: fetchError } = await supabase
+    // Fetch all profiles and count them
+    const { data: users, count: totalUsers, error: fetchError } = await supabase
       .from('profiles')
-      .select('*')
+      .select('id, full_name, username, avatar_url, role, created_at', { count: 'exact' })
       .order('created_at', { ascending: false })
 
     if (fetchError) {
@@ -33,7 +33,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
     }
 
-    return NextResponse.json(users)
+    return NextResponse.json({ users, totalUsers })
   } catch (error) {
     console.error('Server error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

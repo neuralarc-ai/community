@@ -1,8 +1,10 @@
-'use client';
+import MainLayout from '@/app/components/MainLayout';
+import React from 'react';
 
-import ProtectedLayout from "@/app/components/ProtectedLayout";
-
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <ProtectedLayout>{children}</ProtectedLayout>;
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <MainLayout>
+      {children}
+    </MainLayout>
+  );
 }
-

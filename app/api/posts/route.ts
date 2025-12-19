@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
 import { Post } from '@/app/types'
 import { getVoteScore } from '@/app/lib/voteUtils'
+import { awardFlux } from '@/lib/flux'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const searchQuery = searchParams.get('search')
+
   try {
     const supabase = await createServerClient()
 
@@ -11,7 +15,7 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser()
 
     // Fetch posts
-    const { data: posts, error } = await supabase
+    let query = supabase
       .from('posts')
       .select(`
         id,
@@ -22,14 +26,29 @@ export async function GET() {
         created_at,
         updated_at
       `)
-      .order('created_at', { ascending: false })
 
-    if (error) {
-      console.error('Error fetching posts:', error)
+    if (searchQuery) {
+      query = query.or(`title.ilike.%${searchQuery}%,body.ilike.%${searchQuery}%`)
+    }
+
+    const { data: posts, error: postsError } = await query.order('created_at', { ascending: false })
+
+    if (postsError) {
+      console.error('Error fetching posts:', postsError)
       return NextResponse.json(
         { error: 'Failed to fetch posts' },
         { status: 500 }
       )
+    }
+
+    // Get total count of posts (without pagination/filters for the dashboard)
+    const { count: totalPostsCount, error: countError } = await supabase
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
+
+    if (countError) {
+      console.error('Error fetching total posts count:', countError)
+      // Continue with posts even if count fails, or return error
     }
 
     // Fetch profiles for all post authors
@@ -85,7 +104,7 @@ export async function GET() {
       })
     )
 
-    return NextResponse.json(postsWithScores)
+    return NextResponse.json({ posts: postsWithScores, totalPostsCount })
   } catch (error) {
     console.error('Server error:', error)
     return NextResponse.json(
@@ -153,6 +172,10 @@ export async function POST(request: NextRequest) {
       .select('username, full_name, avatar_url')
       .eq('id', user.id)
       .single()
+
+    // Award flux points for creating a post
+    const fluxAwardResult = await awardFlux(user.id, 'POST')
+    console.log('Flux award result for post creation:', fluxAwardResult)
 
     const postWithAuthor = {
       ...newPost,

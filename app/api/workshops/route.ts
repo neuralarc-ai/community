@@ -1,17 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const searchQuery = searchParams.get('search')
+
   try {
     const supabase = await createServerClient()
-    const { data, error } = await supabase
+
+    let query = supabase
       .from('workshops')
       .select('*')
       .order('start_time', { ascending: true })
 
-    if (error) throw error
+    if (searchQuery) {
+      query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+    }
 
-    return NextResponse.json(data)
+    const { data: workshops, error: fetchError } = await query
+
+    if (fetchError) throw fetchError
+
+    // Get total count of workshops
+    const { count: totalWorkshopsCount, error: countError } = await supabase
+      .from('workshops')
+      .select('id', { count: 'exact', head: true })
+
+    if (countError) {
+      console.error('Error fetching total workshops count:', countError)
+    }
+
+    return NextResponse.json({ workshops, totalWorkshopsCount })
   } catch (error) {
     console.error('Error fetching workshops:', error)
     return NextResponse.json(
@@ -30,6 +49,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    // Fetch user profile to check role
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || profile?.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Forbidden - Only admins can create workshops' },
+        { status: 403 }
       )
     }
 

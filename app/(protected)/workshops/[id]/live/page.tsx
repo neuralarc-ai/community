@@ -6,6 +6,7 @@ import LiveRoom from '@/app/components/LiveRoom'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, Info } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function WorkshopLivePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -13,6 +14,28 @@ export default function WorkshopLivePage({ params }: { params: Promise<{ id: str
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
+  const router = useRouter()
+
+  const handleEndWorkshop = async () => {
+    try {
+      // Update workshop status to ENDED
+      const response = await fetch(`/api/workshops/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'ENDED' }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to end workshop')
+      }
+      
+      return true
+    } catch (error) {
+      console.error('Error ending workshop:', error)
+      alert('Failed to end workshop. Please try again.')
+      return false
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,6 +87,7 @@ export default function WorkshopLivePage({ params }: { params: Promise<{ id: str
             participantName={user?.user_metadata?.full_name || user?.email || 'Anonymous'}
             isHost={isHost}
             mode="video" // Can be switched to "audio" for Twitter Spaces style
+            onEndLive={handleEndWorkshop}
           />
 
           <div className="bg-card/50 border border-border p-6 rounded-xl space-y-4">

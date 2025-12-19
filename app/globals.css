@@ -50,6 +50,12 @@
     /* Custom Status Colors - Mapped to Monochrome/Nebula */
     --warning: 0 0% 100%;
     --success: 0 0% 100%;
+
+    /* Custom colors for dynamic cards */
+    --color-cyan-rgb: 0, 188, 212;
+    --color-green-rgb: 76, 175, 80;
+    --color-yellow-rgb: 255, 193, 7;
+    --color-purple-rgb: 156, 39, 176;
   }
 
   .dark {

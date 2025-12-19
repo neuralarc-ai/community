@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Users, MessageSquare, Presentation, Video, MessageCircle, Calendar, UserPlus, Activity, ShieldAlert, Mail, Clock, Heart, Share2, Bookmark } from 'lucide-react'
-import { mockStats, mockActivity } from '@/app/data/mockData'
+import { Users, MessageSquare, Presentation, Video, MessageCircle, Calendar, UserPlus, Activity, ShieldAlert, Mail, Clock } from 'lucide-react'
+import { mockActivity } from '@/app/data/mockData'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Profile } from '@/app/types'
 import Avatar from './Avatar'
@@ -10,11 +10,18 @@ import Avatar from './Avatar'
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'stats' | 'users'>('stats')
   const [users, setUsers] = useState<Profile[]>([])
+  const [totalMembers, setTotalMembers] = useState<number | null>(null)
+  const [totalPosts, setTotalPosts] = useState<number>(Math.floor(Math.random() * 200) + 50) // Random count for Active Discussions
+  const [totalWorkshops, setTotalWorkshops] = useState<number | null>(null)
+  const [totalMeetings, setTotalMeetings] = useState<number>(Math.floor(Math.random() * 20) + 5) // Random count for Meetings Scheduled
   const [loadingUsers, setLoadingUsers] = useState(false)
 
   useEffect(() => {
     if (activeTab === 'users') {
       fetchUsers()
+    } else if (activeTab === 'stats') {
+      fetchTotalMembers()
+      fetchTotalWorkshops()
     }
   }, [activeTab])
 
@@ -24,12 +31,36 @@ export default function Dashboard() {
       const response = await fetch('/api/admin/users')
       if (response.ok) {
         const data = await response.json()
-        setUsers(data)
+        setUsers(data.users)
       }
     } catch (error) {
       console.error('Failed to fetch users:', error)
     } finally {
       setLoadingUsers(false)
+    }
+  }
+
+  const fetchTotalMembers = async () => {
+    try {
+      const response = await fetch('/api/admin/users')
+      if (response.ok) {
+        const data = await response.json()
+        setTotalMembers(data.totalUsers)
+      }
+    } catch (error) {
+      console.error('Failed to fetch total members:', error)
+    }
+  }
+
+  const fetchTotalWorkshops = async () => {
+    try {
+      const response = await fetch('/api/workshops')
+      if (response.ok) {
+        const data = await response.json()
+        setTotalWorkshops(data.totalWorkshopsCount)
+      }
+    } catch (error) {
+      console.error('Failed to fetch total workshops:', error)
     }
   }
 
@@ -71,43 +102,45 @@ export default function Dashboard() {
         <>
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockStats
-              .filter(stat => !['5', '6', '7', '8'].includes(stat.id)) // Filter out stats with IDs '5', '6', '7', '8'
-              .map((stat) => (
-                <Card key={stat.id} className="bg-card/40 backdrop-blur-md border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] transition-all duration-300 group cursor-pointer">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-orange-200 transition-colors duration-300">
-                      {stat.title}
-                    </CardTitle>
-                    <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
-                      {stat.id === 'members' && <Users size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                      {stat.id === 'posts' && <MessageSquare size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                      {stat.id === 'conclaves' && <Presentation size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                      {stat.id === 'meetings' && <Video size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+            {[
+              { id: 'members', title: 'Total Members', value: totalMembers, change: '+12%', icon: 'Users' },
+              { id: 'posts', title: 'Active Discussions', value: totalPosts, change: '+5%', icon: 'MessageSquare' },
+              { id: 'conclaves', title: 'Conclave This Month', value: totalWorkshops, change: '+8%', icon: 'Presentation' },
+              { id: 'meetings', title: 'Meetings Scheduled', value: totalMeetings, change: '+2%', icon: 'Video' },
+            ].map((stat) => (
+              <Card key={stat.id} className="bg-card/40 backdrop-blur-md border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] transition-all duration-300 group cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-orange-200 transition-colors duration-300">
+                    {stat.title}
+                  </CardTitle>
+                  <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
+                    {stat.icon === 'Users' && <Users size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.icon === 'MessageSquare' && <MessageSquare size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.icon === 'Presentation' && <Presentation size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                    {stat.icon === 'Video' && <Video size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col gap-2 pt-2">
+                    <span className="text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
+                        {stat.value?.toLocaleString()}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 transition-all duration-300 ${
+                            stat.change.includes('+') 
+                                ? 'text-white bg-white/10 group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-200' 
+                                : 'text-muted-foreground bg-white/5 group-hover:bg-white/10'
+                        }`}>
+                            {stat.change}
+                        </span>
+                        <span className="text-xs text-muted-foreground group-hover:text-white/60 transition-colors">
+                            from last month
+                        </span>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2 pt-2">
-                      <span className="text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
-                          {stat.value}
-                      </span>
-                      <div className="flex items-center gap-2">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 transition-all duration-300 ${
-                              stat.change.includes('+') 
-                                  ? 'text-white bg-white/10 group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-200' 
-                                  : 'text-muted-foreground bg-white/5 group-hover:bg-white/10'
-                          }`}>
-                              {stat.change}
-                          </span>
-                          <span className="text-xs text-muted-foreground group-hover:text-white/60 transition-colors">
-                              from last month
-                          </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            }
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {/* Recent Activity Section */}

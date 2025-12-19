@@ -1,34 +1,34 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import PostList from '@/app/components/PostList'
 import PostItem from '@/app/components/PostItem'
 import CommentTree from '@/app/components/CommentTree'
 import { Post, Comment } from '@/app/types'
 import { Plus, Image as ImageIcon, Link as LinkIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Card, CardContent } from '@/app/components/ui/card'
 import Avatar from '@/app/components/Avatar'
 import { createClient } from '@/app/lib/supabaseClient'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 import { Profile } from '@/app/types'
-import TwoColumnLayout from '@/app/components/TwoColumnLayout'
 import FilterSection from '@/app/components/FilterSection'
 
-export default function PostsPage() {
+function PostsContent() {
   const router = useRouter()
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set())
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     fetchPosts()
     fetchUserProfile()
     fetchSavedPosts()
-  }, [])
+  }, [searchParams])
 
   useEffect(() => {
     const supabase = createClient()
@@ -81,7 +81,7 @@ export default function PostsPage() {
       supabase.removeChannel(channel)
     }
   }, [])
-
+    
   const fetchUserProfile = async () => {
     try {
       const profile = await getCurrentUserProfile()
@@ -92,14 +92,21 @@ export default function PostsPage() {
   }
 
   const fetchPosts = async () => {
+    setLoading(true)
+    console.log("Fetching posts...")
     try {
-      const response = await fetch('/api/posts')
+      const searchQuery = searchParams.get('search')
+      const url = searchQuery ? `/api/posts?search=${encodeURIComponent(searchQuery)}` : '/api/posts'
+      console.log("Posts API URL:", url)
+      const response = await fetch(url)
       const data = await response.json()
-      setPosts(data)
+      console.log("Posts API response data:", data)
+      setPosts(data.posts)
     } catch (error) {
       console.error('Failed to fetch posts:', error)
     } finally {
       setLoading(false)
+      console.log("Posts loading finished.")
     }
   }
 
@@ -218,7 +225,7 @@ export default function PostsPage() {
   }
 
   return (
-    <TwoColumnLayout>
+    <div className="container max-w-[1400px] mx-auto py-8 px-6 space-y-12">
         {/* Create Post Input & Filter Bar */}
             <Card className="mb-6 shadow-sm border-yellow-500/50 bg-card/50 backdrop-blur-sm p-2 hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(234,179,8,0.15)] hover:bg-yellow-500/5 transition-all">
             <div className="flex items-center space-x-2 p-2">
@@ -285,6 +292,14 @@ export default function PostsPage() {
             ))
           )}
         </PostList>
-    </TwoColumnLayout>
+    </div>
+  )
+}
+
+export default function PostsPage() {
+  return (
+    <Suspense fallback={<div>Loading posts...</div>}>
+      <PostsContent />
+    </Suspense>
   )
 }

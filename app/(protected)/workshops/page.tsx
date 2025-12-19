@@ -1,11 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import CreateWorkshopModal from '@/app/components/CreateWorkshopModal'
 import WorkshopCard from '@/app/components/WorkshopCard'
 import { createClient } from '@/app/lib/supabaseClient'
+import { useSearchParams } from 'next/navigation'
+import { getCurrentUserProfile } from '@/app/lib/getProfile'
+import { Profile } from '@/app/types'
 
 interface Workshop {
   id: string
@@ -18,30 +21,38 @@ interface Workshop {
   ended_at?: string
 }
 
-export default function WorkshopsPage() {
+function WorkshopsContent() {
   const [workshops, setWorkshops] = useState<Workshop[]>([])
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<Profile['role'] | null>(null)
   const supabase = createClient()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
-    const getSession = async () => {
+    const getSessionAndProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUserId(user?.id || null)
+      if (user) {
+        const profile = await getCurrentUserProfile()
+        setUserRole(profile?.role || null)
+      }
     }
-    getSession()
+    getSessionAndProfile()
     fetchWorkshops()
-  }, [])
+  }, [searchParams])
 
   const fetchWorkshops = async () => {
     try {
-      const { data, error } = await supabase
-        .from('workshops')
-        .select('*')
-        .order('start_time', { ascending: true })
-
-      if (error) throw error
-      setWorkshops(data || [])
+      const searchQuery = searchParams.get('search')
+      const url = searchQuery ? `/api/workshops?search=${encodeURIComponent(searchQuery)}` : '/api/workshops'
+      const response = await fetch(url)
+      const data = await response.json()
+      // Sort workshops by start_time in descending order (newest first)
+      const sortedWorkshops = data.workshops.sort((a: Workshop, b: Workshop) => {
+        return new Date(b.start_time).getTime() - new Date(a.start_time).getTime();
+      });
+      setWorkshops(sortedWorkshops || [])
     } catch (error) {
       console.error('Failed to fetch workshops:', error)
     } finally {
@@ -64,7 +75,9 @@ export default function WorkshopsPage() {
             <h1 className="text-4xl font-bold text-white tracking-tight">Conclave</h1>
             <p className="text-lg text-muted-foreground">Schedule and manage online conclaves</p>
           </div>
-          <CreateWorkshopModal onWorkshopCreated={fetchWorkshops} />
+          {userRole === 'admin' && (
+            <CreateWorkshopModal onWorkshopCreated={fetchWorkshops} />
+          )}
         </div>
 
         {/* Workshops Grid */}
@@ -84,5 +97,13 @@ export default function WorkshopsPage() {
              </div>
         )}
     </div>
+  )
+}
+
+export default function WorkshopsPage() {
+  return (
+    <Suspense fallback={<div>Loading workshops...</div>}>
+      <WorkshopsContent />
+    </Suspense>
   )
 }

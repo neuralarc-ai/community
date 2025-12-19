@@ -4,6 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
 import { createProfile, getCurrentUserProfile } from '@/app/lib/getProfile'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 
 export default function CompleteProfilePage() {
   const [formData, setFormData] = useState({
@@ -14,6 +18,7 @@ export default function CompleteProfilePage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [usernameChecking, setUsernameChecking] = useState(false)
+  const [joinDate, setJoinDate] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -24,6 +29,8 @@ export default function CompleteProfilePage() {
         router.push('/login')
         return
       }
+
+      setJoinDate(new Date(user.created_at).toLocaleDateString())
 
       const profile = await getCurrentUserProfile()
       if (profile) {
@@ -105,8 +112,8 @@ export default function CompleteProfilePage() {
         dob: formData.dob
       })
 
-      // Redirect to dashboard after completing profile
-      router.push('/dashboard')
+      // Redirect to avatar creation after completing profile
+      router.push('/create-avatar')
     } catch (err: any) {
       const errorMessage = err?.message || err?.toString() || 'Failed to create profile'
       setError(errorMessage)
@@ -116,87 +123,103 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-cyber-bg py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="max-w-2xl w-full space-y-8 bg-cyber-component border-cyber-border text-cyber-text shadow-lg p-8">
+        <CardHeader>
+          <CardTitle className="mt-6 text-center text-3xl font-bold text-cyber-text tracking-tight">
             Complete Your Profile
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          </CardTitle>
+          <p className="mt-2 text-center text-sm text-cyber-secondary">
             Please fill out your profile information to continue
           </p>
-        </div>
+        </CardHeader>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+        <CardContent>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="full_name" className="block text-sm font-medium text-cyber-text">
+                  Full Name *
+                </Label>
+                <Input
+                  id="full_name"
+                  name="full_name"
+                  type="text"
+                  required
+                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm focus:border-cyber-accent focus:ring-cyber-accent sm:text-sm"
+                  placeholder="Enter your full name"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="username" className="block text-sm font-medium text-cyber-text">
+                  Username *
+                </Label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm focus:border-cyber-accent focus:ring-cyber-accent sm:text-sm"
+                  placeholder="Choose a unique username"
+                  value={formData.username}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                />
+                {usernameChecking && (
+                  <p className="mt-1 text-sm text-cyber-muted">Checking username...</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="dob" className="block text-sm font-medium text-cyber-text">
+                  Date of Birth *
+                </Label>
+                <Input
+                  id="dob"
+                  name="dob"
+                  type="date"
+                  required
+                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm focus:border-cyber-accent focus:ring-cyber-accent sm:text-sm"
+                  value={formData.dob}
+                  onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="join_date" className="block text-sm font-medium text-cyber-text">
+                  Date of Joining
+                </Label>
+                <Input
+                  id="join_date"
+                  name="join_date"
+                  type="text"
+                  readOnly
+                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm sm:text-sm cursor-not-allowed"
+                  value={joinDate}
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="text-destructive text-sm text-center">
+                {error}
+              </div>
+            )}
+
             <div>
-              <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                Full Name *
-              </label>
-              <input
-                id="full_name"
-                name="full_name"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                placeholder="Enter your full name"
-                value={formData.full_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-              />
+              <Button
+                type="submit"
+                disabled={loading || usernameChecking || !formData.full_name || !formData.username || !formData.dob || !!error}
+                className="w-full bg-cyber-accent text-cyber-bg hover:bg-cyber-accentHover focus:ring-cyber-accent disabled:opacity-50"
+              >
+                {loading ? 'Creating Profile...' : 'Complete Profile'}
+              </Button>
             </div>
-
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username *
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                placeholder="Choose a unique username"
-                value={formData.username}
-                onChange={(e) => handleUsernameChange(e.target.value)}
-              />
-              {usernameChecking && (
-                <p className="mt-1 text-sm text-gray-500">Checking username...</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="dob" className="block text-sm font-medium text-gray-700">
-                Date of Birth *
-              </label>
-              <input
-                id="dob"
-                name="dob"
-                type="date"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                value={formData.dob}
-                onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="text-red-600 text-sm text-center">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={loading || usernameChecking || !formData.full_name || !formData.username || !formData.dob || !!error}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-black bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
-            >
-              {loading ? 'Creating Profile...' : 'Complete Profile'}
-            </button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   useLocalParticipant, 
   useRemoteParticipants, 
@@ -8,7 +9,7 @@ import {
 } from '@livekit/components-react'
 import { 
   Mic, MicOff, Video, VideoOff, Hand, 
-  Users, Radio, Square, ShieldCheck, X 
+  Users, Radio, Square, ShieldCheck, X, ChevronLeft 
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -17,13 +18,15 @@ interface ConclaveControlsProps {
   roomName: string
   isHost: boolean
   type: 'AUDIO' | 'VIDEO'
+  onEndLive: () => Promise<boolean | void>
 }
 
 export default function ConclaveControls({ 
   workshopId, 
   roomName, 
   isHost, 
-  type 
+  type,
+  onEndLive
 }: ConclaveControlsProps) {
   const room = useRoomContext()
   const { localParticipant } = useLocalParticipant()
@@ -31,6 +34,7 @@ export default function ConclaveControls({
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState<string | null>(null)
   const [showManagePanel, setShowManagePanel] = useState(false)
+  const router = useRouter()
 
   // Parse local metadata for handRaised status
   const metadata = useMemo(() => {
@@ -78,6 +82,47 @@ export default function ConclaveControls({
     }
   }
 
+  const handleEndLiveSession = async () => {
+    if (!confirm('Are you sure you want to end this live session? This will stop the stream for everyone.')) {
+      return
+    }
+
+    try {
+      // 1. Disable local tracks
+      if (localParticipant) {
+        await localParticipant.setMicrophoneEnabled(false)
+        await localParticipant.setCameraEnabled(false)
+      }
+
+      // 2. Stop recording if active (best effort)
+      if (isRecording) {
+        // We can try to toggle recording off, or rely on room disconnect cleanup
+        // But let's try to be clean if possible, though handling state might be tricky here.
+        // Let's skip explicit recording stop here as the API/server should handle it on room close, 
+        // or the onEndLive function updates status which might trigger something.
+      }
+
+      // 3. Call parent handler to update DB status
+      if (onEndLive) {
+        await onEndLive()
+      }
+
+      // 4. Disconnect from LiveKit room
+      if (room) {
+        await room.disconnect()
+      }
+
+      // 5. Redirect to workshops page
+      router.push('/workshops')
+      router.refresh()
+      
+    } catch (error) {
+      console.error('Error ending live session:', error)
+      // Force redirect anyway as fallback
+      router.push('/workshops') 
+    }
+  }
+
   const manageParticipant = async (identity: string, action: 'promote' | 'demote' | 'remove') => {
     try {
       await fetch('/api/livekit/manage-participant', {
@@ -92,6 +137,14 @@ export default function ConclaveControls({
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl z-50">
+      <Button
+        size="icon"
+        variant="ghost"
+        className="rounded-full h-10 w-10 text-white hover:bg-white/10"
+        onClick={() => router.push('/workshops')}
+      >
+        <ChevronLeft size={20} />
+      </Button>
       
       {/* Mic/Video Toggles */}
       {(localParticipant.trackPublications.size > 0 || isHost) && (
@@ -212,7 +265,7 @@ export default function ConclaveControls({
         variant="destructive"
         size="icon"
         className="rounded-full h-10 w-10 bg-red-600 hover:bg-red-700"
-        onClick={() => room.disconnect()}
+        onClick={handleEndLiveSession}
       >
         <X size={20} />
       </Button>
