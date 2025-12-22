@@ -48,8 +48,11 @@ export async function GET(request: NextRequest) {
             full_name: profile?.full_name || 'Anonymous',
             avatar_url: profile?.avatar_url || '',
             role: profile?.role || 'user', // Default to 'user' if not available
-          })
-
+          },
+          vote_score: voteScore,
+          comment_count: commentCount
+        }
+      })
     )
 
     return NextResponse.json(postsWithScores)
