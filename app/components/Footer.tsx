@@ -6,7 +6,7 @@ export default function Footer() {
         <footer>
             
             {/* Footer Text Section */}
-            <div className="bg-[#262626] py-6 px-4 sm:px-6">
+            <div className="bg-black py-6 px-4 sm:px-6">
                 <div className="mx-auto max-w-7xl">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-white text-sm">
                         {/* Left - Terms of Use and Privacy Policy */}

@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Fetch profile (we know it's the current user, but good for consistency)
     const { data: profile } = await supabase
       .from('profiles')
-      .select('username, full_name, avatar_url')
+      .select('username, full_name, avatar_url, role')
       .eq('id', user.id)
       .single()
 
@@ -43,10 +43,12 @@ export async function GET(request: NextRequest) {
 
         return {
           ...post,
-          author: profile,
-          vote_score: voteScore,
-          comment_count: commentCount,
-          user_vote: 0 // We can implement this if needed, but 0 is fine for "my posts" list view
+          author: {
+            username: profile?.username || 'Anonymous',
+            full_name: profile?.full_name || 'Anonymous',
+            avatar_url: profile?.avatar_url || '',
+            role: profile?.role || 'user', // Default to 'user' if not available
+          }
         }
       })
     )

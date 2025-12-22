@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Fetch the post author profile
     const { data: postProfile } = await supabase
       .from('profiles')
-      .select('username, full_name, avatar_url')
+      .select('username, full_name, avatar_url, role')
       .eq('id', post.author_id)
       .single()
 
@@ -132,7 +132,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       author: {
         username: postProfile?.username || 'Anonymous',
         full_name: postProfile?.full_name || 'Anonymous',
-        avatar_url: postProfile?.avatar_url || ''
+        avatar_url: postProfile?.avatar_url || '',
+        role: postProfile?.role || 'user', // Default to 'user' if not available
       },
       vote_score: postVoteScore,
       user_vote: userVotesMap.get(`post:${postId}`) || 0,

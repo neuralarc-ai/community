@@ -226,11 +226,6 @@ const FluxDashboard = () => {
                 <span className="w-1/3 text-[#e6b31c]">+20 ⚡</span>
                 <span className="text-muted-foreground w-1/3">For showing up, learning, and participating live.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <span className="font-semibold w-1/3">Host a Conclave</span>
-                <span className="w-1/3 text-[#e6b31c]">+50 ⚡</span>
-                <span className="text-muted-foreground w-1/3">[Coming Soon] For leading the community.</span>
-              </li>
             </ul>
 
             <h3>Ascend the Hierarchy</h3>

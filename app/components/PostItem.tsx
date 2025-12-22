@@ -58,6 +58,11 @@ export default function PostItem({
            <div className="flex items-center gap-2 hover:bg-yellow-500/5 p-1.5 -ml-1.5 rounded-lg transition-colors cursor-pointer group/user">
               <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
               <span className="font-medium text-white group-hover/user:text-yellow-200 underline-offset-4 group-hover/user:underline">u/{post.author?.username || 'Anonymous'}</span>
+              {post.author?.role === 'admin' && (
+                <span className="ml-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-200 rounded-full text-[10px] font-bold uppercase tracking-wider border border-yellow-500/30">
+                  Admin
+                </span>
+              )}
            </div>
            <span className="text-white/20">•</span>
            <span>{formatTime(post.created_at)}</span>
@@ -107,25 +112,14 @@ export default function PostItem({
 
 
   const PostCardBase = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex bg-card/40 backdrop-blur-sm border border-white/5 rounded-2xl hover:border-yellow-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02] overflow-hidden group">
+    <div className="flex flex-col bg-card/40 backdrop-blur-sm border rounded-2xl transition-all duration-300 overflow-hidden group min-h-[220px] border-white/5 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02]">
       {children}
     </div>
   );
 
   return (
-    <article className="mb-6">
-      {isAdmin ? (
-        <HoverBorderGradient
-          containerClassName="rounded-2xl w-full h-full"
-          className="rounded-2xl group w-full h-full"
-          as="div"
-          duration={0.5}
-        >
-          <PostCardBase>{postInnerContent}</PostCardBase>
-        </HoverBorderGradient>
-      ) : (
-        <PostCardBase>{postInnerContent}</PostCardBase>
-      )}
+    <article className="mb-6 w-full">
+      <PostCardBase>{postInnerContent}</PostCardBase>
     </article>
   );
 }

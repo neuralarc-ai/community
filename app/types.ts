@@ -11,6 +11,7 @@ export interface Post {
     username: string;
     full_name: string;
     avatar_url: string;
+    role: 'user' | 'admin';
   };
   vote_score?: number;
   comment_count?: number;

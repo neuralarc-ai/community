@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const authorIds = [...new Set(posts.map(post => post.author_id))]
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url')
+      .select('id, username, full_name, avatar_url, role')
       .in('id', authorIds)
 
     const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
@@ -95,7 +95,8 @@ export async function GET(request: NextRequest) {
           author: {
             username: profile?.username || 'Anonymous',
             full_name: profile?.full_name || 'Anonymous',
-            avatar_url: profile?.avatar_url || ''
+            avatar_url: profile?.avatar_url || '',
+            role: profile?.role || 'user', // Default to 'user' if not available
           },
           vote_score: voteScore,
           comment_count: commentCount,
