@@ -176,8 +176,8 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Profile Info - Centered */}
-                <div className="space-y-6 w-full text-center">
-                    <div>
+                <div className="space-y-4 w-full text-center">
+                    <div className="space-y-1">
                         <h2 className="font-heading font-bold text-2xl text-white tracking-tight">{profile.full_name}</h2>
                         <p className="text-sm text-muted-foreground font-medium">u/{profile.username}</p>
                     </div>

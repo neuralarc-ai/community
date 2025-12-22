@@ -38,7 +38,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             isMobile={false}
             onCloseMobile={handleCloseMobileSidebar}
           />
-            <div
+          <div
             className={`flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-20' : 'lg:ml-0'}`}
           >
             <Header onMenuClick={handleToggleSidebar} />

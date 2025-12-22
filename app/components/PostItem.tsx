@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Post } from '@/app/types';
 import PostActions from './PostActions';
 import Avatar from './Avatar';
+import MagicBento from './MagicBento';
 
 interface PostItemProps {
   post: Post;
@@ -46,7 +47,7 @@ export default function PostItem({
     onVoteChange(post.id, newScore, newUserVote);
   };
 
-  return (
+  const postContent = (
     <div className="flex bg-card/40 backdrop-blur-sm border border-white/5 rounded-2xl mb-6 hover:border-yellow-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02] overflow-hidden group">
       <div className="flex-1 min-w-0 p-5 sm:p-6">
         {/* Header Metadata */}
@@ -117,4 +118,6 @@ export default function PostItem({
       </div>
     </div>
   );
+
+  return postContent;
 }

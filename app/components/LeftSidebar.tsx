@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FloatingDock } from '@/components/ui/floating-dock';
-import { LayoutDashboard as DashboardIcon, MessageSquare, Presentation, Calendar, User, Settings } from 'lucide-react';
+import { LayoutDashboard as DashboardIcon, MessageSquare, Presentation, Calendar, User, Settings, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   IconBrandGithub,
@@ -44,14 +44,13 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile 
     fetchUserRole()
   }, [supabase])
 
-  const navItems = [
+  const navItems = useMemo(() => [
     ...(userRole === 'admin' ? [{ href: '/dashboard', label: 'Dashboard', icon: DashboardIcon, hoverColor: 'text-orange-400' }] : []),
     { href: '/posts', label: 'Posts', icon: MessageSquare, hoverColor: 'text-yellow-400' },
     { href: '/workshops', label: 'Conclave', icon: Presentation, hoverColor: 'text-conclave-green' },
-    { href: '/meetings', label: 'Meetings', icon: Calendar, hoverColor: 'text-meetings-pink' },
-    { href: '/profile', label: 'Profile', icon: User, hoverColor: 'text-profile-blue' },
+    { href: '/flux-dashboard', label: 'Flux Leaderboard', icon: Award, hoverColor: 'text-[#e6b31c]' },
     { href: '/profile/settings', label: 'Settings', icon: Settings, hoverColor: 'text-settings-purple' },
-  ];
+  ], [userRole]);
 
   const links = navItems.map(item => {
     const isActive = pathname.startsWith(item.href);
