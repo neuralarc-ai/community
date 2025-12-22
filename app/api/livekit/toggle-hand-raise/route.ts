@@ -1,4 +1,4 @@
-import { AccessToken, AccessTokenPrivileges, RoomServiceClient } from 'livekit-server-sdk';
+import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 import { NextRequest, NextResponse } from 'next/server';
 
 const createToken = (participantIdentity: string, roomName: string) => {
@@ -24,9 +24,9 @@ export async function POST(req: NextRequest) {
   }
 
   const roomService = new RoomServiceClient(
-    process.env.NEXT_PUBLIC_LIVEKIT_URL,
-    process.env.LIVEKIT_API_KEY,
-    process.env.LIVEKIT_API_SECRET
+    process.env.LIVEKIT_URL!,
+    process.env.LIVEKIT_API_KEY!,
+    process.env.LIVEKIT_API_SECRET!
   );
 
   try {
