@@ -10,9 +10,10 @@ import {
   useParticipantContext,
 } from '@livekit/components-react'
 import { Track } from 'livekit-client'
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import Avatar from '@/app/components/Avatar'
 import { MicOff } from 'lucide-react'
+import { createClient } from '@/app/lib/supabaseClient'
 
 export default function VideoStage() {
   const participants = useParticipants()
@@ -70,6 +71,25 @@ export default function VideoStage() {
 function SpotlightTile({ participant }: { participant: any }) {
   const tracks = useTracks([Track.Source.Camera])
   const cameraTrack = tracks.find(t => t.participant.identity === participant.identity)
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('avatar_url, username, full_name')
+        .eq('id', participant.identity)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile for spotlight participant:', error);
+      } else {
+        setProfile(data);
+      }
+    };
+    fetchProfile();
+  }, [participant.identity]);
 
   return (
     <div className="h-full w-full relative">
@@ -78,8 +98,8 @@ function SpotlightTile({ participant }: { participant: any }) {
       ) : (
         <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-950">
           <Avatar
-            src={undefined}
-            alt={participant.name || participant.identity}
+            src={profile?.avatar_url}
+            alt={profile?.username || profile?.full_name || 'User'}
             size={128}
             className="w-32 h-32 border-4 border-white/10"
           />
@@ -88,7 +108,7 @@ function SpotlightTile({ participant }: { participant: any }) {
       
       {/* Overlay Info */}
       <div className="absolute bottom-6 left-6 flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-        <span className="text-white font-bold text-sm">{participant.name || 'Speaker'}</span>
+        <span className="text-white font-bold text-sm">{profile?.full_name || profile?.username || 'Speaker'}</span>
         {!participant.isMicrophoneEnabled && (
           <MicOff size={16} className="text-red-500" />
         )}
@@ -100,6 +120,25 @@ function SpotlightTile({ participant }: { participant: any }) {
 function SidebarTile({ participant }: { participant: any }) {
   const tracks = useTracks([Track.Source.Camera])
   const cameraTrack = tracks.find(t => t.participant.identity === participant.identity)
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('avatar_url, username, full_name')
+        .eq('id', participant.identity)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile for sidebar participant:', error);
+      } else {
+        setProfile(data);
+      }
+    };
+    fetchProfile();
+  }, [participant.identity]);
 
   return (
     <div className="h-full w-full relative group">
@@ -108,8 +147,8 @@ function SidebarTile({ participant }: { participant: any }) {
       ) : (
         <div className="h-full w-full flex items-center justify-center bg-zinc-800">
           <Avatar
-            src={undefined}
-            alt={participant.name || participant.identity}
+            src={profile?.avatar_url}
+            alt={profile?.username || profile?.full_name || 'User'}
             size={48}
             className="w-12 h-12"
           />
@@ -117,7 +156,7 @@ function SidebarTile({ participant }: { participant: any }) {
       )}
       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
       <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 rounded text-[10px] text-white font-medium border border-white/5">
-        {participant.name || 'Member'}
+        {profile?.full_name || profile?.username || 'Member'}
       </div>
     </div>
   )

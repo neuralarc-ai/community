@@ -1,9 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
+import TermsOfUseDialog from './TermsOfUseDialog'
+import PrivacyPolicyDialog from './PrivacyPolicyDialog'
 
 export default function Footer() {
+    const [isTermsOfUseOpen, setIsTermsOfUseOpen] = useState(false)
+    const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState(false)
     return (
         <footer>
+            <TermsOfUseDialog 
+                open={isTermsOfUseOpen}
+                onClose={() => setIsTermsOfUseOpen(false)}
+            />
+            <PrivacyPolicyDialog 
+                open={isPrivacyPolicyOpen}
+                onClose={() => setIsPrivacyPolicyOpen(false)}
+            />
             
             {/* Footer Text Section */}
             <div className="bg-black py-6 px-4 sm:px-6">
@@ -11,18 +23,18 @@ export default function Footer() {
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-white text-sm">
                         {/* Left - Terms of Use and Privacy Policy */}
                         <div className="flex items-center gap-4 sm:gap-6">
-                            <Link 
-                                href="/terms-of-use" 
+                            <button 
+                                onClick={() => setIsTermsOfUseOpen(true)} 
                                 className="hover:text-gray-300 transition-colors duration-300"
                             >
                                 Terms Of Use
-                            </Link>
-                            <Link 
-                                href="/privacy-policy" 
+                            </button>
+                            <button 
+                                onClick={() => setIsPrivacyPolicyOpen(true)} 
                                 className="hover:text-gray-300 transition-colors duration-300"
                             >
                                 Privacy Policy
-                            </Link>
+                            </button>
                         </div>
                         
                         {/* Center - Copyright */}
