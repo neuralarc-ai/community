@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
 import { Post, Comment } from '@/app/types'
-import { getVoteScore } from '@/app/lib/voteUtils'
+import { getVoteScore, getUserVote } from '@/app/lib/voteUtils'
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -21,7 +21,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         body,
         tags,
         created_at,
-        updated_at
+        updated_at,
+        vote_score,
+        is_pinned
       `)
       .eq('id', postId)
       .single()
@@ -78,12 +80,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     // Calculate vote scores for post and comments
-    const [postVoteScore, commentVoteScores] = await Promise.all([
-      getVoteScore('post', postId),
-      Promise.all(
-        comments.map(comment => getVoteScore('comment', comment.id))
-      )
-    ])
+    const commentVoteScores = await Promise.all(
+      comments.map(comment => getVoteScore('comment', comment.id))
+    )
 
     // Fetch profiles for all comment authors
     const authorIds = [...new Set(comments.map(comment => comment.author_id))]
@@ -134,9 +133,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         full_name: postProfile?.full_name || 'Anonymous',
         avatar_url: postProfile?.avatar_url || ''
       },
-      vote_score: postVoteScore,
       user_vote: userVotesMap.get(`post:${postId}`) || 0,
-      comments: rootComments
+      comments: rootComments,
     }
 
     return NextResponse.json(postWithDetails)

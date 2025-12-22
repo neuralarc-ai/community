@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
 import { Post } from '@/app/types'
-import { getVoteScore } from '@/app/lib/voteUtils'
+// import { getVoteScore } from '@/app/lib/voteUtils'
 import { awardFlux } from '@/lib/flux'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const searchQuery = searchParams.get('search')
+  const limit = searchParams.get('limit')
 
   try {
     const supabase = await createServerClient()
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
     // Get the authenticated user
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Fetch posts
+    // Fetch posts - temporarily exclude is_pinned until migration is run
     let query = supabase
       .from('posts')
       .select(`
@@ -24,14 +25,25 @@ export async function GET(request: NextRequest) {
         body,
         tags,
         created_at,
-        updated_at
+        updated_at,
+        vote_score,
+        is_pinned
       `)
 
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,body.ilike.%${searchQuery}%`)
     }
 
-    const { data: posts, error: postsError } = await query.order('created_at', { ascending: false })
+    // Order by is_pinned first, then created_at (newest first)
+    let { data: posts, error: postsError } = await query
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+
+    posts = posts ?? []
+
+    if (limit) {
+      posts = posts.slice(0, parseInt(limit))
+    }
 
     if (postsError) {
       console.error('Error fetching posts:', postsError)
@@ -55,7 +67,7 @@ export async function GET(request: NextRequest) {
     const authorIds = [...new Set(posts.map(post => post.author_id))]
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, username, full_name, avatar_url')
+      .select('id, username, full_name, avatar_url, role')
       .in('id', authorIds)
 
     const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
@@ -77,17 +89,13 @@ export async function GET(request: NextRequest) {
     // Calculate vote scores and comment counts for each post
     const postsWithScores = await Promise.all(
       posts.map(async (post) => {
-        const [voteScore, commentCount] = await Promise.all([
-          getVoteScore('post', post.id),
-          // Count comments for this post
-          (async () => {
-            const { count, error } = await supabase
-              .from('comments')
-              .select('*', { count: 'exact', head: true })
-              .eq('post_id', post.id)
-            return error ? 0 : count || 0
-          })()
-        ])
+        const commentCount = await (async () => {
+          const { count, error } = await supabase
+            .from('comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', post.id)
+          return error ? 0 : count || 0
+        })()
 
         const profile = profileMap.get(post.author_id)
         return {
@@ -95,11 +103,13 @@ export async function GET(request: NextRequest) {
           author: {
             username: profile?.username || 'Anonymous',
             full_name: profile?.full_name || 'Anonymous',
-            avatar_url: profile?.avatar_url || ''
+            avatar_url: profile?.avatar_url || '',
+            role: profile?.role || 'user'
           },
-          vote_score: voteScore,
           comment_count: commentCount,
-          user_vote: userVotesMap.get(post.id) || 0
+          user_vote: userVotesMap.get(post.id) || 0,
+          vote_score: post.vote_score,
+          is_pinned: post.is_pinned
         }
       })
     )
@@ -154,7 +164,8 @@ export async function POST(request: NextRequest) {
         body,
         tags,
         created_at,
-        updated_at
+        updated_at,
+        vote_score
       `)
       .single()
 

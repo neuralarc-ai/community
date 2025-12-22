@@ -19,6 +19,7 @@ interface Workshop {
   recording_url?: string
   host_id: string
   ended_at?: string
+  is_archived?: boolean
 }
 
 function WorkshopsContent() {
@@ -26,6 +27,7 @@ function WorkshopsContent() {
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<Profile['role'] | null>(null)
+  const [showArchived, setShowArchived] = useState(false)
   const supabase = createClient()
   const searchParams = useSearchParams()
 
@@ -40,16 +42,27 @@ function WorkshopsContent() {
     }
     getSessionAndProfile()
     fetchWorkshops()
-  }, [searchParams])
+  }, [searchParams, showArchived])
 
   const fetchWorkshops = async () => {
     try {
       const searchQuery = searchParams.get('search')
-      const url = searchQuery ? `/api/workshops?search=${encodeURIComponent(searchQuery)}` : '/api/workshops'
+      let url = '/api/workshops'
+      const params = new URLSearchParams()
+      if (searchQuery) {
+        params.append('search', searchQuery)
+      }
+      if (showArchived) {
+        params.append('showArchived', 'true')
+      }
+      if (params.toString()) {
+        url = `${url}?${params.toString()}`
+      }
+
       const response = await fetch(url)
       const data = await response.json()
       // Sort workshops by start_time in descending order (newest first)
-      const sortedWorkshops = data.workshops.sort((a: Workshop, b: Workshop) => {
+      const sortedWorkshops = (data.workshops ?? []).sort((a: Workshop, b: Workshop) => {
         return new Date(b.start_time).getTime() - new Date(a.start_time).getTime();
       });
       setWorkshops(sortedWorkshops || [])
@@ -58,6 +71,10 @@ function WorkshopsContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleToggleShowArchived = () => {
+    setShowArchived(prev => !prev)
   }
 
   if (loading) {
@@ -75,9 +92,20 @@ function WorkshopsContent() {
             <h1 className="text-4xl font-bold text-white tracking-tight">Conclave</h1>
             <p className="text-lg text-muted-foreground">Schedule and manage online conclaves</p>
           </div>
-          {userRole === 'admin' && (
-            <CreateWorkshopModal onWorkshopCreated={fetchWorkshops} />
-          )}
+          <div className="flex gap-4">
+            {userRole === 'admin' && (
+              <Button
+                variant="outline"
+                onClick={handleToggleShowArchived}
+                className="bg-[#18181b]/50 border-[#27584F]/30 text-[#27584F] hover:bg-[#27584F]/10"
+              >
+                {showArchived ? 'Hide Archived' : 'Show Archived'}
+              </Button>
+            )}
+            {userRole === 'admin' && (
+              <CreateWorkshopModal onWorkshopCreated={fetchWorkshops} />
+            )}
+          </div>
         </div>
 
         {/* Workshops Grid */}

@@ -4,14 +4,21 @@ import { createServerClient } from '@/app/lib/supabaseServerClient'
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const searchQuery = searchParams.get('search')
+  const showArchived = searchParams.get('showArchived') === 'true'
 
   try {
     const supabase = await createServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const isAdmin = user && (await supabase.from('profiles').select('role').eq('id', user.id).single()).data?.role === 'admin'
 
     let query = supabase
       .from('workshops')
       .select('*')
       .order('start_time', { ascending: true })
+
+    if (!showArchived || !isAdmin) {
+      query = query.eq('is_archived', false)
+    }
 
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)

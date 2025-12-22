@@ -16,6 +16,8 @@ interface PostActionsProps {
   initialVoteScore: number;
   userVote: -1 | 0 | 1;
   onVoteChange: (newScore: number, newUserVote: -1 | 0 | 1) => void;
+  isPinned?: boolean;
+  onTogglePin?: (postId: string, isPinned: boolean) => void;
 }
 
 export default function PostActions({
@@ -29,20 +31,25 @@ export default function PostActions({
   onToggleSave,
   initialVoteScore,
   userVote,
-  onVoteChange
+  onVoteChange,
+  isPinned,
+  onTogglePin,
 }: PostActionsProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [currentScore, setCurrentScore] = useState(initialVoteScore);
-  const [currentUserVote, setCurrentUserVote] = useState(userVote);
+  // Remove local state for score and user vote, rely on props
+  // const [currentScore, setCurrentScore] = useState(initialVoteScore);
+  // const [currentUserVote, setCurrentUserVote] = useState(userVote);
 
   useEffect(() => {
-    setCurrentScore(initialVoteScore);
+    // No longer need to set local state, as props will be updated via real-time
+    // setCurrentScore(initialVoteScore);
   }, [initialVoteScore]);
 
   useEffect(() => {
-    setCurrentUserVote(userVote);
+    // No longer need to set local state, as props will be updated via real-time
+    // setCurrentUserVote(userVote);
   }, [userVote]);
 
   useEffect(() => {
@@ -87,20 +94,21 @@ export default function PostActions({
 
     const supabase = createClient();
     let newVote = 0;
-    let newScore = currentScore;
+    let newScore = initialVoteScore;
 
-    if (currentUserVote === voteType) {
+    if (userVote === voteType) {
       // User is undoing their vote
       newVote = 0;
       newScore -= voteType;
     } else {
       // User is changing their vote or casting a new vote
       newVote = voteType;
-      newScore += voteType - (currentUserVote || 0);
+      newScore += voteType - (userVote || 0);
     }
 
-    setCurrentScore(newScore);
-    setCurrentUserVote(newVote as -1 | 0 | 1);
+    // No longer update local state, rely on prop updates from real-time
+    // setCurrentScore(newScore);
+    // setCurrentUserVote(newVote as -1 | 0 | 1);
     onVoteChange(newScore, newVote as -1 | 0 | 1);
 
     const { error } = await supabase.from('votes').upsert(
@@ -115,10 +123,7 @@ export default function PostActions({
 
     if (error) {
       console.error('Error submitting vote:', error.message || error);
-      // Revert optimistic update if there's an error
-      setCurrentScore(initialVoteScore);
-      setCurrentUserVote(userVote);
-      onVoteChange(initialVoteScore, userVote);
+      // No need to revert optimistic update, as real-time will correct the score
       alert('Failed to cast vote.');
     }
   };
@@ -129,18 +134,18 @@ export default function PostActions({
         <button
           onClick={(e) => handleVote(1, e)}
           className={`p-1 rounded-full transition-colors ${
-            currentUserVote === 1
+          userVote === 1
               ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
               : 'text-muted-foreground hover:bg-white/10 hover:text-white'
           }`}
         >
           <ChevronUp size={16} />
         </button>
-        <span className="text-white font-semibold min-w-[20px] text-center">{currentScore}</span>
+        <span className="text-white font-semibold min-w-[20px] text-center">{initialVoteScore}</span>
         <button
           onClick={(e) => handleVote(-1, e)}
           className={`p-1 rounded-full transition-colors ${
-            currentUserVote === -1
+          userVote === -1
               ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
               : 'text-muted-foreground hover:bg-white/10 hover:text-white'
           }`}
@@ -206,6 +211,15 @@ export default function PostActions({
               >
                 <Trash2 size={14} />
                 <span>Delete</span>
+              </button>
+            ) : null}
+            {isAdmin && onTogglePin ? (
+              <button
+                onClick={() => onTogglePin(postId, !isPinned)}
+                className="w-full text-left px-4 py-2 text-blue-400 hover:bg-blue-500/10 flex items-center gap-2 text-xs font-medium transition-colors"
+              >
+                {isPinned ? <Bookmark size={14} /> : <Bookmark size={14} />}
+                <span>{isPinned ? 'Unpin Post' : 'Pin Post'}</span>
               </button>
             ) : null}
             {!currentUserId || (currentUserId !== authorId && !isAdmin) ? (

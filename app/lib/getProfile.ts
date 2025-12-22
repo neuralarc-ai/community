@@ -16,7 +16,10 @@ export async function getCurrentUserProfile() {
     throw error
   }
 
-  return profile
+  return {
+    ...profile,
+    email: user.email,
+  }
 }
 
 export async function checkUsernameExists(username: string): Promise<boolean> {

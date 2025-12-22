@@ -5,6 +5,7 @@ import { useMemo } from 'react'
 import AudioStage from './stages/AudioStage'
 import VideoStage from './stages/VideoStage'
 import ConclaveControls from './controls/ConclaveControls'
+import { ConclaveChat } from './chat/ConclaveChat'
 import '@livekit/components-styles'
 
 interface ConclaveRoomProps {
@@ -39,12 +40,17 @@ export default function ConclaveRoom({
         connect={true}
         className="flex-1 flex flex-col"
       >
-        <div className="flex-1 relative">
-          {workshop.type === 'AUDIO' ? (
-            <AudioStage />
-          ) : (
-            <VideoStage />
-          )}
+        <div className="flex flex-1 relative">
+          <div className="flex-1">
+            {workshop.type === 'AUDIO' ? (
+              <AudioStage />
+            ) : (
+              <VideoStage />
+            )}
+          </div>
+          <div className="w-80 ml-4">
+            <ConclaveChat workshopId={workshop.id} isHost={isHost} />
+          </div>
         </div>
 
         <ConclaveControls

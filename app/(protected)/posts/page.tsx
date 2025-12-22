@@ -34,46 +34,25 @@ function PostsContent() {
     const supabase = createClient()
 
     const channel = supabase
-      .channel('realtime-votes')
+      .channel('post-updates')
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen to INSERT, UPDATE, DELETE
-          schema: 'public',
-          table: 'votes',
-        },
-        async (payload) => {
-          console.log('Vote change detected:', payload)
-          
-          const newVote = payload.new as any
-          const oldVote = payload.old as any
-          const targetId = newVote?.target_id || oldVote?.target_id
-          const targetType = newVote?.target_type || oldVote?.target_type
-
-          if (targetType === 'post' && targetId) {
-            // Re-fetch the specific post to get accurate count
-            const response = await fetch(`/api/posts/${targetId}`)
-            if (response.ok) {
-              const updatedPost = await response.json()
-              setPosts(currentPosts => 
-                currentPosts.map(post => 
-                  post.id === targetId 
-                    ? { ...post, vote_score: updatedPost.vote_score } 
-                    : post
-                )
-              )
-            }
-          }
-          
-          // Handle comment votes similarly if needed, or trigger re-fetch of comments
-          if (targetType === 'comment' && targetId) {
-             // For comments, we might need to know the postId to update the correct state slice.
-             // Since we don't easily have the postId from just the vote payload (unless we fetch the comment),
-             // we might rely on the user navigating or manually refreshing, or implement a more complex lookup.
-             // However, simply updating the UI if the comment is currently visible is a good enhancement.
-             // For now, let's focus on posts as requested, but the structure is here.
-          }
-        }
+        event: 'UPDATE', // Listen only to UPDATE events
+        schema: 'public',
+        table: 'posts', // Listen to changes on the posts table
+      },
+      (payload) => {
+        console.log('Post vote_score change detected:', payload)
+        const updatedPost = payload.new as Post;
+        setPosts(currentPosts => 
+          currentPosts.map(post => 
+            post.id === updatedPost.id 
+              ? { ...post, vote_score: updatedPost.vote_score } 
+              : post
+          )
+        )
+      }
       )
       .subscribe()
 
@@ -99,11 +78,35 @@ function PostsContent() {
       const url = searchQuery ? `/api/posts?search=${encodeURIComponent(searchQuery)}` : '/api/posts'
       console.log("Posts API URL:", url)
       const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
-      console.log("Posts API response data:", data)
-      setPosts(data.posts)
+
+      // Check if the response contains an error
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      // Check if posts data exists
+      if (!data.posts || !Array.isArray(data.posts)) {
+        console.warn('No posts data received or invalid format:', data)
+        setPosts([])
+        return
+      }
+
+      // Sort posts: pinned posts first, then by creation date
+      const sortedPosts = data.posts.sort((a: Post, b: Post) => {
+        if (a.is_pinned && !b.is_pinned) return -1;
+        if (!a.is_pinned && b.is_pinned) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+      setPosts(sortedPosts);
     } catch (error) {
       console.error('Failed to fetch posts:', error)
+      setPosts([]) // Set empty array on error
     } finally {
       setLoading(false)
       console.log("Posts loading finished.")
@@ -178,6 +181,46 @@ function PostsContent() {
         return newSet
       })
       alert('Failed to update saved status')
+    }
+  }
+
+  const handleTogglePin = async (postId: string, isPinned: boolean) => {
+    if (currentUserProfile?.role !== 'admin') {
+      alert('You do not have permission to pin posts.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/posts/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, isPinned }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle pin status');
+      }
+
+      // If we pinned a post, we need to unpin all others in our local state
+      setPosts(currentPosts => 
+        currentPosts.map(post => {
+          if (post.id === postId) {
+            return { ...post, is_pinned: isPinned };
+          } else if (isPinned) {
+            // If we are pinning this post, all other posts should be unpinned
+            return { ...post, is_pinned: false };
+          }
+          return post;
+        })
+      );
+      
+      // We don't necessarily need to fetchPosts() again if we updated the state correctly,
+      // but fetchPosts also handles sorting. Let's keep it for safety but the local update
+      // will handle the UI immediately.
+      fetchPosts(); 
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+      alert('Failed to update pin status.');
     }
   }
 
@@ -287,6 +330,7 @@ function PostsContent() {
                   onDelete={handleDeletePost}
                   isSaved={savedPostIds.has(post.id)}
                   onToggleSave={handleToggleSave}
+                  onTogglePin={handleTogglePin}
                 />
               </div>
             ))

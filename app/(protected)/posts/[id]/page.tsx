@@ -73,6 +73,32 @@ export default function PostDetailPage() {
     }
   }
 
+  const handleTogglePin = async (postId: string, isPinned: boolean) => {
+    if (currentUserProfile?.role !== 'admin') {
+      alert('You do not have permission to pin posts.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/posts/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId, isPinned }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle pin status');
+      }
+
+      if (post) {
+        setPost({ ...post, is_pinned: isPinned });
+      }
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+      alert('Failed to update pin status.');
+    }
+  }
+
   const handleDeletePost = async (postId: string) => {
     try {
       const response = await fetch(`/api/posts/${postId}`, {
@@ -250,7 +276,16 @@ export default function PostDetailPage() {
                         <div className="flex items-center gap-1">
                             <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
                             <span className="font-bold text-white">u/{post.author?.username || 'Anonymous'}</span>
+                            {post.author?.role === 'admin' && (
+                                <span className="ml-1 bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border border-blue-500/20">Admin</span>
+                            )}
                         </div>
+                        {post.is_pinned && (
+                            <div className="flex items-center gap-1.5 bg-yellow-500/10 text-yellow-500 px-2.5 py-1 rounded-full border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
+                                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)] animate-pulse" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest">Pinned by Admin</span>
+                            </div>
+                        )}
                         <span>•</span>
                         <span>{formatTime(post.created_at)}</span>
                     </div>
@@ -290,6 +325,8 @@ export default function PostDetailPage() {
                             initialVoteScore={post.vote_score || 0}
                             userVote={post.user_vote || 0}
                             onVoteChange={handleVoteChange}
+                            isPinned={post.is_pinned}
+                            onTogglePin={handleTogglePin}
                         />
                     </div>
                 </div>

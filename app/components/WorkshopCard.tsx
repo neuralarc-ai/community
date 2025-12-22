@@ -1,8 +1,30 @@
 'use client'
 
 import { useState } from 'react'
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+const formatRelativeTime = (dateString: string) => {
+  const now = new Date()
+  const date = new Date(dateString)
+  const diffInMs = now.getTime() - date.getTime()
+  const diffInHours = diffInMs / (1000 * 60 * 60)
+
+  if (diffInHours < 1) {
+    const diffInMinutes = diffInMs / (1000 * 60)
+    return `${Math.floor(diffInMinutes)}m ago`
+  } else if (diffInHours < 24) {
+    return `${Math.floor(diffInHours)}h ago`
+  } else {
+    const diffInDays = diffInHours / 24
+    return `${Math.floor(diffInDays)}d ago`
+  }
+}
 import { useRouter } from 'next/navigation'
-import { Calendar, Clock, Users, Video, Bell, CalendarPlus, Square, PlayCircle } from 'lucide-react'
+import { Calendar, Clock, Users, Video, Bell, CalendarPlus, Square, PlayCircle, Archive } from 'lucide-react'
 import { Card, CardContent } from '@/app/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { google, outlook, office365, yahoo, ics, CalendarEvent } from 'calendar-link'
@@ -18,6 +40,7 @@ interface Workshop {
   recording_url?: string
   host_id: string
   ended_at?: string
+  is_archived?: boolean
 }
 
 interface WorkshopCardProps {
@@ -30,6 +53,7 @@ export default function WorkshopCard({ workshop, isHost }: WorkshopCardProps) {
   const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false)
   const [joinedWaitlist, setJoinedWaitlist] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
+  const [isArchiving, setIsArchiving] = useState(false)
   const supabase = createClient()
   const router = useRouter()
 
@@ -66,55 +90,59 @@ export default function WorkshopCard({ workshop, isHost }: WorkshopCardProps) {
     }
   }
 
+  const handleArchiveToggle = async () => {
+    if (!confirm(`Are you sure you want to ${workshop.is_archived ? 'unarchive' : 'archive'} this conclave?`)) {
+      return
+    }
+
+    setIsArchiving(true)
+    try {
+      const response = await fetch(`/api/workshops/${workshop.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_archived: !workshop.is_archived }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${workshop.is_archived ? 'unarchive' : 'archive'} workshop`)
+      }
+
+      router.refresh()
+    } catch (error) {
+      console.error('Error archiving/unarchiving workshop:', error)
+      alert(`Failed to ${workshop.is_archived ? 'unarchive' : 'archive'} workshop. Please try again.`)
+    } finally {
+      setIsArchiving(false)
+    }
+  }
+
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return
+    if (!email.trim()) return
 
     setIsJoiningWaitlist(true)
     try {
       const { error } = await supabase
         .from('workshop_waitlist')
-        .insert([{ workshop_id: workshop.id, user_email: email }])
+        .insert({
+          workshop_id: workshop.id,
+          user_email: email.trim()
+        })
 
       if (error) {
-        if (error.code === '23505') {
-          alert('You are already on the waitlist!')
-        } else {
-          throw error
-        }
-      } else {
-        setJoinedWaitlist(true)
-        setEmail('')
+        console.error('Error joining waitlist:', error)
+        alert('Failed to join waitlist. Please try again.')
+        return
       }
+
+      setJoinedWaitlist(true)
+      setEmail('')
     } catch (error) {
       console.error('Error joining waitlist:', error)
       alert('Failed to join waitlist. Please try again.')
     } finally {
       setIsJoiningWaitlist(false)
     }
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-    if (diffInSeconds < 60) return 'just now'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
-    return `${Math.floor(diffInSeconds / 86400)} days ago`
   }
 
   return (
@@ -285,6 +313,19 @@ export default function WorkshopCard({ workshop, isHost }: WorkshopCardProps) {
                   </div>
                 </Button>
               )}
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="w-12 h-auto bg-[#18181b]/50 border-[#27584F]/30 text-[#27584F] hover:bg-[#27584F]/10" 
+                onClick={handleArchiveToggle}
+                disabled={isArchiving}
+                title={workshop.is_archived ? 'Unarchive Conclave' : 'Archive Conclave'}
+              >
+                <div className="flex flex-col items-center">
+                  <Archive size={14} fill="currentColor" className="mb-0.5" />
+                  <span className="text-[10px] font-bold">{isArchiving ? '...' : (workshop.is_archived ? 'Unarchive' : 'Archive')}</span>
+                </div>
+              </Button>
             </div>
           )}
         </div>

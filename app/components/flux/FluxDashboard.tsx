@@ -12,6 +12,7 @@ interface Profile {
   posts_count: number;
   comments_count: number;
   conclaves_attended: number;
+  is_archived?: boolean;
 }
 
 interface FluxLog {

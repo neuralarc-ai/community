@@ -139,7 +139,7 @@ export default function SettingsPage() {
                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Email Address</label>
                     <input 
                       type="email" 
-                      defaultValue="pratiksha@sphere.io"
+                      defaultValue={profile?.email}
                       className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-[#A69CBE]/50 focus:border-[#A69CBE]/50 transition-all group-hover:bg-white/10"
                     />
                   </div>

@@ -4,26 +4,73 @@ import { useEffect, useState } from 'react'
 import { Users, MessageSquare, Presentation, Video, MessageCircle, Calendar, UserPlus, Activity, ShieldAlert, Mail, Clock } from 'lucide-react'
 import { mockActivity } from '@/app/data/mockData'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
-import { Profile } from '@/app/types'
+import { Profile, Post } from '@/app/types'
 import Avatar from './Avatar'
+import { createClient } from '@/app/lib/supabaseClient'
+import { getCurrentUserProfile } from '@/app/lib/getProfile'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'stats' | 'users'>('stats')
   const [users, setUsers] = useState<Profile[]>([])
   const [totalMembers, setTotalMembers] = useState<number | null>(null)
-  const [totalPosts, setTotalPosts] = useState<number>(Math.floor(Math.random() * 200) + 50) // Random count for Active Discussions
+  const [totalPosts, setTotalPosts] = useState<number | null>(null)
   const [totalWorkshops, setTotalWorkshops] = useState<number | null>(null)
   const [totalMeetings, setTotalMeetings] = useState<number>(Math.floor(Math.random() * 20) + 5) // Random count for Meetings Scheduled
+  const [recentPosts, setRecentPosts] = useState<Post[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
+  const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
+
+  const supabase = createClient()
 
   useEffect(() => {
+    getCurrentUserProfile().then((profile: Profile | null) => {
+      setCurrentUserProfile(profile);
+    });
+
     if (activeTab === 'users') {
       fetchUsers()
     } else if (activeTab === 'stats') {
       fetchTotalMembers()
       fetchTotalWorkshops()
+      fetchTotalPosts()
+      fetchRecentPosts()
     }
-  }, [activeTab])
+
+    const postsChannel = supabase
+      .channel('dashboard-post-changes')
+      .on('postgres_changes',
+        {
+          event: '*', // Listen to all events for posts
+          schema: 'public',
+          table: 'posts',
+        },
+        (payload) => {
+          console.log('Post change detected:', payload)
+          if (payload.eventType === 'INSERT') {
+            setTotalPosts(prevCount => (prevCount !== null ? prevCount + 1 : 1))
+            const newPost = payload.new as Post
+            setRecentPosts(prevPosts => {
+              const updatedPosts = [newPost, ...prevPosts].slice(0, 5)
+              return updatedPosts
+            })
+          } else if (payload.eventType === 'DELETE') {
+            setTotalPosts(prevCount => (prevCount !== null ? prevCount - 1 : 0))
+            const deletedPostId = payload.old.id
+            setRecentPosts(prevPosts => prevPosts.filter(post => post.id !== deletedPostId).slice(0, 5))
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedPost = payload.new as Post
+            setRecentPosts(prevPosts => prevPosts.map(post => 
+              post.id === updatedPost.id ? updatedPost : post
+            ).slice(0,5))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(postsChannel)
+    }
+  }, [activeTab, supabase])
 
   const fetchUsers = async () => {
     setLoadingUsers(true)
@@ -54,13 +101,37 @@ export default function Dashboard() {
 
   const fetchTotalWorkshops = async () => {
     try {
-      const response = await fetch('/api/workshops')
+      const response = await fetch('/api/workshops?showArchived=false')
       if (response.ok) {
         const data = await response.json()
         setTotalWorkshops(data.totalWorkshopsCount)
       }
     } catch (error) {
       console.error('Failed to fetch total workshops:', error)
+    }
+  }
+
+  const fetchTotalPosts = async () => {
+    try {
+      const response = await fetch('/api/posts')
+      if (response.ok) {
+        const data = await response.json()
+        setTotalPosts(data.totalPostsCount)
+      }
+    } catch (error) {
+      console.error('Failed to fetch total posts:', error)
+    }
+  }
+
+  const fetchRecentPosts = async () => {
+    try {
+      const response = await fetch('/api/posts?limit=5') // Assuming your API supports a limit parameter
+      if (response.ok) {
+        const data = await response.json()
+        setRecentPosts(data.posts)
+      }
+    } catch (error) {
+      console.error('Failed to fetch recent posts:', error)
     }
   }
 
@@ -155,23 +226,33 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-white/5">
-                {mockActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-center gap-6 p-6 hover:bg-white/[0.04] transition-all duration-200 group cursor-pointer">
+                {recentPosts.length === 0 ? (
+                  <div className="p-6 text-center text-muted-foreground">
+                    No recent posts.
+                  </div>
+                ) : (
+                  recentPosts.map((post) => (
+                    <div key={post.id} className="flex items-center gap-6 p-6 hover:bg-white/[0.04] transition-all duration-200 group cursor-pointer">
                         <div className="flex-shrink-0 w-12 h-12 bg-[#0F0F0F] rounded-xl flex items-center justify-center border border-white/5 group-hover:border-white/20 group-hover:bg-white/5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300">
-                            {activity.type === 'post' && <MessageCircle size={22} className="text-muted-foreground group-hover:text-white transition-colors" />}
-                            {activity.type === 'workshop' && <Calendar size={22} className="text-muted-foreground group-hover:text-white transition-colors" />}
-                            {activity.type === 'meeting' && <Video size={22} className="text-muted-foreground group-hover:text-white transition-colors" />}
-                            {activity.type === 'member' && <UserPlus size={22} className="text-muted-foreground group-hover:text-white transition-colors" />}
+                            <MessageCircle size={22} className="text-muted-foreground group-hover:text-white transition-colors" />
                         </div>
                         <div className="flex-1 min-w-0 grid gap-1">
                             <div className="flex items-center justify-between">
-                                <p className="text-base font-medium text-white truncate group-hover:text-white/90">{activity.title}</p>
-                                <span className="text-xs text-muted-foreground font-mono bg-white/5 px-2 py-1 rounded border border-white/5 group-hover:border-white/10 transition-colors">{activity.time}</span>
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <p className="text-base font-medium text-white truncate group-hover:text-white/90">{post.title}</p>
+                                  {post.is_pinned && (
+                                    <span className="flex-shrink-0 bg-yellow-500/10 text-yellow-500 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-yellow-500/20">
+                                      Pinned
+                                    </span>
+                                  )}
+                                </div>
+                                <span className="text-xs text-muted-foreground font-mono bg-white/5 px-2 py-1 rounded border border-white/5 group-hover:border-white/10 transition-colors">{new Date(post.created_at).toLocaleTimeString()}</span>
                             </div>
-                            <p className="text-sm text-muted-foreground truncate group-hover:text-white/70 transition-colors">{activity.description}</p>
+                            <p className="text-sm text-muted-foreground truncate group-hover:text-white/70 transition-colors">{post.body?.substring(0, 100)}...</p>
                         </div>
                     </div>
-                ))}
+                ))
+                )}
               </div>
             </CardContent>
           </Card>
