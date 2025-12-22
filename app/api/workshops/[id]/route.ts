@@ -34,9 +34,24 @@ export async function PATCH(
       .eq('id', user.id)
       .single()
 
-    if (profileError || profile?.role !== 'admin') {
+    // Fetch workshop to check host_id
+    const { data: workshop, error: fetchWorkshopError } = await supabase
+      .from('workshops')
+      .select('host_id')
+      .eq('id', id)
+      .single()
+
+    if (fetchWorkshopError || !workshop) {
       return NextResponse.json(
-        { error: 'Forbidden - Only admins can update workshops' },
+        { error: 'Workshop not found' },
+        { status: 404 }
+      )
+    }
+
+    // Only host can update status or archive status
+    if (user.id !== workshop.host_id) {
+      return NextResponse.json(
+        { error: 'Forbidden - Only the host can update this workshop' },
         { status: 403 }
       )
     }
@@ -80,13 +95,26 @@ export async function GET(
     const supabase = await createServerClient()
     const { data, error } = await supabase
       .from('workshops')
-      .select('*')
+      .select('*, host:profiles(username,full_name,avatar_url)')
       .eq('id', id)
       .single()
 
     if (error) throw error
 
-    return NextResponse.json(data)
+    // Fetch waitlist count
+    const { count: waitlist_count, error: waitlistError } = await supabase
+      .from('workshop_waitlist')
+      .select('id', { count: 'exact', head: true })
+      .eq('workshop_id', id)
+
+    if (waitlistError) {
+      console.error('Error fetching waitlist count:', waitlistError)
+      // Continue without waitlist count if there's an error
+    }
+
+    const workshopData = { ...data, waitlist_count }
+
+    return NextResponse.json(workshopData)
   } catch (error) {
     console.error('Error fetching workshop:', error)
     return NextResponse.json(

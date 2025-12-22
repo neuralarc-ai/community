@@ -69,12 +69,18 @@ export interface Workshop {
   title: string;
   description: string | null;
   start_time: string;
-  status: 'SCHEDULED' | 'LIVE' | 'ENDED';
+  status: 'SCHEDULED' | 'LIVE' | 'ENDED'; // Assuming 'ENDED' is equivalent to 'COMPLETED'
   type: 'AUDIO' | 'VIDEO';
   recording_url?: string | null;
   ended_at?: string | null;
   created_at: string;
   is_archived?: boolean;
+  host?: { // Add host details for easier access
+    username: string;
+    full_name: string;
+    avatar_url: string;
+  };
+  waitlist_count?: number; // Add for displaying waitlist size
 }
 
 export interface Meeting {
