@@ -64,6 +64,7 @@ export default function PostItem({
                   {typeTag}
               </span>
            )}
+           
            <div className="flex items-center gap-2 hover:bg-yellow-500/5 p-1.5 -ml-1.5 rounded-lg transition-colors cursor-pointer group/user">
               <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
               <span className="font-medium text-white group-hover/user:text-yellow-200 underline-offset-4 group-hover/user:underline">u/{post.author?.username || 'Anonymous'}</span>
@@ -76,7 +77,14 @@ export default function PostItem({
                 <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-yellow-500/30 hover:text-yellow-200 hover:bg-yellow-500/5 transition-all">
                   {post.tags[0]}
                 </span>
+
               </>
+              
+           )}
+           {post.is_pinned && (
+              <span className="bg-yellow-500/10 text-yellow-400 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border border-yellow-500/20">
+                  Pinned Post
+              </span>
            )}
           </div>
         <Link href={`/posts/${post.id}`} className="block group/title">
