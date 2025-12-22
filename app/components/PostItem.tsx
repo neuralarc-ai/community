@@ -4,6 +4,7 @@ import PostActions from './PostActions';
 import Avatar from './Avatar';
 import MagicBento from './MagicBento';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
+import React from 'react';
 
 interface PostItemProps {
   post: Post;
@@ -30,6 +31,12 @@ const formatTime = (dateString: string) => {
   if (diffInDays < 7) return `${diffInDays}d ago`;
   return date.toLocaleDateString();
 };
+
+const PostCardBase = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex bg-card/40 backdrop-blur-sm border border-white/5 rounded-2xl hover:border-yellow-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02] overflow-hidden group">
+    {children}
+  </div>
+);
 
 export default function PostItem({
   post,
@@ -69,33 +76,9 @@ export default function PostItem({
                 <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-yellow-500/30 hover:text-yellow-200 hover:bg-yellow-500/5 transition-all">
                   {post.tags[0]}
                 </span>
-             )}
-             <div className="flex items-center gap-2 hover:bg-yellow-500/5 p-1.5 -ml-1.5 rounded-lg transition-colors cursor-pointer group/user">
-                <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
-                <span className="font-medium text-white group-hover/user:text-yellow-200 underline-offset-4 group-hover/user:underline">u/{post.author?.username || 'Anonymous'}</span>
-                {post.author?.role === 'admin' && (
-                  <span className="ml-2 bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border border-blue-500/20">Admin</span>
-                )}
-             </div>
-             {post.is_pinned && (
-                <div className="flex items-center gap-1.5 bg-yellow-500/10 text-yellow-500 px-2.5 py-1 rounded-full border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
-                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)] animate-pulse" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest">Pinned by Admin</span>
-                </div>
-             )}
-             <span className="text-white/20">•</span>
-             <span>{formatTime(post.created_at)}</span>
-             {post.tags && post.tags.length > 0 && (
-                <>
-                  <span className="text-white/20">•</span>
-                  <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-yellow-500/30 hover:text-yellow-200 hover:bg-yellow-500/5 transition-all">
-                    {post.tags[0]}
-                  </span>
-                </>
-             )}
-        </div>
-
-        {/* Content Link */}
+              </>
+           )}
+          </div>
         <Link href={`/posts/${post.id}`} className="block group/title">
             <h2 className="text-xl font-heading font-semibold text-white mb-3 leading-snug group-hover/title:text-yellow-50 transition-colors">
               {post.title}
@@ -127,35 +110,7 @@ export default function PostItem({
                   onTogglePin={onTogglePin}
                 />
             </div>
-          )}
-      </Link>
-
-      {/* Mobile Vote & Actions */}
-      <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
-          {/* Removed mobile VoteColumn, now handled in PostActions */}
-          <div className="flex items-center text-muted-foreground font-medium text-xs">
-              <PostActions
-                commentCount={commentCount}
-                postId={post.id}
-                authorId={post.author_id}
-                currentUserId={currentUserId}
-                isAdmin={isAdmin}
-                onDelete={onDelete}
-                isSaved={isSaved}
-                onToggleSave={onToggleSave}
-                initialVoteScore={post.vote_score || 0}
-                userVote={userVote}
-                onVoteChange={handleVoteChange}
-              />
           </div>
-      </div>
-    </div>
-  );
-
-
-  const PostCardBase = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex bg-card/40 backdrop-blur-sm border border-white/5 rounded-2xl hover:border-yellow-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02] overflow-hidden group">
-      {children}
     </div>
   );
 
