@@ -9,6 +9,9 @@ interface MainLayoutProps {
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
+  // #region agent log
+  fetch('http://127.0.0.1:7245/ingest/f5886f73-9674-45b3-a916-af5aa1f6c58a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/components/MainLayout.tsx:11',message:'MainLayout component entered',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'F'})}).catch(()=>{});
+  // #endregion
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
   const logoHref = '/dashboard'; // Assuming default logo href for now
@@ -64,5 +67,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
       )}
     </div>
   );
+  // #region agent log
+  fetch('http://127.0.0.1:7245/ingest/f5886f73-9674-45b3-a916-af5aa1f6c58a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/components/MainLayout.tsx:66',message:'MainLayout component exited',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'F'})}).catch(()=>{});
+  // #endregion
 }
 

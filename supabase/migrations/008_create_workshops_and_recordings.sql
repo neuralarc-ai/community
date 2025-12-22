@@ -76,7 +76,14 @@ create policy "Recordings are publicly accessible"
   using ( bucket_id = 'recordings' );
 
 -- Allow authenticated uploads (if needed for manual uploads, otherwise egress uses S3 keys)
-create policy "Authenticated users can upload recordings"
+create policy "Hosts can upload recordings to their workshops"
   on storage.objects for insert
-  with check ( bucket_id = 'recordings' and auth.role() = 'authenticated' );
+  with check (
+    bucket_id = 'recordings'
+    AND EXISTS (
+      SELECT 1 FROM public.workshops
+      WHERE id = (storage.objects.name ->> 0)::uuid
+      AND host_id = auth.uid()
+    )
+  );
 

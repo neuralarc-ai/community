@@ -8,7 +8,7 @@ export async function getCurrentUserProfile() {
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('*, total_flux, posts_count, comments_count, conclaves_attended')
+    .select('*, avatar_url, total_flux, posts_count, comments_count, conclaves_attended')
     .eq('id', user.id)
     .single()
 
