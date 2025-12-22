@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Header from '@/app/components/Header';
 import LeftSidebar from '@/app/components/LeftSidebar';
 import { useMediaQuery } from '@/lib/utils';
+import Footer from '@/app/components/Footer';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -28,10 +29,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-white">
+    <div className="flex flex-col min-h-screen bg-background text-white">
       {isDesktop ? (
         // Desktop layout
-        <>
+        <div className="flex flex-1">
           <LeftSidebar
             isOpen={isSidebarOpen}
             onToggle={handleToggleSidebar}
@@ -46,10 +47,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
               {children}
             </main>
           </div>
-        </>
+        </div>
       ) : (
         // Mobile layout
-        <>
+        <div className="flex flex-col flex-1">
           <Header onMenuClick={handleToggleSidebar} />
           <LeftSidebar
             isOpen={isSidebarOpen}
@@ -60,8 +61,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <main className="flex-1 bg-background p-2 mt-16">
             {children}
           </main>
-        </>
+        </div>
       )}
+      <Footer />
     </div>
   );
 }
