@@ -5,6 +5,8 @@ import Avatar from './Avatar';
 import MagicBento from './MagicBento';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import React from 'react';
+import { Button } from '@/components/ui/button'; // Added import
+import { useToast } from '@/app/components/ui/use-toast'; // Added import
 
 interface PostItemProps {
   post: Post;
@@ -51,8 +53,43 @@ export default function PostItem({
   onTogglePin,
   typeTag
 }: PostItemProps) {
+  const { toast } = useToast(); // Added toast hook
+
   const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange(post.id, newScore, newUserVote);
+  };
+
+  const handleNotifyPostUsers = async () => {
+    try {
+      const response = await fetch('/api/notify/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ postId: post.id }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: "Post announcement emails sent successfully.",
+        });
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Error!",
+          description: errorData.message || "Failed to send post announcement emails.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to notify post users:', error);
+      toast({
+        title: "Error!",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
   };
 
   const postInnerContent = (
@@ -121,6 +158,7 @@ export default function PostItem({
                   onVoteChange={handleVoteChange}
                   isPinned={post.is_pinned}
                   onTogglePin={onTogglePin}
+                  onNotifyUsers={isAdmin ? handleNotifyPostUsers : undefined} // Pass only if isAdmin
                 />
             </div>
           </div>
