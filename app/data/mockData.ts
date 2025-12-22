@@ -57,26 +57,3 @@ export const mockWorkshops = [
     link: 'https://meet.google.com/workshop2'
   }
 ]
-
-export const mockMeetings = [
-  {
-    id: 1,
-    title: 'Monthly Community Sync',
-    agenda: 'Discuss community updates, upcoming events, and gather feedback',
-    date: '2024-02-10',
-    time: '15:00',
-    duration: 60,
-    type: 'general' as const,
-    link: 'https://meet.google.com/meeting1'
-  },
-  {
-    id: 2,
-    title: 'Technical Team Standup',
-    agenda: 'Review current projects, blockers, and next steps',
-    date: '2024-02-12',
-    time: '09:00',
-    duration: 30,
-    type: 'team' as const,
-    link: 'https://meet.google.com/meeting2'
-  }
-]

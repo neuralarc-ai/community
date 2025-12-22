@@ -25,7 +25,7 @@ export async function GET() {
     // Fetch all profiles and count them
     const { data: users, count: totalUsers, error: fetchError } = await supabase
       .from('profiles')
-      .select('id, full_name, username, avatar_url, role, created_at', { count: 'exact' })
+      .select('id, full_name, username, avatar_url, role, created_at, total_flux', { count: 'exact' })
       .order('created_at', { ascending: false })
 
     if (fetchError) {

@@ -26,15 +26,21 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { full_name, username } = await request.json();
+    const { full_name, username, bio } = await request.json();
+
+    const updateData: { [key: string]: any } = {
+      full_name,
+      username,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (bio !== undefined) {
+      updateData.bio = bio;
+    }
 
     const { data, error } = await supabase
       .from('profiles')
-      .update({ 
-        full_name, 
-        username,
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', user.id)
       .select()
       .single();

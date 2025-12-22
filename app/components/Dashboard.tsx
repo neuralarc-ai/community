@@ -202,13 +202,14 @@ export default function Dashboard() {
                     <th className="px-8 py-4">Member</th>
                     <th className="px-8 py-4">Role</th>
                     <th className="px-8 py-4">Joined</th>
+                    <th className="px-8 py-4">Flux</th>
                     <th className="px-8 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {users.length === 0 && !loadingUsers ? (
                     <tr>
-                      <td colSpan={4} className="px-8 py-12 text-center text-muted-foreground">
+                      <td colSpan={5} className="px-8 py-12 text-center text-muted-foreground">
                         No members found.
                       </td>
                     </tr>
@@ -240,6 +241,9 @@ export default function Dashboard() {
                               {new Date(user.created_at).toLocaleDateString()}
                             </div>
                           </div>
+                        </td>
+                        <td className="px-8 py-4 text-orange-400 font-semibold">
+                          {user.total_flux}
                         </td>
                         <td className="px-8 py-4 text-right">
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

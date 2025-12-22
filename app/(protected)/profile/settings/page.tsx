@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   Save,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  Settings
 } from 'lucide-react';
 import { getCurrentUserProfile } from '@/app/lib/getProfile';
 import { Profile } from '@/app/types';
@@ -27,13 +28,53 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('account');
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [bio, setBio] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
 
   useEffect(() => {
     getCurrentUserProfile().then((data) => {
       setProfile(data);
+      setDisplayName(data?.full_name || '');
+      setUsername(data?.username || '');
+      setBio(data?.bio || '');
       setLoading(false);
     });
   }, []);
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    setSaveSuccess(null);
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ full_name: displayName, username, bio }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save changes');
+      }
+      setSaveSuccess(true);
+      // Optionally refresh profile data after successful save
+      getCurrentUserProfile().then((data) => {
+        setProfile(data);
+        setDisplayName(data?.full_name || '');
+        setUsername(data?.username || '');
+        setBio(data?.bio || '');
+      });
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      setSaveSuccess(false);
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveSuccess(null), 3000); // Clear message after 3 seconds
+    }
+  };
 
   const sections = [
     { id: 'account', label: 'Account Information', icon: User },
@@ -93,7 +134,7 @@ export default function SettingsPage() {
     <TwoColumnLayout rightSidebar={SettingsSidebar}>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Top Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pb-4 border-b border-white/5">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => router.back()}
@@ -106,9 +147,13 @@ export default function SettingsPage() {
               <p className="text-muted-foreground">Manage your account preferences and portal experience</p>
             </div>
           </div>
-          <Button className="bg-[#A69CBE] hover:bg-[#A69CBE]/80 text-white font-bold rounded-xl px-6 py-5 shadow-[0_0_20px_rgba(166,156,190,0.3)] transition-all flex items-center gap-2">
-            <Save size={18} />
-            Save Changes
+          <Button 
+            onClick={handleSaveChanges}
+            disabled={isSaving}
+            className="bg-[#A69CBE] hover:bg-[#A69CBE]/80 text-white font-bold rounded-xl px-6 py-5 shadow-[0_0_20px_rgba(166,156,190,0.3)] transition-all flex items-center gap-2">
+            {isSaving ? 'Saving...' : 'Save Changes'}
+            {saveSuccess === true && <span className="ml-2 text-green-300">Saved!</span>}
+            {saveSuccess === false && <span className="ml-2 text-red-300">Failed!</span>}
           </Button>
         </div>
 
@@ -130,7 +175,8 @@ export default function SettingsPage() {
                       </div>
                       <input 
                         type="text" 
-                        defaultValue={profile?.username}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-[#A69CBE]/50 focus:border-[#A69CBE]/50 transition-all group-hover:bg-white/10"
                       />
                     </div>
@@ -174,7 +220,8 @@ export default function SettingsPage() {
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Display Name</label>
                   <input 
                     type="text" 
-                    defaultValue={profile?.full_name}
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-[#A69CBE]/50 focus:border-[#A69CBE]/50 transition-all"
                   />
                 </div>
@@ -183,6 +230,8 @@ export default function SettingsPage() {
                   <textarea 
                     rows={4}
                     placeholder="Tell the community about yourself..."
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-[#A69CBE]/50 focus:border-[#A69CBE]/50 transition-all resize-none"
                   />
                 </div>
@@ -226,22 +275,3 @@ export default function SettingsPage() {
 }
 
 // Minimal Settings icon if lucide-react doesn't export it in the way I used it in sidebar
-function Settings(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
