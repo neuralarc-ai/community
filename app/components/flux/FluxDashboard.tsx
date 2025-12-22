@@ -170,21 +170,21 @@ const FluxDashboard = () => {
           <h2 className="text-2xl font-bold mb-6">Flux Leaderboard</h2>
           {/* Placeholder for Leaderboard Table */}
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left">
+            <table className="min-w-full text-center">
               <thead>
                 <tr className="border-b border-zinc-700 text-zinc-400">
-                  <th className="py-3 px-4">Rank</th>
-                  <th className="py-3 px-4">User</th>
-                  <th className="py-3 px-4 flex items-center"><Zap size={16} className="inline mr-1 text-[#e6b31c]" /> Total Flux</th>
-                  <th className="py-3 px-4">Posts</th>
-                  <th className="py-3 px-4">Comments</th>
+                  <th className="py-3 px-4 text-center">Rank</th>
+                  <th className="py-3 px-4 text-left">User</th>
+                  <th className="py-3 px-4 flex items-center justify-center"><Zap size={16} className="inline mr-1 text-[#e6b31c]" /> Total Flux</th>
+                  <th className="py-3 px-4 text-center">Posts</th>
+                  <th className="py-3 px-4 text-center">Comments</th>
                 </tr>
               </thead>
               <tbody>
                 {leaderboard.map((profile, index) => (
                   <tr key={profile.id} className={`border-b border-zinc-800 last:border-b-0 ${profile.id === user?.id ? 'bg-zinc-800' : 'hover:bg-zinc-800'}`}>
-                    <td className="py-3 px-4">{index + 1}</td>
-                    <td className="py-3 px-4 flex items-center">
+                    <td className="py-3 px-4 text-center">{index + 1}</td>
+                    <td className="py-3 px-4 flex items-center text-left">
                       <Image
                         src={profile.avatar_url || '/default-avatar.png'} // Fallback for avatar
                         alt={profile.full_name || 'User'}
@@ -194,9 +194,9 @@ const FluxDashboard = () => {
                       />
                       <span>{profile.full_name}</span>
                     </td>
-                    <td className="py-3 px-4">{profile.total_flux}</td>
-                    <td className="py-3 px-4">{profile.posts_count}</td>
-                    <td className="py-3 px-4">{profile.comments_count}</td>
+                    <td className="py-3 px-4 text-center">{profile.total_flux}</td>
+                    <td className="py-3 px-4 text-center">{profile.posts_count}</td>
+                    <td className="py-3 px-4 text-center">{profile.comments_count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -206,32 +206,41 @@ const FluxDashboard = () => {
 
         {/* Right Column: Recent Activity Feed */}
         <div className="lg:col-span-1 bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700">
-          <h2 className="text-2xl font-bold mb-6">Recent Activity</h2>
-          <ul className="space-y-4">
-            {recentActivity.map(activity => (
-              <li key={activity.id} className="flex items-start">
-                <Image
-                  src={activity.profiles?.[0]?.avatar_url || '/default-avatar.png'}
-                  alt={activity.profiles?.[0]?.full_name || 'User'}
-                  width={32}
-                  height={32}
-                  className="rounded-full mr-3 flex-shrink-0"
-                />
-                <div>
-                  <p className="text-sm">
-                    <span className="font-semibold">{activity.profiles?.[0]?.full_name || 'Unknown User'}</span>
-                    {' '}
-                    {activity.action_type === 'POST_CREATE' && 'posted a discussion'}
-                    {activity.action_type === 'COMMENT_CREATE' && 'added a comment'}
-                    {activity.action_type === 'CONCLAVE_JOIN' && 'joined a conclave'}
-                    {' '}
-                    <span className="text-[#e6b31c]">+<Zap size={12} className="inline" />{activity.amount}</span>
-                  </p>
-                  <p className="text-xs text-zinc-500">{timeAgo(activity.created_at)}</p>
-                </div>
+          <h2 className="text-2xl font-bold mb-6">What is Flux?</h2>
+          <div className="space-y-6">
+            <p>Flux (⚡) is the definitive metric of your contribution to The Sphere. It tracks how much value you provide to the community. The more you help others grow, the higher your Flux potential rises.</p>
+
+            <h3>Ways to Earn</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2">
+                <span className="font-semibold w-1/3">Start a Discussion</span>
+                <span className="w-1/3 text-[#e6b31c]">+10 ⚡</span>
+                <span className="text-muted-foreground w-1/3">For initiating new ideas and knowledge sharing.</span>
               </li>
-            ))}
-          </ul>
+              <li className="flex items-start gap-2">
+                <span className="font-semibold w-1/3">Post a Comment</span>
+                <span className="w-1/3 text-[#e6b31c]">+5 ⚡</span>
+                <span className="text-muted-foreground w-1/3">For adding perspective and helping peers.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="font-semibold w-1/3">Join a Conclave</span>
+                <span className="w-1/3 text-[#e6b31c]">+20 ⚡</span>
+                <span className="text-muted-foreground w-1/3">For showing up, learning, and participating live.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="font-semibold w-1/3">Host a Conclave</span>
+                <span className="w-1/3 text-[#e6b31c]">+50 ⚡</span>
+                <span className="text-muted-foreground w-1/3">[Coming Soon] For leading the community.</span>
+              </li>
+            </ul>
+
+            <h3>Ascend the Hierarchy</h3>
+            <p>Accumulating Flux unlocks higher tiers on the global leaderboard.</p>
+            <ul className="list-disc list-inside space-y-1 ml-4">
+              <li><span className="font-semibold">Top 10%:</span> Earn the "Architect" Status.</li>
+              <li><span className="font-semibold">Top 1%:</span> Earn the "Luminary" Status (and exclusive access to private Conclaves).</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
