@@ -11,11 +11,13 @@ export interface Post {
     username: string;
     full_name: string;
     avatar_url: string;
+    role: 'user' | 'admin';
   };
-  vote_score?: number;
-  comment_count?: number;
+  vote_score: number;
   user_vote?: -1 | 0 | 1;
   comments?: Comment[];
+  comment_count?: number;
+  is_pinned?: boolean;
 }
 
 // Database-backed Comment interface
@@ -30,8 +32,9 @@ export interface Comment {
     username: string;
     full_name: string;
     avatar_url: string;
+    role?: 'user' | 'admin';
   };
-  vote_score?: number;
+  vote_score: number;
   replies?: Comment[];
   user_vote?: -1 | 0 | 1;
 }
@@ -71,6 +74,7 @@ export interface Workshop {
   recording_url?: string | null;
   ended_at?: string | null;
   created_at: string;
+  is_archived?: boolean;
 }
 
 export interface Meeting {
@@ -105,6 +109,7 @@ export interface Profile {
   id: string;
   full_name: string;
   username: string;
+  email: string;
   dob: string;
   role: 'user' | 'admin';
   avatar_url?: string;

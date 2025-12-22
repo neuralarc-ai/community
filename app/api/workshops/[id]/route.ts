@@ -18,39 +18,38 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const { status } = body
+    const { status, is_archived } = body
 
-    if (!status) {
+    if (!status && typeof is_archived === 'undefined') {
       return NextResponse.json(
-        { error: 'Status is required' },
+        { error: 'Status or is_archived is required' },
         { status: 400 }
       )
     }
 
-    // Check if the user is the host
-    const { data: workshop, error: fetchError } = await supabase
-      .from('workshops')
-      .select('host_id')
-      .eq('id', id)
+    // Fetch user profile to check role
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
       .single()
 
-    if (fetchError || !workshop) {
+    if (profileError || profile?.role !== 'admin') {
       return NextResponse.json(
-        { error: 'Workshop not found' },
-        { status: 404 }
-      )
-    }
-
-    if (workshop.host_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Forbidden: Only the host can update the workshop' },
+        { error: 'Forbidden - Only admins can update workshops' },
         { status: 403 }
       )
     }
 
-    const updateData: any = { status }
-    if (status === 'ENDED') {
-      updateData.ended_at = new Date().toISOString()
+    const updateData: any = {}
+    if (status) {
+      updateData.status = status
+      if (status === 'ENDED') {
+        updateData.ended_at = new Date().toISOString()
+      }
+    }
+    if (typeof is_archived !== 'undefined') {
+      updateData.is_archived = is_archived
     }
 
     const { data, error } = await supabase

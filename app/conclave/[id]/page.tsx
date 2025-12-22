@@ -31,6 +31,21 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
         }
         setUserId(user.id)
 
+        // Fetch user profile to get username
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
+          .single()
+
+        if (profileError || !profile) {
+          console.error('User profile not found:', profileError)
+          router.push('/login') // Or handle this error appropriately
+          return
+        }
+
+        const participantUsername = profile.username;
+
         // 2. Fetch Workshop Data
         const { data: workshopData, error } = await supabase
           .from('workshops')
@@ -52,7 +67,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           body: JSON.stringify({
             workshopId: id,
             roomName: `conclave-${id}`,
-            participantName: user.user_metadata?.full_name || user.email
+            participantName: participantUsername
           })
         })
 

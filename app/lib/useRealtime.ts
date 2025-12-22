@@ -155,7 +155,9 @@ export function useRealtime(callbacks: RealtimeCallbacks) {
     }
   }, [callbacks.onPostInsert, callbacks.onPostUpdate, callbacks.onPostDelete,
       callbacks.onCommentInsert, callbacks.onCommentUpdate, callbacks.onCommentDelete,
-      callbacks.onVoteInsert, callbacks.onVoteUpdate, callbacks.onVoteDelete])
+      callbacks.onVoteInsert, callbacks.onVoteUpdate, callbacks.onVoteDelete,
+      callbacks.onPostUpdate // Add onPostUpdate to the dependency array
+    ])
 
   return channelRef.current
 }

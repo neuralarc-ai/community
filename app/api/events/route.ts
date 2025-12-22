@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mockWorkshops, mockMeetings } from '@/app/data/mockData'
+import { mockWorkshops } from '@/app/data/mockData'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
 
   try {
     let workshops = mockWorkshops
-    let meetings = mockMeetings
 
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase()
@@ -16,14 +15,9 @@ export async function GET(request: NextRequest) {
           workshop.title.toLowerCase().includes(searchLower) ||
           workshop.description.toLowerCase().includes(searchLower)
       )
-      meetings = mockMeetings.filter(
-        (meeting) =>
-          meeting.title.toLowerCase().includes(searchLower) ||
-          meeting.agenda.toLowerCase().includes(searchLower)
-      )
     }
 
-    return NextResponse.json({ workshops, meetings, totalWorkshopsCount: workshops.length, totalMeetingsCount: meetings.length })
+    return NextResponse.json({ workshops, totalWorkshopsCount: workshops.length })
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to fetch events' },
@@ -52,20 +46,6 @@ export async function POST(request: NextRequest) {
 
       mockWorkshops.push(newWorkshop)
       return NextResponse.json(newWorkshop, { status: 201 })
-    } else if (type === 'meeting') {
-      const newMeeting = {
-        id: mockMeetings.length + 1,
-        title: data.title,
-        agenda: data.agenda,
-        date: data.date,
-        time: data.time,
-        duration: parseInt(data.duration),
-        type: data.type,
-        link: data.link
-      }
-
-      mockMeetings.push(newMeeting)
-      return NextResponse.json(newMeeting, { status: 201 })
     }
 
     return NextResponse.json(

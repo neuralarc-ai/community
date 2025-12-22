@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
+import { createWorkshopSchema } from '@/app/validationSchemas/workshopSchemas'
+import logger from '@/app/lib/logger'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const searchQuery = searchParams.get('search')
+  const showArchived = searchParams.get('showArchived') === 'true'
 
   try {
     const supabase = await createServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const isAdmin = user && (await supabase.from('profiles').select('role').eq('id', user.id).single()).data?.role === 'admin'
 
     let query = supabase
       .from('workshops')
       .select('*')
       .order('start_time', { ascending: true })
+
+    if (!showArchived || !isAdmin) {
+      query = query.eq('is_archived', false)
+    }
 
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
@@ -19,7 +28,13 @@ export async function GET(request: NextRequest) {
 
     const { data: workshops, error: fetchError } = await query
 
-    if (fetchError) throw fetchError
+    if (fetchError) {
+      logger.error('Error fetching workshops', fetchError)
+      return NextResponse.json(
+        { error: 'Failed to fetch workshops' },
+        { status: 500 }
+      )
+    }
 
     // Get total count of workshops
     const { count: totalWorkshopsCount, error: countError } = await supabase
@@ -27,12 +42,12 @@ export async function GET(request: NextRequest) {
       .select('id', { count: 'exact', head: true })
 
     if (countError) {
-      console.error('Error fetching total workshops count:', countError)
+      logger.error('Error fetching total workshops count', countError)
     }
 
     return NextResponse.json({ workshops, totalWorkshopsCount })
   } catch (error) {
-    console.error('Error fetching workshops:', error)
+    logger.error('Error fetching workshops', error)
     return NextResponse.json(
       { error: 'Failed to fetch workshops' },
       { status: 500 }
@@ -67,7 +82,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, start_time, status, type } = body
+    
+    // Validate incoming data with Zod
+    const validationResult = createWorkshopSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: validationResult.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { title, description, start_time, status, type } = validationResult.data;
 
     if (!title || !start_time) {
       return NextResponse.json(
@@ -89,11 +113,17 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      logger.error('Error creating workshop', error)
+      return NextResponse.json(
+        { error: 'Failed to create workshop' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json(data, { status: 201 })
   } catch (error) {
-    console.error('Error creating workshop:', error)
+    logger.error('Error creating workshop', error)
     return NextResponse.json(
       { error: 'Failed to create workshop' },
       { status: 500 }
