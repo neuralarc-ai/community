@@ -28,7 +28,7 @@ export default function rateLimit(options?: Options) {
         limit,
         remaining: isRateLimited ? 0 : limit - currentUsage,
         reset: Math.ceil(Date.now() / 1000) + Math.ceil(retryAfter / 1000),
-      };
+      } as const;
     },
   };
 }

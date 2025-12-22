@@ -9,7 +9,14 @@ import logger from '@/app/lib/logger'
 const limiter = rateLimit({
   uniqueTokenPerInterval: 500, // Max 500 users per 60 seconds
   interval: 60 * 1000, // 60 seconds
-});
+}) as unknown as {
+  check: (limit: number, token: string) => {
+    success: boolean;
+    limit: number;
+    remaining: number;
+    reset: number;
+  };
+};
 
 const createPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
@@ -116,12 +123,12 @@ export async function GET(request: NextRequest) {
             username: profile?.username || 'Anonymous',
             full_name: profile?.full_name || 'Anonymous',
             avatar_url: profile?.avatar_url || '',
-            role: profile?.role || 'user'
+            role: profile?.role || 'user', // Default to 'user' if not available
           },
           comment_count: commentCount,
           user_vote: userVotesMap.get(post.id) || 0,
           vote_score: post.vote_score,
-          is_pinned: post.          is_pinned
+          is_pinned: post.is_pinned
         }
       })
     )

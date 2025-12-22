@@ -319,7 +319,7 @@ function PostsContent() {
             </div>
           ) : (
             filteredPosts.map((post) => (
-              <div key={post.id}>
+              <div key={post.id} className="w-full">
                 <PostItem
                   post={post}
                   userVote={(post as any).user_vote || 0}
