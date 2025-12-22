@@ -6,6 +6,7 @@ import AudioStage from './stages/AudioStage'
 import VideoStage from './stages/VideoStage'
 import ConclaveControls from './controls/ConclaveControls'
 import { ConclaveChat } from './chat/ConclaveChat'
+import { ParticipantList } from './ParticipantList'
 import '@livekit/components-styles'
 
 interface ConclaveRoomProps {
@@ -48,8 +49,9 @@ export default function ConclaveRoom({
               <VideoStage />
             )}
           </div>
-          <div className="w-80 ml-4">
+          <div className="w-30 ml-4 flex flex-col gap-4">
             <ConclaveChat workshopId={workshop.id} isHost={isHost} />
+            <ParticipantList workshopId={workshop.id} isHost={isHost} />
           </div>
         </div>
 
