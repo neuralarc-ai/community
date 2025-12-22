@@ -112,7 +112,12 @@ export default function PostItem({
 
 
   const PostCardBase = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex flex-col bg-card/40 backdrop-blur-sm border rounded-2xl transition-all duration-300 overflow-hidden group min-h-[220px] border-white/5 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02]">
+    <div className={`flex flex-col backdrop-blur-sm border rounded-2xl transition-all duration-300 overflow-hidden group min-h-[220px]
+      ${post.author?.role === 'admin'
+        ? 'bg-gradient-to-br from-yellow-900/40 via-yellow-900/20 to-transparent border-yellow-700/30 shadow-[0_0_25px_rgba(234,179,8,0.15)]'
+        : 'bg-card/40 border-white/5 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02]'
+      }
+    `}>
       {children}
     </div>
   );
