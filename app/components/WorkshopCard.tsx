@@ -251,6 +251,39 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
     })
   }
 
+  const handleNotifyConclaveUsers = async () => {
+    try {
+      const response = await fetch('/api/notify/conclave', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ conclaveId: workshop.id }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: "Conclave invitations sent successfully.",
+        });
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Error!",
+          description: errorData.message || "Failed to send conclave invitations.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to notify conclave users:', error);
+      toast({
+        title: "Error!",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const isScheduled = workshop.status === 'SCHEDULED'
   const isLive = workshop.status === 'LIVE'
   const isEnded = workshop.status === 'ENDED'
@@ -422,6 +455,16 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                       Session Finished
                     </span>
                   )}
+                </Button>
+              )}
+              {/* Notify Users Button */}
+              {isScheduled && (
+                <Button 
+                  className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora"
+                  onClick={handleNotifyConclaveUsers}
+                >
+                  <Bell size={20} />
+                  Notify Users
                 </Button>
               )}
             </>

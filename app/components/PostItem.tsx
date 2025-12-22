@@ -5,6 +5,8 @@ import Avatar from './Avatar';
 import MagicBento from './MagicBento';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
 import React from 'react';
+import { Button } from '@/components/ui/button'; // Added import
+import { useToast } from '@/app/components/ui/use-toast'; // Added import
 
 interface PostItemProps {
   post: Post;
@@ -32,10 +34,20 @@ const formatTime = (dateString: string) => {
   return date.toLocaleDateString();
 };
 
-const PostCardBase = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex bg-card/40 backdrop-blur-sm border border-white/5 rounded-2xl hover:border-yellow-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(234,179,8,0.05)] hover:bg-white/[0.02] overflow-hidden group">
-    {children}
-  </div>
+  interface PostCardBaseProps {
+  children: React.ReactNode;
+  post: Post;
+}
+
+const PostCardBase = ({ children, post }: PostCardBaseProps) => (
+    <div className={`flex bg-card/40 backdrop-blur-sm border rounded-2xl transition-all duration-300 overflow-hidden group min-h-[220px]
+      ${post.author?.role === 'admin'
+        ? 'bg-gradient-to-br from-admin-yellow/40 via-admin-yellow/20 to-transparent border-admin-yellow/30 shadow-[0_0_25px_rgba(231,179,27,0.15)]'
+        : 'border-white/5 hover:border-admin-yellow/30 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] hover:bg-white/[0.02]'
+      }
+    `}>
+      {children}
+    </div>
 );
 
 export default function PostItem({
@@ -51,8 +63,43 @@ export default function PostItem({
   onTogglePin,
   typeTag
 }: PostItemProps) {
+  const { toast } = useToast(); // Added toast hook
+
   const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange(post.id, newScore, newUserVote);
+  };
+
+  const handleNotifyPostUsers = async () => {
+    try {
+      const response = await fetch('/api/notify/post', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ postId: post.id }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: "Post announcement emails sent successfully.",
+        });
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Error!",
+          description: errorData.message || "Failed to send post announcement emails.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to notify post users:', error);
+      toast({
+        title: "Error!",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
   };
 
   const postInnerContent = (
@@ -65,11 +112,11 @@ export default function PostItem({
               </span>
            )}
            
-           <div className="flex items-center gap-2 hover:bg-yellow-500/5 p-1.5 -ml-1.5 rounded-lg transition-colors cursor-pointer group/user">
+           <div className="flex items-center gap-2 hover:bg-admin-yellow/5 p-1.5 -ml-1.5 rounded-lg transition-colors cursor-pointer group/user">
               <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
-              <span className="font-medium text-white group-hover/user:text-yellow-200 underline-offset-4 group-hover/user:underline">u/{post.author?.username || 'Anonymous'}</span>
+              <span className="font-medium text-white group-hover/user:text-admin-yellow/80 underline-offset-4 group-hover/user:underline">u/{post.author?.username || 'Anonymous'}</span>
               {post.author?.role === 'admin' && (
-                <span className="ml-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-200 rounded-full text-[10px] font-bold uppercase tracking-wider border border-yellow-500/30">
+                <span className="ml-2 px-2 py-0.5 bg-admin-yellow/20 text-admin-yellow rounded-full text-[10px] font-bold uppercase tracking-wider border border-admin-yellow/30">
                   Admin
                 </span>
               )}
@@ -79,7 +126,7 @@ export default function PostItem({
            {post.tags && post.tags.length > 0 && (
               <>
                 <span className="text-white/20">•</span>
-                <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-yellow-500/30 hover:text-yellow-200 hover:bg-yellow-500/5 transition-all">
+                <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-admin-yellow/30 hover:text-admin-yellow hover:bg-admin-yellow/5 transition-all">
                   {post.tags[0]}
                 </span>
 
@@ -87,13 +134,13 @@ export default function PostItem({
               
            )}
            {post.is_pinned && (
-              <span className="bg-yellow-500/10 text-yellow-400 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border border-yellow-500/20">
+              <span className="bg-admin-yellow/10 text-admin-yellow/80 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border border-admin-yellow/20">
                   Pinned Post
               </span>
            )}
           </div>
         <Link href={`/posts/${post.id}`} className="block group/title">
-            <h2 className="text-xl font-heading font-semibold text-white mb-3 leading-snug group-hover/title:text-yellow-50 transition-colors">
+            <h2 className="text-xl font-heading font-semibold text-white mb-3 leading-snug group-hover/title:text-admin-yellow/80 transition-colors">
               {post.title}
             </h2>
             {post.body && (
@@ -121,6 +168,7 @@ export default function PostItem({
                   onVoteChange={handleVoteChange}
                   isPinned={post.is_pinned}
                   onTogglePin={onTogglePin}
+                  onNotifyUsers={isAdmin ? handleNotifyPostUsers : undefined} // Pass only if isAdmin
                 />
             </div>
           </div>
@@ -129,7 +177,7 @@ export default function PostItem({
 
   return (
     <article className="mb-6 w-full">
-      <PostCardBase>{postInnerContent}</PostCardBase>
+      <PostCardBase post={post}>{postInnerContent}</PostCardBase>
     </article>
   );
 }

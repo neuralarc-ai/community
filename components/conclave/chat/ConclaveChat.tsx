@@ -152,8 +152,8 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
   const canPublishData = localParticipant?.permissions?.canPublishData ?? true;
 
   return (
-    <div className="flex flex-col h-full bg-gray-800 text-white">
-      <div className="p-4 border-b border-gray-700">
+    <div className="flex flex-col h-full bg-zinc-950 text-white rounded-lg">
+      <div className="p-4 border-b border-zinc-700">
         <h2 className="text-lg font-semibold">Live Chat</h2>
       </div>
       <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-2">
@@ -192,14 +192,14 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
           </div>
         ))}
       </div>
-      <form onSubmit={handleSubmit} className="p-4 border-t border-gray-700">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-700">
         <div className="flex">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={canPublishData ? "Say something..." : "You have been muted by a moderator."}
-            className="flex-1 bg-gray-700 border border-gray-600 rounded-l-md p-2 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-l-md p-2 text-white placeholder-zinc-400 focus:outline-none focus:border-blue-500"
             disabled={!canPublishData}
           />
           <button

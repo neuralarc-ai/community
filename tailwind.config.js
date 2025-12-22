@@ -25,6 +25,7 @@ module.exports = {
           cyan: { DEFAULT: 'rgb(var(--color-cyan-rgb) / <alpha-value>)', },
           green: { DEFAULT: 'rgb(var(--color-green-rgb) / <alpha-value>)', },
           yellow: { DEFAULT: 'rgb(var(--color-yellow-rgb) / <alpha-value>)', },
+          'admin-yellow': '#E7B31B',
           purple: { DEFAULT: 'rgb(var(--color-purple-rgb) / <alpha-value>)', },
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
