@@ -132,8 +132,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
                 <RadioGroupItem value="VIDEO" id="video-type" className="border-[#27584F] text-[#27584F]" />
                 <Label htmlFor="video-type" className="cursor-pointer">
                   <div className="flex flex-col">
-                    <span className="font-medium text-foreground">Video Workshop</span>
-                    <span className="text-sm text-muted-foreground">Zoom-style webinar</span>
+                    <span className="font-medium text-foreground">Video</span>
                   </div>
                 </Label>
               </div>
@@ -141,8 +140,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
                 <RadioGroupItem value="AUDIO" id="audio-type" className="border-[#27584F] text-[#27584F]" />
                 <Label htmlFor="audio-type" className="cursor-pointer">
                   <div className="flex flex-col">
-                    <span className="font-medium text-foreground">Audio Space</span>
-                    <span className="text-sm text-muted-foreground">Twitter-style space</span>
+                    <span className="font-medium text-foreground">Audio</span>
                   </div>
                 </Label>
               </div>
