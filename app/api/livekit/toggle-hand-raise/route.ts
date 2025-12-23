@@ -13,6 +13,7 @@ const createToken = (participantIdentity: string, roomName: string) => {
     canPublish: true,
     canSubscribe: true,
     canPublishData: true,
+    canUpdateOwnMetadata: true,
   });
   return at.toJwt();
 };

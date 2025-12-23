@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       canPublish,
       canSubscribe: true,
       canPublishData: true, // Required for "Raise Hand" data packets
+      canUpdateOwnMetadata: true, // Required for participants to raise/lower hands
     })
 
     const token = await at.toJwt()
