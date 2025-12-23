@@ -337,7 +337,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-3 py-2 bg-background border border-[#27584F]/30 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#e6b31c]/50 font-manrope"
+                className="flex-1 px-3 py-2 bg-background border border-[#27584F]/30 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#27584F]/50 font-manrope"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -346,7 +346,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 type="submit" 
                 size="sm" 
                 disabled={isJoiningWaitlist}
-                className="bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white font-bold font-sora"
+                className="bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold font-sora"
               >
                 <Bell size={14} className="mr-1" />
                 Notify Me
@@ -389,7 +389,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
             <>
               {isScheduled && (
                 <Button 
-                  className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora"
+                  className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora"
                   onClick={handleStartConclave}
                   disabled={isStarting}
                 >
@@ -398,7 +398,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 </Button>
               )}
               {isLive && (
-                <Button className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora" asChild>
+                <Button className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora" asChild>
                   <a href={`/conclave/${workshop.id}`}>
                     <Video size={20} />
                     Join as Host
@@ -408,7 +408,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {isEnded && (
                 <Button 
                   disabled={!workshop.recording_url} 
-                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#e6b31c] hover:bg-[#e6b31c]/90 shadow-lg shadow-[#e6b31c]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
+                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
                   asChild={!!workshop.recording_url}
                 >
                   {workshop.recording_url ? (
@@ -434,7 +434,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 </Button>
               )}
               {isLive && (
-                <Button className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora" asChild>
+                <Button className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora" asChild>
                   <a href={`/conclave/${workshop.id}`}>
                     <Video size={20} />
                     Join Now
@@ -444,7 +444,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {isEnded && (
                 <Button 
                   disabled={!workshop.recording_url} 
-                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#e6b31c] hover:bg-[#e6b31c]/90 shadow-lg shadow-[#e6b31c]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
+                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
                   asChild={!!workshop.recording_url}
                 >
                   {workshop.recording_url ? (
