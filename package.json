@@ -24,6 +24,7 @@
         "@supabase/supabase-js": "^2.87.3",
         "@tabler/icons-react": "^3.36.0",
         "@tailwindcss/postcss": "^4.1.18",
+        "@types/uuid": "^10.0.0",
         "calendar-link": "^2.11.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -42,6 +43,7 @@
         "resend": "^6.6.0",
         "tailwind-merge": "^3.4.0",
         "tailwindcss-animate": "^1.0.7",
+        "uuid": "^13.0.0",
         "zod": "^4.2.1"
     },
     "devDependencies": {

@@ -23,6 +23,7 @@ const createPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
   body: z.string().min(1, 'Body is required'),
   tags: z.array(z.string()).optional().default([]),
+  image_urls: z.array(z.string()).optional().default([]),
 });
 
 export async function GET(request: NextRequest) {
@@ -48,7 +49,8 @@ export async function GET(request: NextRequest) {
         created_at,
         updated_at,
         vote_score,
-        is_pinned
+        is_pinned,
+        image_urls
       `)
 
     if (searchQuery) {
@@ -180,7 +182,7 @@ export async function POST(request: NextRequest) {
       );
       return setCorsHeaders(request, response);
     }
-    const { title, body: postBody, tags } = validationResult.data;
+    const { title, body: postBody, tags, image_urls } = validationResult.data;
 
     // Get the authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -201,7 +203,8 @@ export async function POST(request: NextRequest) {
         author_id: user.id,
         title,
         body: postBody,
-        tags
+        tags,
+        image_urls
       })
       .select(`
         id,
@@ -211,7 +214,8 @@ export async function POST(request: NextRequest) {
         tags,
         created_at,
         updated_at,
-        vote_score
+        vote_score,
+        image_urls
       `)
       .single()
 
