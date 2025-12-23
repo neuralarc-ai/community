@@ -46,10 +46,17 @@ export async function createProfile(profileData: {
 }) {
   const supabase = createClient()
 
+  // Get the current user's email from auth.users
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) {
+    throw new Error('User not authenticated')
+  }
+
   const { data, error } = await supabase
     .from('profiles')
     .insert({
       ...profileData,
+      email: user.email, // Include email from auth.users
       role: 'user'
     })
     .select()

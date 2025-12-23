@@ -5,6 +5,7 @@ import { awardFlux } from '@/lib/flux'
 import rateLimit from '@/app/lib/rateLimit'
 import { z } from 'zod'
 import logger from '@/app/lib/logger'
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
 
 const limiter = rateLimit({
   uniqueTokenPerInterval: 500, // Max 500 users per 60 seconds
@@ -22,6 +23,7 @@ const createPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
   body: z.string().min(1, 'Body is required'),
   tags: z.array(z.string()).optional().default([]),
+  image_urls: z.array(z.string()).optional().default([]),
 });
 
 export async function GET(request: NextRequest) {
@@ -47,7 +49,8 @@ export async function GET(request: NextRequest) {
         created_at,
         updated_at,
         vote_score,
-        is_pinned
+        is_pinned,
+        image_urls
       `)
 
     if (searchQuery) {
@@ -67,10 +70,10 @@ export async function GET(request: NextRequest) {
 
     if (postsError) {
       logger.error('Error fetching posts', postsError)
-      return NextResponse.json(
+      return setCorsHeaders(request, NextResponse.json(
         { error: 'Failed to fetch posts' },
         { status: 500 }
-      )
+      ));
     }
 
     // Get total count of posts (without pagination/filters for the dashboard)
@@ -133,13 +136,13 @@ export async function GET(request: NextRequest) {
       })
     )
 
-    return NextResponse.json({ posts: postsWithScores, totalPostsCount })
+    return setCorsHeaders(request, NextResponse.json({ posts: postsWithScores, totalPostsCount }));
   } catch (error) {
     logger.error('Server error:', error)
-    return NextResponse.json(
+    return setCorsHeaders(request, NextResponse.json(
       { error: 'Failed to fetch posts' },
       { status: 500 }
-    )
+    ));
   }
 }
 
@@ -153,7 +156,7 @@ export async function POST(request: NextRequest) {
     const rateLimitResult = limiter.check(limit, ip);
 
     if (!rateLimitResult.success) {
-      return NextResponse.json(
+      let response = NextResponse.json(
         { error: 'Too Many Requests' },
         {
           status: 429,
@@ -164,6 +167,7 @@ export async function POST(request: NextRequest) {
           },
         }
       );
+      return setCorsHeaders(request, response);
     }
 
     const supabase = await createServerClient()
@@ -172,21 +176,23 @@ export async function POST(request: NextRequest) {
     // Validate incoming data with Zod
     const validationResult = createPostSchema.safeParse(body);
     if (!validationResult.success) {
-      return NextResponse.json(
+      let response = NextResponse.json(
         { error: validationResult.error.flatten().fieldErrors },
         { status: 400 }
       );
+      return setCorsHeaders(request, response);
     }
-    const { title, body: postBody, tags } = validationResult.data;
+    const { title, body: postBody, tags, image_urls } = validationResult.data;
 
     // Get the authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json(
+      let response = NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
-      )
+      );
+      return setCorsHeaders(request, response);
     }
 
 
@@ -197,7 +203,8 @@ export async function POST(request: NextRequest) {
         author_id: user.id,
         title,
         body: postBody,
-        tags
+        tags,
+        image_urls
       })
       .select(`
         id,
@@ -207,16 +214,18 @@ export async function POST(request: NextRequest) {
         tags,
         created_at,
         updated_at,
-        vote_score
+        vote_score,
+        image_urls
       `)
       .single()
 
     if (error) {
       logger.error('Error creating post', error)
-      return NextResponse.json(
+      let response = NextResponse.json(
         { error: 'Failed to create post' },
         { status: 500 }
-      )
+      );
+      return setCorsHeaders(request, response);
     }
 
     // Fetch the author profile
@@ -240,12 +249,19 @@ export async function POST(request: NextRequest) {
       vote_score: 0
     }
 
-    return NextResponse.json(postWithAuthor, { status: 201 })
+    let response = NextResponse.json(postWithAuthor, { status: 201 });
+    return setCorsHeaders(request, response);
   } catch (error) {
     logger.error('Server error:', error)
-    return NextResponse.json(
+    let response = NextResponse.json(
       { error: 'Failed to create post' },
       { status: 500 }
-    )
+    );
+    return setCorsHeaders(request, response);
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
 }

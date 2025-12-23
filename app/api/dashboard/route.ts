@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,13 +37,19 @@ export async function GET(request: NextRequest) {
       },
     ];
 
-    return NextResponse.json(stats);
+    const successResponse = NextResponse.json(stats);
+    return setCorsHeaders(request, successResponse);
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { error: 'Failed to fetch dashboard stats' },
       { status: 500 }
     );
+    return setCorsHeaders(request, errorResponse);
   }
 }
 
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
+}

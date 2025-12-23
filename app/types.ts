@@ -18,6 +18,7 @@ export interface Post {
   comments?: Comment[];
   comment_count?: number;
   is_pinned?: boolean;
+  image_urls?: string[];
 }
 
 // Database-backed Comment interface

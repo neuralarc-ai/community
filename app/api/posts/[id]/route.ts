@@ -23,7 +23,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         created_at,
         updated_at,
         vote_score,
-        is_pinned
+        is_pinned,
+        image_urls
       `)
       .eq('id', postId)
       .single()

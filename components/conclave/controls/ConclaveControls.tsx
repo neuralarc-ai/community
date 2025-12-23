@@ -34,6 +34,7 @@ export default function ConclaveControls({
   const [isRecording, setIsRecording] = useState(false)
   const [egressId, setEgressId] = useState<string | null>(null)
   const [showManagePanel, setShowManagePanel] = useState(false)
+  const [isNotifying, setIsNotifying] = useState(false); // New state for notification loading
   const router = useRouter()
 
   // Parse local metadata for handRaised status
@@ -135,6 +136,32 @@ export default function ConclaveControls({
     }
   }
 
+  // New function to handle "Notify All"
+  const handleNotifyAll = async () => {
+    setIsNotifying(true);
+    try {
+      const res = await fetch('/api/notify/conclave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workshopId }),
+      });
+
+      if (res.ok) {
+        // toast({ title: 'Success', description: 'Notifications sent to all eligible users.' });
+        console.log('Conclave notifications sent successfully!');
+      } else {
+        const errorData = await res.json();
+        // toast({ title: 'Error', description: errorData.message || 'Failed to send notifications.' });
+        console.error('Failed to send conclave notifications:', errorData.message);
+      }
+    } catch (error) {
+      // toast({ title: 'Error', description: 'An unexpected error occurred while sending notifications.' });
+      console.error('Error sending conclave notifications:', error);
+    } finally {
+      setIsNotifying(false);
+    }
+  };
+
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl z-50">
       <Button
@@ -195,6 +222,16 @@ export default function ConclaveControls({
           >
             {isRecording ? <Square size={16} fill="currentColor" /> : <Radio size={16} />}
             {isRecording ? 'LIVE' : 'GO LIVE'}
+          </Button>
+
+          {/* New "Notify All" button */}
+          <Button
+            variant="outline"
+            className="rounded-full gap-2 px-6 h-10 font-bold"
+            onClick={handleNotifyAll}
+            disabled={isNotifying}
+          >
+            {isNotifying ? 'Sending...' : 'Notify All'}
           </Button>
 
           <div className="relative">

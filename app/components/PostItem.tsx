@@ -1,12 +1,13 @@
 import Link from 'next/link';
-import { Post } from '@/app/types';
+import { Post } from '@/app/types'; // Assuming Post type will include image_urls
 import PostActions from './PostActions';
 import Avatar from './Avatar';
 import MagicBento from './MagicBento';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
-import React from 'react';
-import { Button } from '@/components/ui/button'; // Added import
-import { useToast } from '@/app/components/ui/use-toast'; // Added import
+import React, { useState } from 'react';
+import Lightbox from './Lightbox';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/app/components/ui/use-toast';
 
 interface PostItemProps {
   post: Post;
@@ -35,7 +36,7 @@ const formatTime = (dateString: string) => {
   return date.toLocaleDateString();
 };
 
-  interface PostCardBaseProps {
+interface PostCardBaseProps {
   children: React.ReactNode;
   post: Post;
   isProfilePage?: boolean;
@@ -68,7 +69,19 @@ export default function PostItem({
   typeTag,
   isProfilePage
 }: PostItemProps) {
-  const { toast } = useToast(); // Added toast hook
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageSrc, setCurrentImageSrc] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleImageClick = (src: string) => {
+    setCurrentImageSrc(src);
+    setLightboxOpen(true);
+  };
+
+  const handleCloseLightbox = () => {
+    setLightboxOpen(false);
+    setCurrentImageSrc(null);
+  };
 
   const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange(post.id, newScore, newUserVote);
@@ -107,6 +120,48 @@ export default function PostItem({
     }
   };
 
+  const renderImages = (imageUrls: string[]) => {
+    const numImages = imageUrls.length;
+    let gridClass = '';
+    let imageClasses: string[] = [];
+
+    switch (numImages) {
+      case 1:
+        gridClass = 'grid grid-cols-1';
+        imageClasses = ['w-full max-h-[300px] h-[200px] object-cover rounded-xl'];
+        break;
+      case 2:
+        gridClass = 'grid grid-cols-2 gap-2';
+        imageClasses = ['w-full h-[150px] object-cover rounded-xl'];
+        break;
+      case 3:
+        gridClass = 'grid grid-cols-3 gap-2';
+        imageClasses = [
+          'col-span-2 w-full h-[180px] object-cover rounded-xl', // Large image (60%)
+          'col-span-1 w-full h-[90px] object-cover rounded-xl', // Stacked top (40%)
+          'col-span-1 w-full h-[90px] object-cover rounded-xl', // Stacked bottom (40%)
+        ];
+        break;
+      default:
+        return null; // Should not happen with max 3 constraint
+    }
+
+    return (
+      <div className={`${gridClass} mb-4`}>
+        {imageUrls.map((url, index) => (
+          <div key={index} onClick={() => handleImageClick(url)} className="block overflow-hidden cursor-pointer">
+            <img 
+              src={url} 
+              alt={`Post image ${index + 1}`} 
+              className={`${imageClasses[index] || ''} transition-transform duration-300 hover:scale-105`} 
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+
   const postInnerContent = (
     <div className="flex-1 min-w-0 p-6">
       {/* Header Metadata */}
@@ -129,7 +184,7 @@ export default function PostItem({
             <span>{formatTime(post.created_at)}</span>
             {post.tags && post.tags.length > 0 && (
               <>
-                <span className="text-white/20">•</span>
+                <span className="text-white/20"> • </span>
                 <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-admin-yellow/30 hover:text-admin-yellow hover:bg-admin-yellow/5 transition-all">
                   {post.tags[0]}
                 </span>
@@ -152,9 +207,11 @@ export default function PostItem({
             )}
         </Link>
 
+        {/* Render Images if available */}
+        {post.image_urls && post.image_urls.length > 0 && renderImages(post.image_urls)}
+
         {/* Mobile Vote & Actions */}
         <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
-            {/* Removed mobile VoteColumn, now handled in PostActions */}
             <div className="flex items-center text-muted-foreground font-medium text-xs">
                 <PostActions
                   commentCount={commentCount}
@@ -170,7 +227,7 @@ export default function PostItem({
                   onVoteChange={handleVoteChange}
                   isPinned={post.is_pinned}
                   onTogglePin={onTogglePin}
-                  onNotifyUsers={isAdmin ? handleNotifyPostUsers : undefined} // Pass only if isAdmin
+                  onNotifyUsers={isAdmin ? handleNotifyPostUsers : undefined}
                 />
             </div>
           </div>
@@ -178,8 +235,9 @@ export default function PostItem({
   );
 
   return (
-    <article className="mb-6 w-full">
-      <PostCardBase post={post} isProfilePage={isProfilePage}>{postInnerContent}</PostCardBase>
+    <article className="mb-6 w-full font-manrope"> {/* Added font-manrope */}
+      <PostCardBase post={post}>{postInnerContent}</PostCardBase>
+      <Lightbox src={currentImageSrc} isOpen={lightboxOpen} onClose={handleCloseLightbox} />
     </article>
   );
 }
