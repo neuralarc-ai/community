@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
 
 // Use service role key for server-side operations
 const supabase = createClient(
@@ -8,13 +9,12 @@ const supabase = createClient(
 )
 
 export async function POST(request: NextRequest) {
+  // ✅ FIX 1: Explicitly type as <any>
+  let response: NextResponse<any> = NextResponse.json({});
+  response = setCorsHeaders(request, response);
+
   try {
     const body = await request.json()
-    
-    // Verify webhook signature (recommended for production)
-    // const signature = request.headers.get('x-livekit-signature')
-    // You should verify the signature using your LiveKit API secret
-
     console.log('LiveKit webhook received:', body)
 
     if (body.event === 'egress_ended') {
@@ -22,11 +22,13 @@ export async function POST(request: NextRequest) {
       
       if (!file || !file.filename) {
         console.error('No file information in egress_ended webhook')
-        return NextResponse.json({ success: false }, { status: 400 })
+        // ✅ FIX 2: Explicitly type as <any>
+        let errorResponse: NextResponse<any> = NextResponse.json({ success: false }, { status: 400 });
+        errorResponse = setCorsHeaders(request, errorResponse);
+        return errorResponse;
       }
 
-      // Extract workshop ID from room_name (format: workshop-{id})
-      // Or from filename (format: conclaves/{id}/{timestamp}.mp4)
+      // Extract workshop ID logic...
       let workshopId = ''
       if (room_name && room_name.startsWith('workshop-')) {
         workshopId = room_name.replace('workshop-', '')
@@ -35,17 +37,16 @@ export async function POST(request: NextRequest) {
       }
 
       if (!workshopId) {
-        console.error('Could not extract workshop ID from webhook', { room_name, filename: file.filename })
-        return NextResponse.json({ success: false }, { status: 400 })
+        console.error('Could not extract workshop ID', { room_name, filename: file.filename })
+        // ✅ FIX 3: Explicitly type as <any>
+        let errorResponse: NextResponse<any> = NextResponse.json({ success: false }, { status: 400 });
+        errorResponse = setCorsHeaders(request, errorResponse);
+        return errorResponse;
       }
       
-      // Extract project ref from Supabase URL
       const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL!.split('.')[0].replace('https://', '')
-      
-      // Construct the public URL for the recording
       const recordingUrl = `https://${projectRef}.supabase.co/storage/v1/object/public/recordings/${file.filename}`
 
-      // Update workshop with recording URL and set status to ENDED
       const { error } = await supabase
         .from('workshops')
         .update({ 
@@ -57,20 +58,33 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         console.error('Error updating workshop:', error)
-        return NextResponse.json({ success: false }, { status: 500 })
+        // ✅ FIX 4: Explicitly type as <any>
+        let errorResponse: NextResponse<any> = NextResponse.json({ success: false }, { status: 500 });
+        errorResponse = setCorsHeaders(request, errorResponse);
+        return errorResponse;
       }
 
       console.log(`Workshop ${workshopId} recording completed: ${recordingUrl}`)
     }
 
-    return NextResponse.json({ success: true })
+    // ✅ FIX 5: Explicitly type as <any>
+    let successResponse: NextResponse<any> = NextResponse.json({ success: true });
+    successResponse = setCorsHeaders(request, successResponse);
+    return successResponse;
 
   } catch (error) {
     console.error('Webhook error:', error)
-    return NextResponse.json(
+    // ✅ FIX 6: Explicitly type as <any>
+    let errorResponse: NextResponse<any> = NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
+    errorResponse = setCorsHeaders(request, errorResponse);
+    return errorResponse;
   }
 }
 
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
+}

@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/app/lib/mail'; // Adjust the import path if necessary
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders';
 
 export async function POST(request: Request) {
   try {
     const { conclaveId } = await request.json();
 
     if (!conclaveId) {
-      return NextResponse.json({ message: 'conclaveId is required' }, { status: 400 });
+      const response = NextResponse.json({ message: 'conclaveId is required' }, { status: 400 });
+      return setCorsHeaders(request, response);
     }
 
     // --- Placeholder for fetching conclave details and registered users ---
@@ -33,7 +35,8 @@ export async function POST(request: Request) {
     // --- End Placeholder ---
 
     if (!registeredUsers || registeredUsers.length === 0) {
-      return NextResponse.json({ message: 'No registered users found for this conclave' }, { status: 404 });
+      let notFoundResponse: NextResponse<any> = NextResponse.json({ message: 'No registered users found for this conclave' }, { status: 404 });      notFoundResponse = setCorsHeaders(request, notFoundResponse);
+      return notFoundResponse;
     }
 
     const emailPromises = registeredUsers.map(async (user) => {
@@ -64,16 +67,24 @@ export async function POST(request: Request) {
     const failures = results.filter(result => !result.success);
 
     if (failures.length > 0) {
-      return NextResponse.json(
+      const errorResponse = NextResponse.json(
         { message: `${failures.length} emails failed to send.`, details: failures },
         { status: 500 }
       );
+      return setCorsHeaders(request, errorResponse);
     }
 
-    return NextResponse.json({ message: 'Conclave invitations sent successfully!' }, { status: 200 });
+    const successResponse = NextResponse.json({ message: 'Conclave invitations sent successfully!' }, { status: 200 });
+    return setCorsHeaders(request, successResponse);
 
   } catch (error) {
     console.error('Error sending conclave invitations:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    const errorResponse = NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return setCorsHeaders(request, errorResponse);
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
 }
