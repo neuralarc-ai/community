@@ -42,18 +42,18 @@ export default function WorkshopLivePage({ params }: { params: Promise<{ id: str
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
 
-      const { data: workshop } = await supabase
+      const { data: workshopData } = await supabase // Renamed to avoid conflict with outer 'workshop' state
         .from('workshops')
         .select('*')
         .eq('id', id)
         .single()
 
-      setWorkshop(workshop)
+      setWorkshop(workshopData) // Set the fetched workshop data
       setLoading(false)
     }
 
     fetchData()
-  }, [id])
+  }, [id, supabase])
 
   if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>
   if (!workshop) return <div className="flex justify-center items-center h-screen">Conclave not found</div>
@@ -82,8 +82,8 @@ export default function WorkshopLivePage({ params }: { params: Promise<{ id: str
           <h1 className="text-3xl font-bold">{workshop.title}</h1>
           
           <LiveRoom
-            workshopId={id}
-            roomName={`workshop-${id}`}
+            workshopId={workshop.id} // <--- CHANGE THIS LINE
+            roomName={`workshop-${workshop.id}`} // <--- CHANGE THIS LINE
             participantName={user?.user_metadata?.full_name || user?.email || 'Anonymous'}
             isHost={isHost}
             mode="video" // Can be switched to "audio" for Twitter Spaces style

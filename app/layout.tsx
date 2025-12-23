@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sora, Manrope } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/app/components/ui/toaster";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${sora.variable} ${manrope.variable} antialiased bg-background text-foreground font-sans`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

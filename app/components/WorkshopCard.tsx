@@ -22,8 +22,13 @@ const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
     return window.location.origin
   }
-  // Fallback for server-side rendering, though client-side is expected for this component
-  return 'https://sphere.com' 
+  // Fallback for server-side rendering
+  if (process.env.NEXT_PUBLIC_FRONTEND_URL) {
+    return process.env.NEXT_PUBLIC_FRONTEND_URL
+  }
+  throw new Error(
+    'NEXT_PUBLIC_FRONTEND_URL is not set. Please set it in your .env.local file or Vercel environment variables.'
+  )
 }
 
 interface WorkshopCardProps {
@@ -258,13 +263,13 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ conclaveId: workshop.id }),
+        body: JSON.stringify({ workshopId: workshop.id }),
       });
 
       if (response.ok) {
         toast({
-          title: "Success!",
-          description: "Conclave invitations sent successfully.",
+          title: "Notifications Sent!",
+          description: "Conclave invitations have been successfully dispatched to eligible users.",
         });
       } else {
         const errorData = await response.json();

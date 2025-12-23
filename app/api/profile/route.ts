@@ -36,6 +36,7 @@ export async function PUT(request: NextRequest) {
     const updateData: { [key: string]: any } = {
       full_name,
       username,
+      email: user.email, // Keep email in sync with auth.users
       updated_at: new Date().toISOString(),
     };
 
