@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocalParticipant, useRemoteParticipants } from '@livekit/components-react';
+import type { Participant } from 'livekit-client';
 import Avatar from '@/app/components/Avatar';
 import { createClient } from '@/app/lib/supabaseClient';
 import { User } from '@/app/types';
@@ -16,7 +17,7 @@ export const JoineesDisplay: React.FC<JoineesDisplayProps> = ({ workshopId }) =>
   const [participantProfiles, setParticipantProfiles] = useState<Map<string, { full_name: string; username: string; avatar_url: string }>>(new Map());
 
   const allParticipants = useMemo(() => {
-    const participants = remoteParticipants.map(p => p);
+    const participants: Participant[] = remoteParticipants.map(p => p);
     if (localParticipant) {
       participants.unshift(localParticipant);
     }

@@ -30,7 +30,7 @@ export default function RootLayout({
         <link rel="icon" href="/logo Sphere black.png" />
       </head>
       <body
-        className={`${sora.variable} ${manrope.variable} antialiased bg-background text-foreground font-sans`}
+        className={`${sora.variable} ${manrope.variable} antialiased bg-background text-foreground font-sans overflow-x-hidden`}
       >
         {children}
       </body>

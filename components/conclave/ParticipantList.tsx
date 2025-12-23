@@ -28,10 +28,11 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
   const [isHandRaised, setIsHandRaised] = useState(false);
 
   const sortedParticipants = useMemo(() => {
+    const roomMetadata = room.metadata ? JSON.parse(room.metadata) : {};
     const participants = [...allParticipants].sort((a, b) => {
       // Prioritize host
-      const aIsHost = a.identity === room.metadata?.host_identity;
-      const bIsHost = b.identity === room.metadata?.host_identity;
+      const aIsHost = a.identity === roomMetadata.host_identity;
+      const bIsHost = b.identity === roomMetadata.host_identity;
       if (aIsHost && !bIsHost) return -1;
       if (!aIsHost && bIsHost) return 1;
 
@@ -50,7 +51,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
       const name = profile?.full_name || profile?.username || p.identity;
       return name.toLowerCase().includes(searchTerm.toLowerCase());
     });
-  }, [allParticipants, participantProfiles, searchTerm, room.metadata?.host_identity]);
+  }, [allParticipants, participantProfiles, searchTerm, room.metadata]);
 
   useEffect(() => {
     const fetchProfiles = async () => {

@@ -4,10 +4,21 @@ import { useEffect, useState } from 'react'
 import { Users, MessageSquare, Presentation, Video, MessageCircle, Calendar, UserPlus, Activity, ShieldAlert, Mail, Clock } from 'lucide-react'
 import { mockActivity } from '@/app/data/mockData'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
+import ChartCard from '@/app/components/charts/ChartCard'
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts'
+import type { Icon as LucideIcon } from 'lucide-react';
 import { Profile, Post } from '@/app/types'
 import Avatar from './Avatar'
 import { createClient } from '@/app/lib/supabaseClient'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
+
+interface StatCardData {
+  id: string;
+  title: string;
+  value: number | null;
+  change: string;
+  icon: React.ElementType;
+}
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'stats' | 'users'>('stats')
@@ -15,7 +26,6 @@ export default function Dashboard() {
   const [totalMembers, setTotalMembers] = useState<number | null>(null)
   const [totalPosts, setTotalPosts] = useState<number | null>(null)
   const [totalWorkshops, setTotalWorkshops] = useState<number | null>(null)
-  const [totalMeetings, setTotalMeetings] = useState<number>(Math.floor(Math.random() * 20) + 5) // Random count for Meetings Scheduled
   const [recentPosts, setRecentPosts] = useState<Post[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null);
@@ -108,7 +118,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Failed to fetch total workshops:', error)
-    }
+    } 
   }
 
   const fetchTotalPosts = async () => {
@@ -135,12 +145,197 @@ export default function Dashboard() {
     }
   }
 
+  const mockMemberGrowthData = [
+    { name: 'Jan', value: 100 },
+    { name: 'Feb', value: 120 },
+    { name: 'Mar', value: 150 },
+    { name: 'Apr', value: 130 },
+    { name: 'May', value: 180 },
+    { name: 'Jun', value: totalMembers || 200 }, // Use actual totalMembers for the last point
+  ];
+
+  const mockDiscussionData = [
+    { name: 'Category A', discussions: 400 },
+    { name: 'Category B', discussions: 300 },
+    { name: 'Category C', discussions: 200 },
+    { name: 'Category D', discussions: 278 },
+    { name: 'Category E', discussions: 189 },
+  ];
+
+  const mockPostsActivityData = [
+    { name: 'Week 1', posts: 10 },
+    { name: 'Week 2', posts: 15 },
+    { name: 'Week 3', posts: 12 },
+    { name: 'Week 4', posts: 18 },
+  ];
+
+
+  const renderStatCard = (stat: StatCardData) => {
+    const isMembersCard = stat.id === 'members';
+    const isPostsCard = stat.id === 'posts';
+    const isConclavesCard = stat.id === 'conclaves';
+
+    return isMembersCard ? (
+      <ChartCard
+        key={stat.id}
+        title={stat.title}
+        icon={stat.icon}
+        accentColor="orange-500"
+      >
+        <div className="flex flex-col gap-2 pt-2">
+          <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter">
+            {stat.value?.toLocaleString()}
+          </span>
+          <div className="flex items-center gap-2 mb-4">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 ${
+                stat.change.includes('+')
+                    ? 'text-white bg-white/10'
+                    : 'text-muted-foreground bg-white/5'
+            }`}>
+                {stat.change}
+            </span>
+            <span className="text-xs text-muted-foreground">
+                from last month
+            </span>
+          </div>
+          {/* Placeholder for Member Growth Chart - Requires historical data from backend */}
+          <div className="h-[100px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={mockMemberGrowthData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} stroke="#6b7280" style={{ fontSize: '10px' }} />
+                <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '8px' }}
+                  labelStyle={{ color: '#a1a1aa' }}
+                  itemStyle={{ color: '#f97316' }}
+                />
+                <Line type="monotone" dataKey="value" stroke="#f97316" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </ChartCard>
+    ) : isPostsCard ? (
+      <ChartCard
+        key={stat.id}
+        title={stat.title}
+        icon={stat.icon}
+        accentColor="orange-500"
+      >
+        <div className="flex flex-col gap-2 pt-2">
+          <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter">
+            {stat.value?.toLocaleString()}
+          </span>
+          <div className="flex items-center gap-2 mb-4">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 ${
+                stat.change.includes('+')
+                    ? 'text-white bg-white/10'
+                    : 'text-muted-foreground bg-white/5'
+            }`}>
+                {stat.change}
+            </span>
+            <span className="text-xs text-muted-foreground">
+                from last month
+            </span>
+          </div>
+          <div className="h-[100px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={mockDiscussionData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} stroke="#6b7280" style={{ fontSize: '10px' }} />
+                <YAxis hide domain={[0, 'dataMax + 100']} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(249,115,22,0.1)' }}
+                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '8px' }}
+                  labelStyle={{ color: '#a1a1aa' }}
+                  itemStyle={{ color: '#f97316' }}
+                />
+                <Bar dataKey="discussions" fill="#f97316" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </ChartCard>
+    ) : isConclavesCard ? (
+      <ChartCard
+        key={stat.id}
+        title={stat.title}
+        icon={stat.icon}
+        accentColor="orange-500"
+      >
+        <div className="flex flex-col gap-2 pt-2">
+          <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter">
+            {stat.value?.toLocaleString()}
+          </span>
+          <div className="flex items-center gap-2 mb-4">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 ${
+                stat.change.includes('+')
+                    ? 'text-white bg-white/10'
+                    : 'text-muted-foreground bg-white/5'
+            }`}>
+                {stat.change}
+            </span>
+            <span className="text-xs text-muted-foreground">
+                from last month
+            </span>
+          </div>
+          <div className="h-[100px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={mockPostsActivityData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} stroke="#6b7280" style={{ fontSize: '10px' }} />
+                <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '8px' }}
+                  labelStyle={{ color: '#a1a1aa' }}
+                  itemStyle={{ color: '#f97316' }}
+                />
+                <Line type="monotone" dataKey="posts" stroke="#f97316" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </ChartCard>
+    ) : (
+      <Card key={stat.id} className="bg-card/40 backdrop-blur-md border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] transition-all duration-300 group cursor-pointer">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-orange-200 transition-colors duration-300">
+            {stat.title}
+          </CardTitle>
+          <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
+            <stat.icon size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-2 pt-2">
+            <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
+                {stat.value?.toLocaleString()}
+            </span>
+            <div className="flex items-center gap-2">
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 transition-all duration-300 ${
+                    stat.change.includes('+')
+                        ? 'text-white bg-white/10 group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-200'
+                        : 'text-muted-foreground bg-white/5 group-hover:bg-white/10'
+                }`}>
+                    {stat.change}
+                </span>
+                <span className="text-xs text-muted-foreground group-hover:text-white/60 transition-colors">
+                    from last month
+                </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="space-y-12">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-heading font-bold text-white tracking-tight">Admin Dashboard</h1>
+          <h1 className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tight">Admin Dashboard</h1>
           <p className="text-lg text-muted-foreground">Comprehensive overview and community management</p>
         </div>
         
@@ -148,7 +343,7 @@ export default function Dashboard() {
         <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md">
           <button
             onClick={() => setActiveTab('stats')}
-            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+            className={`px-4 py-1 sm:px-6 sm:py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
               activeTab === 'stats' 
                 ? 'bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)]' 
                 : 'text-muted-foreground hover:text-white hover:bg-white/5'
@@ -158,7 +353,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+            className={`px-4 py-1 sm:px-6 sm:py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
               activeTab === 'users' 
                 ? 'bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)]' 
                 : 'text-muted-foreground hover:text-white hover:bg-white/5'
@@ -172,46 +367,12 @@ export default function Dashboard() {
       {activeTab === 'stats' ? (
         <>
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { id: 'members', title: 'Total Members', value: totalMembers, change: '+12%', icon: 'Users' },
-              { id: 'posts', title: 'Active Discussions', value: totalPosts, change: '+5%', icon: 'MessageSquare' },
-              { id: 'conclaves', title: 'Conclave This Month', value: totalWorkshops, change: '+8%', icon: 'Presentation' },
-              { id: 'meetings', title: 'Meetings Scheduled', value: totalMeetings, change: '+2%', icon: 'Video' },
-            ].map((stat) => (
-              <Card key={stat.id} className="bg-card/40 backdrop-blur-md border-orange-500/20 hover:border-orange-500/40 hover:bg-orange-500/5 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] transition-all duration-300 group cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-orange-200 transition-colors duration-300">
-                    {stat.title}
-                  </CardTitle>
-                  <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
-                    {stat.icon === 'Users' && <Users size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                    {stat.icon === 'MessageSquare' && <MessageSquare size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                    {stat.icon === 'Presentation' && <Presentation size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                    {stat.icon === 'Video' && <Video size={18} className="text-muted-foreground group-hover:text-orange-400 transition-colors" />}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col gap-2 pt-2">
-                    <span className="text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
-                        {stat.value?.toLocaleString()}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 transition-all duration-300 ${
-                            stat.change.includes('+') 
-                                ? 'text-white bg-white/10 group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-200' 
-                                : 'text-muted-foreground bg-white/5 group-hover:bg-white/10'
-                        }`}>
-                            {stat.change}
-                        </span>
-                        <span className="text-xs text-muted-foreground group-hover:text-white/60 transition-colors">
-                            from last month
-                        </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+              { id: 'members', title: 'Total Members', value: totalMembers, change: '+12%', icon: Users },
+              { id: 'posts', title: 'Active Discussions', value: totalPosts, change: '+5%', icon: MessageSquare },
+              { id: 'conclaves', title: 'Conclave This Month', value: totalWorkshops, change: '+8%', icon: Presentation },
+            ].map(renderStatCard)}
           </div>
 
           {/* Recent Activity Section */}
@@ -232,8 +393,8 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   recentPosts.map((post) => (
-                    <div key={post.id} className="flex items-center gap-6 p-6 hover:bg-white/[0.04] transition-all duration-200 group cursor-pointer">
-                        <div className="flex-shrink-0 w-12 h-12 bg-[#0F0F0F] rounded-xl flex items-center justify-center border border-white/5 group-hover:border-white/20 group-hover:bg-white/5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300">
+                    <div key={post.id} className="flex items-center gap-4 sm:gap-6 p-4 sm:p-6 hover:bg-white/[0.04] transition-all duration-200 group cursor-pointer">
+                        <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-[#0F0F0F] rounded-xl flex items-center justify-center border border-white/5 group-hover:border-white/20 group-hover:bg-white/5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300">
                             <MessageCircle size={22} className="text-muted-foreground group-hover:text-white transition-colors" />
                         </div>
                         <div className="flex-1 min-w-0 grid gap-1">
@@ -280,26 +441,26 @@ export default function Dashboard() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-white/5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <th className="px-8 py-4">Member</th>
-                    <th className="px-8 py-4">Role</th>
-                    <th className="px-8 py-4">Joined</th>
-                    <th className="px-8 py-4">Flux</th>
-                    <th className="px-8 py-4 text-right">Actions</th>
+                    <th className="px-4 py-3 sm:px-8 sm:py-4">Member</th>
+                    <th className="px-4 py-3 sm:px-8 sm:py-4">Role</th>
+                    <th className="px-4 py-3 sm:px-8 sm:py-4">Joined</th>
+                    <th className="px-4 py-3 sm:px-8 sm:py-4">Flux</th>
+                    <th className="px-4 py-3 sm:px-8 sm:py-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {users.length === 0 && !loadingUsers ? (
                     <tr>
-                      <td colSpan={5} className="px-8 py-12 text-center text-muted-foreground">
+                      <td colSpan={5} className="px-4 py-3 sm:px-8 sm:py-12 text-center text-muted-foreground">
                         No members found.
                       </td>
                     </tr>
                   ) : (
                     users.map((user) => (
                       <tr key={user.id} className="hover:bg-white/[0.04] transition-all duration-200 group">
-                        <td className="px-8 py-4">
+                        <td className="px-4 py-3 sm:px-8 sm:py-4">
                           <div className="flex items-center gap-3">
-                            <Avatar src={user.avatar_url} alt={user.full_name} size={40} className="ring-2 ring-white/5 group-hover:ring-orange-500/20" />
+                            <Avatar src={user.avatar_url} alt={user.full_name} size={32} className="ring-2 ring-white/5 group-hover:ring-orange-500/20" />
                             <div className="flex flex-col">
                               <span className="text-sm font-medium text-white">{user.full_name}</span>
                               <span className="text-xs text-muted-foreground font-mono">u/{user.username}</span>
@@ -348,4 +509,3 @@ export default function Dashboard() {
     </div>
   )
 }
-

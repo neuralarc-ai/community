@@ -1,8 +1,9 @@
-import Link from 'next/link';
-import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark, ChevronUp, ChevronDown } from 'lucide-react';
+import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark, ChevronUp, ChevronDown, Bell } from 'lucide-react';
 import { createClient } from '@/app/lib/supabaseClient'; // Assuming supabase client is needed for votes
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import VoteColumn from './VoteColumn';
+import { useToast } from '@/app/components/ui/use-toast'; // Added import for useToast
 
 interface PostActionsProps {
   commentCount: number;
@@ -18,6 +19,7 @@ interface PostActionsProps {
   onVoteChange: (newScore: number, newUserVote: -1 | 0 | 1) => void;
   isPinned?: boolean;
   onTogglePin?: (postId: string, isPinned: boolean) => void;
+  onNotifyUsers?: () => Promise<void>; // New prop for notifying users
 }
 
 export default function PostActions({
@@ -34,23 +36,12 @@ export default function PostActions({
   onVoteChange,
   isPinned,
   onTogglePin,
+  onNotifyUsers, // Destructure new prop
 }: PostActionsProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  // Remove local state for score and user vote, rely on props
-  // const [currentScore, setCurrentScore] = useState(initialVoteScore);
-  // const [currentUserVote, setCurrentUserVote] = useState(userVote);
-
-  useEffect(() => {
-    // No longer need to set local state, as props will be updated via real-time
-    // setCurrentScore(initialVoteScore);
-  }, [initialVoteScore]);
-
-  useEffect(() => {
-    // No longer need to set local state, as props will be updated via real-time
-    // setCurrentUserVote(userVote);
-  }, [userVote]);
+  const { toast } = useToast(); // Initialize toast hook
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -220,6 +211,18 @@ export default function PostActions({
               >
                 {isPinned ? <Bookmark size={14} /> : <Bookmark size={14} />}
                 <span>{isPinned ? 'Unpin Post' : 'Pin Post'}</span>
+              </button>
+            ) : null}
+            {isAdmin && onNotifyUsers ? (
+              <button
+                onClick={() => {
+                  onNotifyUsers();
+                  setShowMenu(false);
+                }}
+                className="w-full text-left px-4 py-2 text-green-400 hover:bg-green-500/10 flex items-center gap-2 text-xs font-medium transition-colors"
+              >
+                <Bell size={14} />
+                <span>Notify Users</span>
               </button>
             ) : null}
             {!currentUserId || (currentUserId !== authorId && !isAdmin) ? (

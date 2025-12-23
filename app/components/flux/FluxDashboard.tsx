@@ -145,19 +145,19 @@ const FluxDashboard = () => {
             </div>
         </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700">
+        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700 hover:border-[#FFB6C1] transition-colors duration-300">
           <h3 className="text-zinc-400 text-sm mb-2">Total Flux</h3>
           <p className="text-3xl font-bold text-[#e6b31c]">{currentUserStats?.total_flux || 0}</p>
         </div>
-        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700">
+        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700 hover:border-[#FFB6C1] transition-colors duration-300">
           <h3 className="text-zinc-400 text-sm mb-2">Posts Created</h3>
           <p className="text-3xl font-bold">{currentUserStats?.posts_count || 0}</p>
         </div>
-        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700">
+        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700 hover:border-[#FFB6C1] transition-colors duration-300">
           <h3 className="text-zinc-400 text-sm mb-2">Comments Added</h3>
           <p className="text-3xl font-bold">{currentUserStats?.comments_count || 0}</p>
         </div>
-        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700">
+        <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700 hover:border-[#FFB6C1] transition-colors duration-300">
           <h3 className="text-zinc-400 text-sm mb-2">Your Rank</h3>
           <p className="text-3xl font-bold">{currentUserRank > 0 ? `#${currentUserRank}` : 'N/A'}</p>
         </div>
