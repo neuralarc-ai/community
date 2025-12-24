@@ -14,6 +14,7 @@ import { createClient } from '@/app/lib/supabaseClient'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 import { Profile } from '@/app/types'
 import FilterSection from '@/app/components/FilterSection'
+import CreatePostDialog from '@/app/components/CreatePostDialog'
 
 function PostsContent() {
   const router = useRouter()
@@ -22,6 +23,7 @@ function PostsContent() {
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set())
+  const [isCreatePostDialogOpen, setIsCreatePostDialogOpen] = useState(false)
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -283,7 +285,7 @@ function PostsContent() {
                     type="text" 
                     placeholder="Create Post" 
                     className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-yellow-500/50 rounded-lg px-4 py-2.5 flex-grow text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-yellow-500/20 transition-all cursor-text"
-                    onFocus={() => router.push('/posts/new')}
+                    onClick={() => setIsCreatePostDialogOpen(true)}
                 />
             </div>
         </Card>
@@ -295,6 +297,12 @@ function PostsContent() {
             onSelectTag={setSelectedTag}
             activeColor="bg-yellow-500/10 text-white shadow-sm border border-yellow-500/20"
             hoverColor="hover:bg-yellow-500/5 hover:text-white"
+        />
+
+        <CreatePostDialog
+          isOpen={isCreatePostDialogOpen}
+          onClose={() => setIsCreatePostDialogOpen(false)}
+          onPostCreated={fetchPosts}
         />
 
         {/* Posts List */}
@@ -335,3 +343,4 @@ export default function PostsPage() {
     </Suspense>
   )
 }
+

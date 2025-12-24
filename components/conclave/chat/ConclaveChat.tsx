@@ -1,4 +1,5 @@
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import './ConclaveChat.css';
 import { useChat, useLocalParticipant, useRemoteParticipants } from '@livekit/components-react';
 import { useRoomContext } from '@livekit/components-react';
 import { createClient } from '@/app/lib/supabaseClient'; // Assuming you have a supabaseClient.ts for client-side
@@ -156,7 +157,7 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
       <div className="p-4 border-b border-zinc-700">
         <h2 className="text-lg font-semibold">Live Chat</h2>
       </div>
-      <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-2">
+      <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-2 custom-scrollbar">
         {chatMessages.map((msg, index) => (
           <div key={index} className="flex items-start space-x-2">
             <Avatar

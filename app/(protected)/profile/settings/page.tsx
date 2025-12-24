@@ -133,7 +133,7 @@ export default function SettingsPage() {
 
   return (
     <TwoColumnLayout rightSidebar={SettingsSidebar}>
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-transparent hover:border-[#FFB6C1] transition-all duration-300">
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-transparent">
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/5">
           <div className="flex items-center gap-4">

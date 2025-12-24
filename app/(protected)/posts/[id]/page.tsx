@@ -323,7 +323,7 @@ export default function PostDetailPage() {
         </div>
 
         {/* Main Post Card */}
-        <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl shadow-sm overflow-hidden mb-6">
+        <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl shadow-sm overflow-hidden mb-6 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] transition-all duration-300">
             <div className="flex flex-col">
                 
                 {/* Content */}
@@ -334,7 +334,7 @@ export default function PostDetailPage() {
                             <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
                             <span className="font-bold text-white">u/{post.author?.username || 'Anonymous'}</span>
                             {post.author?.role === 'admin' && (
-                                <span className="ml-1 bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border border-blue-500/20">Admin</span>
+                                <span className="ml-1 bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border border-yellow-500/20">Admin</span>
                             )}
                         </div>
                         {post.is_pinned && (

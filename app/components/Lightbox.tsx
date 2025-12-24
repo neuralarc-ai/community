@@ -1,6 +1,6 @@
 'use client'
 
-import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@/app/components/ui/dialog'
+import { Dialog, DialogContent, DialogOverlay, DialogHeader, DialogTitle } from '@/app/components/ui/dialog'
 import Image from 'next/image'
 
 interface LightboxProps {
@@ -16,7 +16,9 @@ export default function Lightbox({ src, isOpen, onClose }: LightboxProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogOverlay className="z-50 bg-black/90" />
       <DialogContent className="z-50 flex items-center justify-center p-0 border-none bg-transparent shadow-none max-w-full max-h-full w-fit h-fit">
-        <DialogTitle className="sr-only">Image Lightbox</DialogTitle>
+        <DialogHeader>
+          <DialogTitle className="sr-only">Image View</DialogTitle>
+        </DialogHeader>
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"

@@ -9,7 +9,15 @@ import {
 import { Track } from 'livekit-client'
 import { MicOff, ShieldCheck } from 'lucide-react'
 import Avatar from '@/app/components/Avatar'
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
+import { createClient } from '@/app/lib/supabaseClient';
+import { Profile } from '@/app/types';
+
+interface AudioStageProfile {
+  avatar_url: string | null;
+  full_name: string | null;
+  username: string | null;
+}
 
 export default function AudioStage() {
   // Use useTracks to get only active audio tracks
@@ -33,6 +41,27 @@ export default function AudioStage() {
 
 function SpaceAvatar({ trackRef }: { trackRef: any }) {
   const p = trackRef.participant;
+  const [profile, setProfile] = useState<AudioStageProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('avatar_url, full_name, username')
+        .eq('id', p.identity)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile for audio stage:', error);
+      } else if (data) {
+        setProfile(data as AudioStageProfile);
+      }
+      setLoadingProfile(false);
+    };
+    fetchProfile();
+  }, [p.identity]);
   
   return (
     <div className="relative flex flex-col items-center gap-3 group">
@@ -42,8 +71,8 @@ function SpaceAvatar({ trackRef }: { trackRef: any }) {
         
         <div className={`relative z-10 p-1 rounded-full border-2 transition-all duration-300 ${p.isSpeaking ? 'border-green-500 scale-105' : 'border-white/10'}`}>
           <Avatar
-            src={undefined} // In a real app, you'd pull this from participant metadata or a DB
-            alt={p.name || p.identity}
+            src={profile?.avatar_url} // Use fetched avatar URL
+            alt={profile?.full_name || p.name || p.identity}
             size={80}
             className="w-20 h-20 sm:w-24 sm:h-24 grayscale-[0.2] group-hover:grayscale-0 transition-all"
           />
@@ -65,13 +94,9 @@ function SpaceAvatar({ trackRef }: { trackRef: any }) {
 
       <div className="text-center space-y-0.5 w-full">
         <span className="text-sm font-semibold text-white line-clamp-1">
-          {p.name || 'Anonymous'}
+          {profile?.full_name || p.name || 'Anonymous'}
         </span>
-        <div className="flex justify-center h-4">
-          {p.isSpeaking && (
-            <BarVisualizer trackRef={trackRef.publication.track} />
-          )}
-        </div>
+        <div className="flex justify-center h-4"></div>
       </div>
     </div>
   )
@@ -89,7 +114,7 @@ function HandRaisedBadge({ participant }: { participant: any }) {
   if (!metadata.handRaised) return null
 
   return (
-    <div className="absolute -top-2 -right-2 bg-yellow-500 text-black w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-xl border-2 border-black animate-bounce z-20">
+    <div className="absolute -top-2 -right-2 bg-white text-yellow-500 w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-xl border-2 border-white/50 animate-bounce z-20">
       ✋
     </div>
   )
