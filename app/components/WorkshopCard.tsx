@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, toZonedTime } from 'date-fns-tz'
 import { formatDistanceToNowStrict } from 'date-fns'
-import { Calendar, Clock, Users, Video, Bell, CalendarPlus, Square, PlayCircle, Archive, Share2, User as UserIcon } from 'lucide-react'
+import { Calendar, Clock, Users, Video, Bell, CalendarPlus, Square, PlayCircle, Archive, Share2, User as UserIcon, X } from 'lucide-react'
 import { Card, CardContent } from '@/app/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
@@ -305,6 +305,37 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
     })
   }
 
+  const handleDeleteConclave = async () => {
+    if (!confirm('Are you sure you want to delete this conclave? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/workshops/${workshop.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete conclave');
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Conclave deleted successfully.',
+      });
+      router.push('/workshops'); // Redirect to workshops page after deletion
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting conclave:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete conclave. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleNotifyConclaveUsers = async () => {
     try {
       const response = await fetch('/api/notify/conclave', {
@@ -350,7 +381,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
         isEnded ? 'bg-zinc-900/10' : 'bg-[#27584F]/5 group-hover:bg-[#27584F]/10'
       }`}>
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 text-[#27584F] font-medium">
+          <div className="flex items-center gap-2 text-white font-medium">
             <Calendar size={16} />
             <span className="text-sm">{formatDateTimeLocal(workshop.start_time)}</span> {/* UI Fix: Date & Time Display */}
           </div>
@@ -365,7 +396,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
             ) : workshop.status}
           </div>
         </div>
-        <h3 className="text-lg sm:text-xl font-bold text-[#27584F] group-hover:text-[#27584F]/80 transition-colors font-sora">{workshop.title}</h3> {/* Apply Header Font */}
+        <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-white/90 transition-colors font-sora">{workshop.title}</h3> {/* Apply Header Font */}
       </div>
 
       <CardContent className="p-6">
@@ -387,14 +418,14 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               <div className="w-12 h-12 rounded-full bg-[#27584F]/10 flex items-center justify-center mb-3 animate-pulse">
                 <Clock className="text-[#27584F]" size={24} />
               </div>
-              <h4 className="font-semibold text-[#27584F] font-sora">Recording Processing</h4>
+              <h4 className="font-semibold text-white font-sora">Recording Processing</h4>
               <p className="text-xs text-muted-foreground max-w-[200px] mt-1 font-manrope">
                 The session has ended. We\'re currently processing the recording for you.
               </p>
             </div>
           )
         ) : (
-          <p className="text-muted-foreground mb-6 leading-relaxed line-clamp-3 font-manrope">{workshop.description}</p>
+          <p className="text-white/80 mb-6 leading-relaxed line-clamp-3 font-manrope">{workshop.description}</p>
         )}
 
         {/* Share Button */}
@@ -416,31 +447,6 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           )}
         </div>
 
-        {/* Waitlist UI */}
-        {isScheduled && !joinedWaitlist && (
-          <form onSubmit={handleJoinWaitlist} className="mb-6 space-y-3">
-            <p className="text-sm font-medium text-foreground font-manrope">Get notified when we go live:</p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-3 py-2 bg-background border border-[#27584F]/30 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#27584F]/50 font-manrope"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <Button 
-                type="submit" 
-                size="sm" 
-                disabled={isJoiningWaitlist}
-                className="bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold font-sora"
-              >
-                <Bell size={14} className="mr-1" />
-                Notify Me
-              </Button>
-            </div>
-          </form>
-        )}
 
         {joinedWaitlist && isScheduled && (
           <div className="mb-6 p-3 bg-[#27584F]/10 border border-[#27584F]/30 rounded-md text-[#27584F] text-sm text-center font-medium font-manrope">
@@ -476,7 +482,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
             <>
               {isScheduled && (
                 <Button 
-                  className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora"
+                  className="w-fit gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora"
                   onClick={handleStartConclave}
                   disabled={isStarting}
                 >
@@ -485,7 +491,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 </Button>
               )}
               {isLive && (
-                <Button className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora" asChild>
+                <Button className="w-full sm:w-auto gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora" asChild>
                   <a href={`/conclave/${workshop.id}`}>
                     <Video size={20} />
                     Join as Host
@@ -495,7 +501,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {isEnded && (
                 <Button 
                   disabled={!workshop.recording_url} 
-                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
+                  className={`w-full sm:w-auto gap-2 py-4 text-base font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
                   asChild={!!workshop.recording_url}
                 >
                   {workshop.recording_url ? (
@@ -514,7 +520,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {/* Notify Users Button */}
               {isScheduled && (
                 <Button 
-                  className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora"
+                  className="w-fit gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora"
                   onClick={handleNotifyConclaveUsers}
                 >
                   <Bell size={20} />
@@ -525,13 +531,13 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           ) : ( /* Attendee Logic */
             <>
               {isScheduled && (
-                <Button disabled className="flex-1 gap-2 bg-zinc-800 text-zinc-500 py-6 text-lg font-bold cursor-not-allowed font-sora">
+                <Button disabled className="w-full sm:w-auto gap-2 bg-zinc-800 text-zinc-500 py-4 text-base font-bold cursor-not-allowed font-sora">
                   <Clock size={20} />
                   Event Scheduled
                 </Button>
               )}
               {isLive && (
-                <Button className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora" asChild>
+                <Button className="w-full sm:w-auto gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora" asChild>
                   <a href={`/conclave/${workshop.id}`}>
                     <Video size={20} />
                     Join Now
@@ -541,7 +547,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {isEnded && (
                 <Button 
                   disabled={!workshop.recording_url} 
-                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
+                  className={`w-full sm:w-auto gap-2 py-4 text-base font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
                   asChild={!!workshop.recording_url}
                 >
                   {workshop.recording_url ? (
@@ -561,17 +567,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           )}
           
           {isHost && (
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                className="w-12 h-auto bg-[#18181b]/50 border-[#27584F]/30 text-[#27584F] hover:bg-[#27584F]/10"
-                asChild
-              >
-                <a href={`/workshops/${workshop.id}/edit`} title="Edit Conclave">
-                  <span className="text-xs font-bold">Edit</span>
-                </a>
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
               {isLive && (
                 <Button 
                   variant="destructive" 
@@ -598,6 +594,18 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 <div className="flex flex-col items-center">
                   <Archive size={14} fill="currentColor" className="mb-0.5" />
                   <span className="text-[10px] font-bold">{isArchiving ? '...' : (workshop.is_archived ? 'Unarchive' : 'Archive')}</span>
+                </div>
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="icon"
+                className="w-12 h-auto bg-red-950/30 border-red-500/30 text-red-500 hover:bg-red-500/20"
+                onClick={handleDeleteConclave}
+                title="Delete Conclave"
+              >
+                <div className="flex flex-col items-center">
+                  <X size={14} fill="currentColor" className="mb-0.5" />
+                  <span className="text-[10px] font-bold">Delete</span>
                 </div>
               </Button>
             </div>
