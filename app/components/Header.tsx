@@ -69,7 +69,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center justify-between h-16 px-4">
+      <div className="flex items-center justify-between min-h-16 px-4">
         {/* Left: Logo and App Name */}
         <div className="flex items-center gap-2">
           {onMenuClick && !isDesktop && (
