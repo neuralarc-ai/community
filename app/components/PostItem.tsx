@@ -128,18 +128,18 @@ export default function PostItem({
     switch (numImages) {
       case 1:
         gridClass = 'grid grid-cols-1';
-        imageClasses = ['w-full max-h-[300px] h-[200px] object-cover rounded-xl'];
+        imageClasses = ['w-full h-auto aspect-[4/5] object-cover rounded-xl'];
         break;
       case 2:
-        gridClass = 'grid grid-cols-2 gap-2';
-        imageClasses = ['w-full h-[150px] object-cover rounded-xl'];
+        gridClass = 'grid grid-cols-2 gap-0'; /* Changed gap to 0 */
+        imageClasses = ['w-full h-full aspect-square object-cover', 'w-full h-full aspect-square object-cover'];
         break;
       case 3:
-        gridClass = 'grid grid-cols-3 gap-2';
+        gridClass = 'grid grid-cols-3 gap-0'; /* Changed to 3 columns with no gap */
         imageClasses = [
-          'w-full h-[150px] object-cover rounded-xl',
-          'w-full h-[150px] object-cover rounded-xl',
-          'w-full h-[150px] object-cover rounded-xl',
+          'w-full h-full aspect-square object-cover', /* Image 1 */
+          'w-full h-full aspect-square object-cover', /* Image 2 */
+          'w-full h-full aspect-square object-cover', /* Image 3 */
         ];
         break;
       default:

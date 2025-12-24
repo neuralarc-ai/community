@@ -376,7 +376,7 @@ export default function Dashboard() {
           </div>
 
           {/* Recent Activity Section */}
-          <Card className="bg-card/30 backdrop-blur-sm border-orange-500/20 overflow-hidden hover:border-orange-500/30 transition-colors duration-300 hover:shadow-[0_0_30px_rgba(249,115,22,0.05)]">
+          <Card className="bg-card/30 backdrop-blur-sm border-orange-500/20 overflow-hidden hover:border-orange-500/30 transition-colors duration-300">
             <CardHeader className="px-8 pt-8 pb-6 border-b border-white/5">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-orange-500/10 rounded-lg border border-orange-500/20">

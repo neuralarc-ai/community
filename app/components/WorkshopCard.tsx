@@ -465,7 +465,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {/* Notify Users Button */}
               {isScheduled && (
                 <Button 
-                  className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora"
+                  className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora"
                   onClick={handleNotifyConclaveUsers}
                 >
                   <Bell size={20} />
