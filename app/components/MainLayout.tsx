@@ -35,7 +35,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     <div className="flex flex-col min-h-screen bg-background text-white">
       {isDesktop ? (
         // Desktop layout
-        <div className="flex flex-1">
+        <div className="grid grid-cols-[16rem_1fr] flex-1">
           <LeftSidebar
             isOpen={isSidebarOpen}
             onToggle={handleToggleSidebar}
@@ -43,10 +43,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
             onCloseMobile={handleCloseMobileSidebar}
           />
           <div
-            className={`flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? 'lg:ml-[28rem]' : 'lg:ml-0'}`}
+            className={`flex-1 transition-all duration-300 ease-in-out min-w-0`}
           >
             <Header onMenuClick={handleToggleSidebar} />
-            <main className="flex-1 bg-background p-4 lg:max-w-[1600px] lg:mx-auto">
+            <main className="flex-1 bg-background p-4">
               {children}
             </main>
           </div>

@@ -188,12 +188,16 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, isCollapsible,
       )}
       <div
         className={cn(
-          "fixed left-0 top-0 z-40 h-full lg:h-screen transition-all duration-300 ease-in-out flex flex-col bg-[#0F0F0F] border-r border-white/5 backdrop-blur-xl pt-16", /* Made fixed again and added padding */
-          {
-            "w-full max-w-[16rem]": isOpen && isMobile, // Full width on mobile when open, max 16rem
-            "-translate-x-full": !isOpen && isMobile, // Collapse on mobile when closed
-            "w-0 overflow-hidden lg:w-[16rem] lg:translate-x-0 lg:overflow-visible": !isMobile, // Fixed width on desktop, visible
-          }
+          "transition-all duration-300 ease-in-out flex flex-col bg-[#0F0F0F] border-r border-white/5 backdrop-blur-xl pt-16",
+          isMobile ?
+            {
+              "fixed left-0 top-0 z-40 h-full w-full max-w-[16rem]": isOpen,
+              "-translate-x-full": !isOpen,
+            }
+            :
+            {
+              "relative w-64 shrink-0": true,
+            }
         )}
         style={{
           '--main-color': navItems[activeIndex]?.mainColor || '#f97316', // Fallback to orange

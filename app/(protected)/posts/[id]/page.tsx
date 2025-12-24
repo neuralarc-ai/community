@@ -21,19 +21,19 @@ const renderImages = (imageUrls: string[], handleImageClick: (src: string) => vo
 
   switch (numImages) {
     case 1:
-      gridClass = 'grid grid-cols-1';
-      imageClasses = ['w-full max-h-[500px] object-cover rounded-xl'];
+      gridClass = 'grid grid-cols-1 place-items-center';
+      imageClasses = ['max-w-full max-h-[500px] w-auto h-auto object-contain rounded-xl'];
       break;
     case 2:
       gridClass = 'grid grid-cols-2 gap-2';
-      imageClasses = ['w-full h-[250px] object-cover rounded-xl'];
+      imageClasses = ['w-full h-[250px] object-cover rounded-xl', 'w-full h-[250px] object-cover rounded-xl'];
       break;
     case 3:
       gridClass = 'grid grid-cols-3 gap-2';
       imageClasses = [
-        'col-span-2 w-full h-[350px] object-cover rounded-xl', // Large image (60%)
-        'col-span-1 w-full h-[170px] object-cover rounded-xl', // Stacked top (40%)
-        'col-span-1 w-full h-[170px] object-cover rounded-xl', // Stacked bottom (40%)
+        'w-full h-[250px] object-cover rounded-xl',
+        'w-full h-[250px] object-cover rounded-xl',
+        'w-full h-[250px] object-cover rounded-xl',
       ];
       break;
     default:
