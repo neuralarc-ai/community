@@ -7,18 +7,6 @@ import { z } from 'zod'
 import logger from '@/app/lib/logger'
 import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
 
-const limiter = rateLimit({
-  uniqueTokenPerInterval: 500, // Max 500 users per 60 seconds
-  interval: 60 * 1000, // 60 seconds
-}) as unknown as {
-  check: (limit: number, token: string) => {
-    success: boolean;
-    limit: number;
-    remaining: number;
-    reset: number;
-  };
-};
-
 const createPostSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255),
   body: z.string().min(1, 'Body is required'),
@@ -27,6 +15,28 @@ const createPostSchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
+  // Apply rate limiting for GET requests
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ??
+             request.headers.get('x-real-ip') ??
+             '127.0.0.1';
+  const limiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 });
+  const rateLimitResult = limiter.check(60, ip); // 60 requests per minute
+
+  if (!rateLimitResult.success) {
+    const response = NextResponse.json(
+      { error: 'Too Many Requests' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+          'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+        },
+      }
+    );
+    return setCorsHeaders(request, response);
+  }
+
   const { searchParams } = new URL(request.url)
   const searchQuery = searchParams.get('search')
   const limit = searchParams.get('limit')
@@ -50,7 +60,8 @@ export async function GET(request: NextRequest) {
         updated_at,
         vote_score,
         is_pinned,
-        image_urls
+        image_urls,
+        post_comment_counts(comment_count)
       `)
 
     if (searchQuery) {
@@ -109,32 +120,22 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate vote scores and comment counts for each post
-    const postsWithScores = await Promise.all(
-      posts.map(async (post) => {
-        const commentCount = await (async () => {
-          const { count, error } = await supabase
-            .from('comments')
-            .select('*', { count: 'exact', head: true })
-            .eq('post_id', post.id)
-          return error ? 0 : count || 0
-        })()
-
-        const profile = profileMap.get(post.author_id)
-        return {
-          ...post,
-          author: {
-            username: profile?.username || 'Anonymous',
-            full_name: profile?.full_name || 'Anonymous',
-            avatar_url: profile?.avatar_url || '',
-            role: profile?.role || 'user', // Default to 'user' if not available
-          },
-          comment_count: commentCount,
-          user_vote: userVotesMap.get(post.id) || 0,
-          vote_score: post.vote_score,
-          is_pinned: post.is_pinned
-        }
-      })
-    )
+    const postsWithScores = posts.map((post: any) => {
+      const profile = profileMap.get(post.author_id)
+      return {
+        ...post,
+        author: {
+          username: profile?.username || 'Anonymous',
+          full_name: profile?.full_name || 'Anonymous',
+          avatar_url: profile?.avatar_url || '',
+          role: profile?.role || 'user',
+        },
+        comment_count: post.post_comment_counts ? post.post_comment_counts.comment_count : 0,
+        user_vote: userVotesMap.get(post.id) || 0,
+        vote_score: post.vote_score,
+        is_pinned: post.is_pinned
+      }
+    })
 
     return setCorsHeaders(request, NextResponse.json({ posts: postsWithScores, totalPostsCount }));
   } catch (error) {
@@ -152,11 +153,12 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ??
                request.headers.get('x-real-ip') ??
                '127.0.0.1';
+    const limiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 });
     const limit = 10; // 10 requests per 60 seconds
     const rateLimitResult = limiter.check(limit, ip);
 
     if (!rateLimitResult.success) {
-      let response = NextResponse.json(
+      const response = NextResponse.json(
         { error: 'Too Many Requests' },
         {
           status: 429,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/app/lib/supabaseServerClient';
 import { getCurrentUserProfile } from '@/app/lib/getProfile';
 import { setCorsHeaders } from '@/app/lib/setCorsHeaders';
+import rateLimit from '@/app/lib/rateLimit';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,6 +23,29 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  // Apply rate limiting
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ??
+             request.headers.get('x-real-ip') ??
+             '127.0.0.1';
+  const limiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 });
+  const limit = 10; // 10 requests per 60 seconds
+  const rateLimitResult = limiter.check(limit, ip);
+
+  if (!rateLimitResult.success) {
+    const response = NextResponse.json(
+      { error: 'Too Many Requests' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+          'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+        },
+      }
+    );
+    return setCorsHeaders(request, response);
+  }
+
   try {
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
