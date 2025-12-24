@@ -14,6 +14,7 @@ import { createClient } from '@/app/lib/supabaseClient'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 import { Profile } from '@/app/types'
 import FilterSection from '@/app/components/FilterSection'
+import CreatePostDialog from '@/app/components/CreatePostDialog'
 
 function PostsContent() {
   const router = useRouter()
@@ -22,6 +23,7 @@ function PostsContent() {
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set())
+  const [isCreatePostDialogOpen, setIsCreatePostDialogOpen] = useState(false)
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -268,7 +270,7 @@ function PostsContent() {
   }
 
   return (
-    <div className="container max-w-[1400px] mx-auto py-8 px-6 space-y-12">
+    <div className="container max-w-[1000px] mx-auto py-8 px-6 space-y-12">
         {/* Create Post Input & Filter Bar */}
             <Card className="mb-6 shadow-sm border-yellow-500/50 bg-card/50 backdrop-blur-sm p-2 hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(234,179,8,0.15)] hover:bg-yellow-500/5 transition-all">
             <div className="flex items-center space-x-2 p-2">
@@ -276,27 +278,15 @@ function PostsContent() {
                     <Avatar 
                         src={currentUserProfile?.avatar_url} 
                         alt={currentUserProfile?.username || 'User'} 
-                        size={38} 
+                        size={32} // Adjusted for responsiveness
                     />
                 </div>
                 <input 
                     type="text" 
                     placeholder="Create Post" 
                     className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-yellow-500/50 rounded-lg px-4 py-2.5 flex-grow text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-yellow-500/20 transition-all cursor-text"
-                    onFocus={() => router.push('/posts/new')}
+                    onClick={() => setIsCreatePostDialogOpen(true)}
                 />
-                <button 
-                    onClick={() => router.push('/posts/new')}
-                    className="text-muted-foreground hover:bg-white/10 hover:text-white p-2 rounded-lg transition-all"
-                >
-                    <ImageIcon size={20} />
-                </button>
-                <button 
-                    onClick={() => router.push('/posts/new')}
-                    className="text-muted-foreground hover:bg-white/10 hover:text-white p-2 rounded-lg transition-all"
-                >
-                    <LinkIcon size={20} />
-                </button>
             </div>
         </Card>
 
@@ -307,6 +297,12 @@ function PostsContent() {
             onSelectTag={setSelectedTag}
             activeColor="bg-yellow-500/10 text-white shadow-sm border border-yellow-500/20"
             hoverColor="hover:bg-yellow-500/5 hover:text-white"
+        />
+
+        <CreatePostDialog
+          isOpen={isCreatePostDialogOpen}
+          onClose={() => setIsCreatePostDialogOpen(false)}
+          onPostCreated={fetchPosts}
         />
 
         {/* Posts List */}
@@ -347,3 +343,4 @@ export default function PostsPage() {
     </Suspense>
   )
 }
+

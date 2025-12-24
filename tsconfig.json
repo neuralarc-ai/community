@@ -31,5 +31,9 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "example"]
+  "exclude": [
+    "node_modules",
+    "example",
+    "**/AudioStage.tsx"
+  ]
 }

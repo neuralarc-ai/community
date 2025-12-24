@@ -44,7 +44,7 @@
     
     /* Focus Ring / Glow */
     --ring: 0 0% 100%;
-
+    
     --radius: 0.75rem;
     
     /* Custom Status Colors - Mapped to Monochrome/Nebula */
@@ -112,4 +112,55 @@
   .hover-lift {
     @apply transition-transform duration-300 hover:-translate-y-1;
   }
+
+  /* Glare Effect */
+  .glare-effect {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .glare-effect::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150%; /* Make it wider to ensure it covers the diagonal movement */
+    height: 150%; /* Make it taller */
+    background: radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.0) 70%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    transform: translate(-100%, -100%) rotate(45deg); /* Start off-screen top-left */
+    z-index: 1; /* Ensure it's above card content */
+  }
+
+  .glare-effect:hover::before {
+    opacity: 1;
+    transform: translate(0%, 0%) rotate(45deg); /* End at 0,0 */
+  }
 }
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Transparent track */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #FFFFFF; /* White scrollbar thumb */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #E0E0E0; /* Lighter white on hover */
+}
+

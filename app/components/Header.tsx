@@ -93,7 +93,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         {/* Center: Search Bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-xl mx-4 lg:mx-8 hidden md:flex">
+        <form onSubmit={handleSearch} className="flex-1 max-w-sm mx-4 lg:mx-8 hidden md:flex lg:max-w-2xl">
           <div className="relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-white transition-colors" />

@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  let response: NextResponse<any> = NextResponse.json({});
+  response = setCorsHeaders(request, response);
   try {
     const supabase = await createServerClient()
     
     // Get the authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      response = NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      response = setCorsHeaders(request, response);
+      return response;
     }
 
     // Check if user is admin
@@ -19,7 +24,9 @@ export async function GET() {
       .single()
 
     if (profileError || profile?.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      response = NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      response = setCorsHeaders(request, response);
+      return response;
     }
 
     // Fetch all profiles and count them
@@ -30,13 +37,23 @@ export async function GET() {
 
     if (fetchError) {
       console.error('Error fetching users:', fetchError)
-      return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
+      response = NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
+      response = setCorsHeaders(request, response);
+      return response;
     }
 
-    return NextResponse.json({ users, totalUsers })
+    let successResponse: NextResponse<any> = NextResponse.json({ users, totalUsers });
+    successResponse = setCorsHeaders(request, successResponse);
+    return successResponse;
   } catch (error) {
     console.error('Server error:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    let errorResponse: NextResponse<any> = NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    errorResponse = setCorsHeaders(request, errorResponse);
+    return errorResponse;
   }
 }
 
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
+}

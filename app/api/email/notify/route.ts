@@ -1,36 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 export async function POST(request: NextRequest) {
   try {
     if (!resend) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: 'Email service not configured' },
         { status: 500 }
-      )
+      );
+      return setCorsHeaders(request, response);
     }
 
     const { workshopId } = await request.json()
-    
+
     if (!workshopId) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: 'Missing workshopId' },
         { status: 400 }
-      )
+      );
+      return setCorsHeaders(request, response);
     }
 
     // Verify user is authenticated and is the host
     const supabase = await createServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+
     if (authError || !user) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
-      )
+      );
+      return setCorsHeaders(request, response);
     }
 
     // Verify user is the host and workshop is LIVE
@@ -43,10 +47,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (workshopError || !workshop) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: 'Workshop not found, user is not host, or workshop is not LIVE' },
         { status: 403 }
-      )
+      );
+      return setCorsHeaders(request, response);
     }
 
     // Get all waitlist emails that haven't been notified
@@ -58,14 +63,16 @@ export async function POST(request: NextRequest) {
 
     if (waitlistError) {
       console.error('Error fetching waitlist:', waitlistError)
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: 'Failed to fetch waitlist' },
         { status: 500 }
-      )
+      );
+      return setCorsHeaders(request, response);
     }
 
     if (!waitlist || waitlist.length === 0) {
-      return NextResponse.json({ message: 'No users to notify' })
+      const successResponse = NextResponse.json({ message: 'No users to notify' });
+      return setCorsHeaders(request, successResponse);
     }
 
     // Send emails to all waitlist users
@@ -108,17 +115,23 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const finalResponse = NextResponse.json({
       message: `Notifications sent to ${sentEmails.length} users`,
       sentCount: sentEmails.length,
-    })
+    });
+    return setCorsHeaders(request, finalResponse);
 
   } catch (error) {
     console.error('Error sending notifications:', error)
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
+    return setCorsHeaders(request, errorResponse);
   }
 }
 
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Lightbox from '@/app/components/Lightbox';
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import TwoColumnLayout from '@/app/components/TwoColumnLayout'
@@ -13,7 +14,50 @@ import { Button } from '@/components/ui/button'
 import { MessageSquare, Share2, ArrowLeft, Bookmark } from 'lucide-react'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 
+const renderImages = (imageUrls: string[], handleImageClick: (src: string) => void) => {
+  const numImages = imageUrls.length;
+  let gridClass = '';
+  let imageClasses: string[] = [];
+
+  switch (numImages) {
+    case 1:
+      gridClass = 'grid grid-cols-1';
+      imageClasses = ['w-full max-h-[500px] object-cover rounded-xl'];
+      break;
+    case 2:
+      gridClass = 'grid grid-cols-2 gap-2';
+      imageClasses = ['w-full h-[250px] object-cover rounded-xl'];
+      break;
+    case 3:
+      gridClass = 'grid grid-cols-3 gap-2';
+      imageClasses = [
+        'col-span-2 w-full h-[350px] object-cover rounded-xl', // Large image (60%)
+        'col-span-1 w-full h-[170px] object-cover rounded-xl', // Stacked top (40%)
+        'col-span-1 w-full h-[170px] object-cover rounded-xl', // Stacked bottom (40%)
+      ];
+      break;
+    default:
+      return null; // Should not happen with max 3 constraint
+  }
+
+  return (
+    <div className={`${gridClass} mb-4`}>
+      {imageUrls.map((url, index) => (
+        <div key={index} onClick={() => handleImageClick(url)} className="block overflow-hidden cursor-pointer">
+          <img 
+            src={url} 
+            alt={`Post image ${index + 1}`} 
+            className={`${imageClasses[index] || ''} transition-transform duration-300 hover:scale-105`} 
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export default function PostDetailPage() {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [currentImageSrc, setCurrentImageSrc] = useState<string | null>(null);
   const params = useParams()
   const router = useRouter()
   const postId = params.id as string
@@ -122,6 +166,8 @@ export default function PostDetailPage() {
       const response = await fetch(`/api/posts/${postId}`)
       if (response.ok) {
         const postData = await response.json()
+        console.log('Post data received:', postData)
+        console.log('Image URLs:', postData.image_urls)
         setPost(postData)
         setUserCommentVotes(extractUserVotesFromComments(postData.comments || []))
       }
@@ -216,6 +262,16 @@ export default function PostDetailPage() {
     }
   }
 
+  const handleImageClick = (src: string) => {
+    setCurrentImageSrc(src)
+    setLightboxOpen(true)
+  }
+
+  const handleCloseLightbox = () => {
+    setLightboxOpen(false)
+    setCurrentImageSrc(null)
+  }
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -251,6 +307,7 @@ export default function PostDetailPage() {
   }
 
   return (
+    <>
     <TwoColumnLayout>
 <div className="flex items-center gap-4 mb-8">
             <button 
@@ -266,7 +323,7 @@ export default function PostDetailPage() {
         </div>
 
         {/* Main Post Card */}
-        <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl shadow-sm overflow-hidden mb-6">
+        <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl shadow-sm overflow-hidden mb-6 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] transition-all duration-300">
             <div className="flex flex-col">
                 
                 {/* Content */}
@@ -277,7 +334,7 @@ export default function PostDetailPage() {
                             <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
                             <span className="font-bold text-white">u/{post.author?.username || 'Anonymous'}</span>
                             {post.author?.role === 'admin' && (
-                                <span className="ml-1 bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border border-blue-500/20">Admin</span>
+                                <span className="ml-1 bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border border-yellow-500/20">Admin</span>
                             )}
                         </div>
                         {post.is_pinned && (
@@ -299,6 +356,12 @@ export default function PostDetailPage() {
                     <div className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans mb-6 text-[15px]">
                         {post.body}
                     </div>
+
+                    {/* Render Images if available */}
+                    {(() => {
+                      console.log('Rendering images, post.image_urls:', post.image_urls)
+                      return post.image_urls && post.image_urls.length > 0 && renderImages(post.image_urls, handleImageClick)
+                    })()}
 
                     {/* Tags */}
                     {post.tags && post.tags.length > 0 && (
@@ -359,5 +422,7 @@ export default function PostDetailPage() {
             />
         </div>
     </TwoColumnLayout>
+    <Lightbox src={currentImageSrc} isOpen={lightboxOpen} onClose={handleCloseLightbox} />
+    </>
   )
 }

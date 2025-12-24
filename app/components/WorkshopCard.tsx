@@ -22,8 +22,13 @@ const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
     return window.location.origin
   }
-  // Fallback for server-side rendering, though client-side is expected for this component
-  return 'https://sphere.com' 
+  // Fallback for server-side rendering
+  if (process.env.NEXT_PUBLIC_FRONTEND_URL) {
+    return process.env.NEXT_PUBLIC_FRONTEND_URL
+  }
+  throw new Error(
+    'NEXT_PUBLIC_FRONTEND_URL is not set. Please set it in your .env.local file or Vercel environment variables.'
+  )
 }
 
 interface WorkshopCardProps {
@@ -40,7 +45,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
   const [isStarting, setIsStarting] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
   const [isArchiving, setIsArchiving] = useState(false)
-  const [waitlistCount, setWaitlistCount] = useState(initialWorkshop.waitlist_count || 0)
+  const [waitlistCount, setWaitlistCount] = useState(0) // Initialize to 0
 
   const supabase = createClient()
   const router = useRouter()
@@ -54,7 +59,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
       try {
         const { data, error } = await supabase
           .from('workshops')
-          .select('status, waitlist_count')
+          .select('status') // Only select status
           .eq('id', workshop.id)
           .single()
 
@@ -75,9 +80,6 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           if (data.status !== workshop.status) {
             setWorkshop(prev => ({ ...prev, status: data.status }))
           }
-          if (data.waitlist_count !== waitlistCount) {
-            setWaitlistCount(data.waitlist_count || 0)
-          }
         }
       } catch (err) {
         // Handle any unexpected errors in the polling logic
@@ -86,17 +88,36 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
     }, 5000) // Poll every 5 seconds
 
     return () => clearInterval(interval)
-  }, [workshop.id, workshop.status, waitlistCount, supabase])
+  }, [workshop.id, workshop.status, supabase])
+
+  // Fetch waitlist count on load and when workshop.id changes
+  useEffect(() => {
+    const fetchWaitlistCount = async () => {
+      const { count, error } = await supabase
+        .from('workshop_waitlist')
+        .select('*', { count: 'exact' })
+        .eq('workshop_id', workshop.id);
+
+      if (error) {
+        console.error('Error fetching waitlist count:', error);
+        setWaitlistCount(0);
+      } else {
+        setWaitlistCount(count || 0);
+      }
+    };
+    fetchWaitlistCount();
+  }, [workshop.id, supabase]);
 
   // Check if current user is already on the waitlist on load
   useEffect(() => {
     const checkWaitlistStatus = async () => {
-      if (currentUserId) {
+      // Only check if email is available (for anonymous waitlist)
+      if (email) {
         const { data, error } = await supabase
           .from('workshop_waitlist')
           .select('*')
           .eq('workshop_id', workshop.id)
-          .eq('user_id', currentUserId) // Assuming user_id is now stored for authenticated users
+          .eq('user_email', email) 
           .single()
 
         if (data) {
@@ -106,8 +127,11 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
         }
       }
     }
-    checkWaitlistStatus()
-  }, [currentUserId, workshop.id, supabase])
+    // Call immediately if email is present. The effect will re-run if 'email' changes.
+    if (email) {
+      checkWaitlistStatus()
+    }
+  }, [workshop.id, supabase, email])
 
   const event: CalendarEvent = {
     title: workshop.title,
@@ -208,29 +232,59 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
 
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) return
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      toast({
+        title: 'Error',
+        description: 'Email address cannot be empty.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a valid email address.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (trimmedEmail.includes(',')) {
+      toast({
+        title: 'Error',
+        description: 'Please enter only one email address at a time.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setIsJoiningWaitlist(true)
     try {
       const response = await fetch(`/api/workshops/${workshop.id}/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: trimmedEmail }),
       })
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to join waitlist')
+      if (response.ok || (response.status === 200 && data.message === 'You are already on the waitlist.')) {
+        setJoinedWaitlist(true)
+        if (response.status === 201) {
+            setWaitlistCount(prev => prev + 1)
+        }
+        setEmail('')
+        toast({
+          title: 'Success',
+          description: '✅ You\'re on the waitlist! We\'ll email you when we go live.',
+        })
+      } else {
+        throw new Error(data.error || 'Failed to join waitlist');
       }
-      
-      setJoinedWaitlist(true)
-      setWaitlistCount(prev => prev + 1)
-      setEmail('')
-      toast({
-        title: 'Success',
-        description: '✅ You\'re on the waitlist! We\'ll email you when we go live.',
-      })
     } catch (error: any) {
       console.error('Error joining waitlist:', error)
       toast({
@@ -258,13 +312,13 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ conclaveId: workshop.id }),
+        body: JSON.stringify({ workshopId: workshop.id }),
       });
 
       if (response.ok) {
         toast({
-          title: "Success!",
-          description: "Conclave invitations sent successfully.",
+          title: "Notifications Sent!",
+          description: "Conclave invitations have been successfully dispatched to eligible users.",
         });
       } else {
         const errorData = await response.json();
@@ -311,7 +365,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
             ) : workshop.status}
           </div>
         </div>
-        <h3 className="text-xl font-bold text-[#27584F] group-hover:text-[#27584F]/80 transition-colors font-sora">{workshop.title}</h3> {/* Apply Header Font */}
+        <h3 className="text-lg sm:text-xl font-bold text-[#27584F] group-hover:text-[#27584F]/80 transition-colors font-sora">{workshop.title}</h3> {/* Apply Header Font */}
       </div>
 
       <CardContent className="p-6">
@@ -366,11 +420,11 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
         {isScheduled && !joinedWaitlist && (
           <form onSubmit={handleJoinWaitlist} className="mb-6 space-y-3">
             <p className="text-sm font-medium text-foreground font-manrope">Get notified when we go live:</p>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-3 py-2 bg-background border border-[#27584F]/30 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#e6b31c]/50 font-manrope"
+                className="flex-1 px-3 py-2 bg-background border border-[#27584F]/30 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#27584F]/50 font-manrope"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -379,7 +433,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 type="submit" 
                 size="sm" 
                 disabled={isJoiningWaitlist}
-                className="bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white font-bold font-sora"
+                className="bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold font-sora"
               >
                 <Bell size={14} className="mr-1" />
                 Notify Me
@@ -417,12 +471,12 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           </div>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           {isHost ? (
             <>
               {isScheduled && (
                 <Button 
-                  className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora"
+                  className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora"
                   onClick={handleStartConclave}
                   disabled={isStarting}
                 >
@@ -431,7 +485,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 </Button>
               )}
               {isLive && (
-                <Button className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora" asChild>
+                <Button className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora" asChild>
                   <a href={`/conclave/${workshop.id}`}>
                     <Video size={20} />
                     Join as Host
@@ -441,7 +495,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {isEnded && (
                 <Button 
                   disabled={!workshop.recording_url} 
-                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#e6b31c] hover:bg-[#e6b31c]/90 shadow-lg shadow-[#e6b31c]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
+                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
                   asChild={!!workshop.recording_url}
                 >
                   {workshop.recording_url ? (
@@ -460,7 +514,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {/* Notify Users Button */}
               {isScheduled && (
                 <Button 
-                  className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora"
+                  className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora"
                   onClick={handleNotifyConclaveUsers}
                 >
                   <Bell size={20} />
@@ -477,7 +531,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 </Button>
               )}
               {isLive && (
-                <Button className="flex-1 gap-2 bg-[#e6b31c] hover:bg-[#e6b31c]/90 text-white shadow-lg shadow-[#e6b31c]/20 py-6 text-lg font-bold font-sora" asChild>
+                <Button className="flex-1 gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-6 text-lg font-bold font-sora" asChild>
                   <a href={`/conclave/${workshop.id}`}>
                     <Video size={20} />
                     Join Now
@@ -487,7 +541,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               {isEnded && (
                 <Button 
                   disabled={!workshop.recording_url} 
-                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#e6b31c] hover:bg-[#e6b31c]/90 shadow-lg shadow-[#e6b31c]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
+                  className={`flex-1 gap-2 py-6 text-lg font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
                   asChild={!!workshop.recording_url}
                 >
                   {workshop.recording_url ? (
@@ -507,7 +561,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           )}
           
           {isHost && (
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button 
                 variant="outline" 
                 size="icon"

@@ -266,6 +266,7 @@ export default function ProfilePage() {
                    onVoteChange={() => {}}
                    commentCount={post.comment_count || 0}
                    currentUserId={profile.id}
+                   isProfilePage={true}
                  />
                ))}
              </PostList>
@@ -318,6 +319,7 @@ export default function ProfilePage() {
                    currentUserId={profile.id}
                    isSaved={true}
                    onToggleSave={handleToggleSave}
+                   isProfilePage={true}
                  />
                ))}
              </PostList>
@@ -384,6 +386,7 @@ export default function ProfilePage() {
                           commentCount={item.comment_count || 0}
                           currentUserId={profile.id}
                           typeTag="Post"
+                          isProfilePage={true}
                         />
                       ) : (
                         <CommentItem key={item.id} comment={item} showTag={true} />

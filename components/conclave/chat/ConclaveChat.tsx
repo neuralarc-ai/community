@@ -1,4 +1,5 @@
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import './ConclaveChat.css';
 import { useChat, useLocalParticipant, useRemoteParticipants } from '@livekit/components-react';
 import { useRoomContext } from '@livekit/components-react';
 import { createClient } from '@/app/lib/supabaseClient'; // Assuming you have a supabaseClient.ts for client-side
@@ -65,7 +66,10 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
   // Scroll to bottom on new messages
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
     }
   }, [chatMessages]);
 
@@ -152,11 +156,11 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
   const canPublishData = localParticipant?.permissions?.canPublishData ?? true;
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950 text-white rounded-lg">
+    <div className="flex flex-col h-full max-h-[600px] overflow-hidden bg-zinc-950 text-white rounded-lg">
       <div className="p-4 border-b border-zinc-700">
         <h2 className="text-lg font-semibold">Live Chat</h2>
       </div>
-      <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-2">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 space-y-2 custom-scrollbar">
         {chatMessages.map((msg, index) => (
           <div key={index} className="flex items-start space-x-2">
             <Avatar
@@ -192,7 +196,7 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
           </div>
         ))}
       </div>
-      <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-700">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-700 flex-none">
         <div className="flex">
           <input
             type="text"

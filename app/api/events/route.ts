@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { mockWorkshops } from '@/app/data/mockData'
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -17,12 +18,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ workshops, totalWorkshopsCount: workshops.length })
+    const successResponse = NextResponse.json({ workshops, totalWorkshopsCount: workshops.length });
+    return setCorsHeaders(request, successResponse);
   } catch (error) {
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { error: 'Failed to fetch events' },
       { status: 500 }
-    )
+    );
+    return setCorsHeaders(request, errorResponse);
   }
 }
 
@@ -45,17 +48,25 @@ export async function POST(request: NextRequest) {
       }
 
       mockWorkshops.push(newWorkshop)
-      return NextResponse.json(newWorkshop, { status: 201 })
+      const successResponse = NextResponse.json(newWorkshop, { status: 201 });
+      return setCorsHeaders(request, successResponse);
     }
 
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { error: 'Invalid event type' },
       { status: 400 }
-    )
+    );
+    return setCorsHeaders(request, errorResponse);
   } catch (error) {
-    return NextResponse.json(
+    const errorResponse = NextResponse.json(
       { error: 'Failed to create event' },
       { status: 500 }
-    )
+    );
+    return setCorsHeaders(request, errorResponse);
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
 }

@@ -1,7 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/app/lib/supabaseServerClient'
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
+import rateLimit from '@/app/lib/rateLimit'
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ??
+             request.headers.get('x-real-ip') ??
+             '127.0.0.1';
+  const limiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 });
+  const limit = 10; // 10 requests per 60 seconds
+  const rateLimitResult = limiter.check(limit, ip);
+
+  if (!rateLimitResult.success) {
+    const response = NextResponse.json(
+      { error: 'Too Many Requests' },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+          'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+        },
+      }
+    );
+    return setCorsHeaders(request, response);
+  }
+
+  let response: NextResponse<any> = NextResponse.json({});
+  response = setCorsHeaders(request, response);
   try {
     const supabase = await createServerClient()
     const body = await request.json()
@@ -10,27 +37,33 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json(
+      response = NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
+      response = setCorsHeaders(request, response);
+      return response;
     }
 
     const { target_type, target_id, value } = body
 
     // Validate input
     if (!target_type || !target_id || (value !== -1 && value !== 1)) {
-      return NextResponse.json(
+      response = NextResponse.json(
         { error: 'Invalid vote data. Required: target_type, target_id, value (-1 or 1)' },
         { status: 400 }
       )
+      response = setCorsHeaders(request, response);
+      return response;
     }
 
     if (!['post', 'comment'].includes(target_type)) {
-      return NextResponse.json(
+      response = NextResponse.json(
         { error: 'target_type must be "post" or "comment"' },
         { status: 400 }
       )
+      response = setCorsHeaders(request, response);
+      return response;
     }
 
     // Verify the target exists

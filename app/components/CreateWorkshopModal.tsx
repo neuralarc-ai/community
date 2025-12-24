@@ -127,7 +127,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
           {/* Conclave Type Selection */}
           <div className="space-y-3">
             <Label className="text-base font-semibold text-foreground">Conclave Format</Label>
-            <RadioGroup value={conclaveType} onValueChange={(value: 'AUDIO' | 'VIDEO') => setConclaveType(value)} className="flex gap-6">
+            <RadioGroup value={conclaveType} onValueChange={(value: 'AUDIO' | 'VIDEO') => setConclaveType(value)} className="flex flex-wrap gap-6">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="VIDEO" id="video-type" className="border-[#27584F] text-[#27584F]" />
                 <Label htmlFor="video-type" className="cursor-pointer">
@@ -150,7 +150,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
           {/* Meeting Type Selection */}
           <div className="space-y-3">
             <Label className="text-base font-semibold text-foreground">Timing</Label>
-            <RadioGroup value={meetingType} onValueChange={(value: 'schedule' | 'live') => setMeetingType(value)} className="flex gap-6">
+            <RadioGroup value={meetingType} onValueChange={(value: 'schedule' | 'live') => setMeetingType(value)} className="flex flex-wrap gap-6">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="schedule" id="schedule" className="border-[#27584F] text-[#27584F]" />
                 <Label htmlFor="schedule" className="cursor-pointer">
@@ -200,7 +200,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
 
           {/* Date & Time (only for scheduled meetings) */}
           {meetingType === 'schedule' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="date" className="text-foreground">Date *</Label>
                 <Input

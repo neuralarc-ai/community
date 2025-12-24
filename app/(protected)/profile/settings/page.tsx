@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import TwoColumnLayout from '@/app/components/TwoColumnLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { 
   User, 
@@ -132,7 +133,7 @@ export default function SettingsPage() {
 
   return (
     <TwoColumnLayout rightSidebar={SettingsSidebar}>
-      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 border border-transparent">
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-white/5">
           <div className="flex items-center gap-4">
@@ -227,7 +228,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Short Bio</label>
-                  <textarea 
+                  <Textarea 
                     rows={4}
                     placeholder="Tell the community about yourself..."
                     value={bio}
