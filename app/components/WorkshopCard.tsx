@@ -45,7 +45,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
   const [isStarting, setIsStarting] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
   const [isArchiving, setIsArchiving] = useState(false)
-  const [waitlistCount, setWaitlistCount] = useState(initialWorkshop.waitlist_count || 0)
+  const [waitlistCount, setWaitlistCount] = useState(0) // Initialize to 0
 
   const supabase = createClient()
   const router = useRouter()
@@ -59,7 +59,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
       try {
         const { data, error } = await supabase
           .from('workshops')
-          .select('status, waitlist_count')
+          .select('status') // Only select status
           .eq('id', workshop.id)
           .single()
 
@@ -80,9 +80,6 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           if (data.status !== workshop.status) {
             setWorkshop(prev => ({ ...prev, status: data.status }))
           }
-          if (data.waitlist_count !== waitlistCount) {
-            setWaitlistCount(data.waitlist_count || 0)
-          }
         }
       } catch (err) {
         // Handle any unexpected errors in the polling logic
@@ -91,17 +88,36 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
     }, 5000) // Poll every 5 seconds
 
     return () => clearInterval(interval)
-  }, [workshop.id, workshop.status, waitlistCount, supabase])
+  }, [workshop.id, workshop.status, supabase])
+
+  // Fetch waitlist count on load and when workshop.id changes
+  useEffect(() => {
+    const fetchWaitlistCount = async () => {
+      const { count, error } = await supabase
+        .from('workshop_waitlist')
+        .select('*', { count: 'exact' })
+        .eq('workshop_id', workshop.id);
+
+      if (error) {
+        console.error('Error fetching waitlist count:', error);
+        setWaitlistCount(0);
+      } else {
+        setWaitlistCount(count || 0);
+      }
+    };
+    fetchWaitlistCount();
+  }, [workshop.id, supabase]);
 
   // Check if current user is already on the waitlist on load
   useEffect(() => {
     const checkWaitlistStatus = async () => {
-      if (currentUserId) {
+      // Only check if email is available (for anonymous waitlist)
+      if (email) {
         const { data, error } = await supabase
           .from('workshop_waitlist')
           .select('*')
           .eq('workshop_id', workshop.id)
-          .eq('user_id', currentUserId) // Assuming user_id is now stored for authenticated users
+          .eq('user_email', email) 
           .single()
 
         if (data) {
@@ -111,8 +127,11 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
         }
       }
     }
-    checkWaitlistStatus()
-  }, [currentUserId, workshop.id, supabase])
+    // Call immediately if email is present. The effect will re-run if 'email' changes.
+    if (email) {
+      checkWaitlistStatus()
+    }
+  }, [workshop.id, supabase, email])
 
   const event: CalendarEvent = {
     title: workshop.title,
@@ -213,29 +232,59 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
 
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) return
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      toast({
+        title: 'Error',
+        description: 'Email address cannot be empty.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a valid email address.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (trimmedEmail.includes(',')) {
+      toast({
+        title: 'Error',
+        description: 'Please enter only one email address at a time.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setIsJoiningWaitlist(true)
     try {
       const response = await fetch(`/api/workshops/${workshop.id}/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: trimmedEmail }),
       })
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to join waitlist')
+      if (response.ok || (response.status === 200 && data.message === 'You are already on the waitlist.')) {
+        setJoinedWaitlist(true)
+        if (response.status === 201) {
+            setWaitlistCount(prev => prev + 1)
+        }
+        setEmail('')
+        toast({
+          title: 'Success',
+          description: '✅ You\'re on the waitlist! We\'ll email you when we go live.',
+        })
+      } else {
+        throw new Error(data.error || 'Failed to join waitlist');
       }
-      
-      setJoinedWaitlist(true)
-      setWaitlistCount(prev => prev + 1)
-      setEmail('')
-      toast({
-        title: 'Success',
-        description: '✅ You\'re on the waitlist! We\'ll email you when we go live.',
-      })
     } catch (error: any) {
       console.error('Error joining waitlist:', error)
       toast({

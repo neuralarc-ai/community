@@ -2,9 +2,8 @@
 
 import { LiveKitRoom } from '@livekit/components-react'
 import { useMemo } from 'react'
-import AudioStage from './stages/AudioStage'
+import AudioConclaveView from './stages/AudioConclaveView'
 import VideoStage from './stages/VideoStage'
-import ConclaveControls from './controls/ConclaveControls'
 import { ConclaveChat } from './chat/ConclaveChat'
 import { ParticipantList } from './ParticipantList'
 import '@livekit/components-styles'
@@ -44,7 +43,7 @@ export default function ConclaveRoom({
         <div className="flex flex-1 relative">
           <div className="flex-1">
             {workshop.type === 'AUDIO' ? (
-              <AudioStage />
+              <AudioConclaveView onLeave={onEndLive} />
             ) : (
               <VideoStage />
             )}
@@ -55,13 +54,6 @@ export default function ConclaveRoom({
           </div>
         </div>
 
-        <ConclaveControls
-          workshopId={workshop.id}
-          roomName={roomName}
-          isHost={isHost}
-          type={workshop.type}
-          onEndLive={onEndLive}
-        />
       </LiveKitRoom>
     </div>
   )
