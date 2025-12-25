@@ -15,9 +15,10 @@ import Image from 'next/image'
 
 interface HeaderProps {
     onMenuClick?: () => void;
+    headerHeight?: string; // Add headerHeight prop
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [supabase, setSupabase] = useState<any>(null)
@@ -68,8 +69,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center justify-between min-h-16 px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60" style={{ height: headerHeight }}>
+      <div className="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
         {/* Left: Logo and App Name */}
         <div className="flex items-center gap-2">
           {onMenuClick && !isDesktop && (
@@ -78,22 +79,23 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </Button>
           )}
           <Link href="/dashboard" className="flex items-center gap-2 group">
-            <div className="relative w-8 h-8 group-hover:opacity-80 transition-all">
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 group-hover:opacity-80 transition-all">
                <Image 
                  src="/logo Sphere.png"
                  alt="Sphere Logo"
                  fill
+                 sizes="(max-width: 640px) 28px, 32px"
                  className="object-contain"
                />
             </div>
-            <span className="text-xl font-bold font-heading text-white tracking-tight hidden md:block">
+            <span className="text-lg sm:text-xl font-bold font-heading text-white tracking-tight hidden md:block">
               Sphere
             </span>
           </Link>
         </div>
 
         {/* Center: Search Bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-sm mx-4 lg:mx-8 hidden md:flex lg:max-w-2xl">
+        <form onSubmit={handleSearch} className="flex-1 mx-2 sm:mx-4 md:mx-4 lg:mx-8 lg:max-w-4xl">
           <div className="relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-white transition-colors" />

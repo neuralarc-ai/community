@@ -182,7 +182,7 @@ export default function ConclaveControls({
             className={`rounded-full h-10 w-10 ${!localParticipant.isMicrophoneEnabled ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-white hover:bg-white/10'}`}
             onClick={() => localParticipant.setMicrophoneEnabled(!localParticipant.isMicrophoneEnabled)}
           >
-            {localParticipant.isMicrophoneEnabled ? <Mic size={20} /> : <MicOff size={20} />}
+            {localParticipant.isMicrophoneEnabled ? <Mic className="w-8 h-8" /> : <MicOff className="w-8 h-8" />}
           </Button>
 
           {type === 'VIDEO' && (
@@ -192,7 +192,7 @@ export default function ConclaveControls({
               className={`rounded-full h-10 w-10 ${!localParticipant.isCameraEnabled ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' : 'text-white hover:bg-white/10'}`}
               onClick={() => localParticipant.setCameraEnabled(!localParticipant.isCameraEnabled)}
             >
-              {localParticipant.isCameraEnabled ? <Video size={20} /> : <VideoOff size={20} />}
+              {localParticipant.isCameraEnabled ? <Video className="w-8 h-8" /> : <VideoOff className="w-8 h-8" />}
             </Button>
           )}
         </>
@@ -205,7 +205,7 @@ export default function ConclaveControls({
           className={`gap-2 h-10 rounded-full transition-all ${metadata.handRaised ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' : 'text-white hover:bg-white/10'}`}
           onClick={toggleHand}
         >
-          <Hand size={20} fill={metadata.handRaised ? "currentColor" : "none"} />
+          <Hand className="w-8 h-8" fill={metadata.handRaised ? "currentColor" : "none"} />
           <span className="hidden sm:inline font-medium">{metadata.handRaised ? 'Hand Raised' : 'Raise Hand'}</span>
         </Button>
       )}
@@ -220,7 +220,7 @@ export default function ConclaveControls({
             className="rounded-full gap-2 px-6 h-10 font-bold"
             onClick={isRecording ? () => {} : handleGoLive}
           >
-            {isRecording ? <Square size={16} fill="currentColor" /> : <Radio size={16} />}
+            {isRecording ? <Square className="w-8 h-8" fill="currentColor" /> : <Radio className="w-8 h-8" />}
             {isRecording ? 'LIVE' : 'GO LIVE'}
           </Button>
 
@@ -241,7 +241,7 @@ export default function ConclaveControls({
               className={`rounded-full h-10 w-10 text-white hover:bg-white/10 ${showManagePanel ? 'bg-white/20' : ''}`}
               onClick={() => setShowManagePanel(!showManagePanel)}
             >
-              <Users size={20} />
+              <Users className="w-8 h-8" />
               {handRaisers.length > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-bold text-black border-2 border-black">
                   {handRaisers.length}
@@ -304,7 +304,7 @@ export default function ConclaveControls({
         className="rounded-full h-10 w-10 bg-red-600 hover:bg-red-700"
         onClick={handleEndLiveSession}
       >
-        <X size={20} />
+        <X className="w-8 h-8" />
       </Button>
     </div>
   )

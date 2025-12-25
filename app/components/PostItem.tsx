@@ -48,7 +48,7 @@ const PostCardBase = ({ children, post, isProfilePage }: PostCardBaseProps) => (
         ? 'border-[#A6C8D5]/20 hover:border-[#A6C8D5]/30 hover:shadow-[0_0_30px_rgba(166,200,213,0.1)]'
         : post.author?.role === 'admin'
           ? 'bg-admin-yellow/10 border-admin-yellow/40 shadow-md shadow-admin-yellow/10'
-          : 'border-white/5 hover:border-admin-yellow/30 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] hover:bg-white/[0.02]'
+          : 'border-white/5 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] hover:bg-white/[0.02]'
       }
     `}>
       {children}

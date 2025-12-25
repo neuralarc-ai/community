@@ -180,6 +180,9 @@ export default function ProfilePage() {
                     <div className="space-y-1">
                         <h2 className="font-heading font-bold text-2xl text-white tracking-tight">{profile.full_name}</h2>
                         <p className="text-sm text-muted-foreground font-medium">u/{profile.username}</p>
+                        {profile.bio && (
+                            <p className="text-sm text-muted-foreground mt-2 px-4 whitespace-pre-wrap">{profile.bio}</p>
+                        )}
                     </div>
                     
                     {/* Stats Grid */}
@@ -272,7 +275,7 @@ export default function ProfilePage() {
              </PostList>
            ) : (
              <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors">
-               <MessageCircle className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
+               <MessageCircle className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
                <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">No posts yet</h3>
                <p className="text-muted-foreground max-w-sm text-base leading-relaxed mb-6">
                  Share your thoughts with the community.
@@ -295,7 +298,7 @@ export default function ProfilePage() {
              </div>
            ) : (
              <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors">
-               <MessageCircle className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
+               <MessageCircle className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
                <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">No comments yet</h3>
                <p className="text-muted-foreground max-w-sm text-base leading-relaxed">
                  Join the discussion on posts that interest you.
@@ -325,7 +328,7 @@ export default function ProfilePage() {
              </PostList>
            ) : (
              <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors">
-               <Bookmark className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
+               <Bookmark className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
                <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">No saved posts</h3>
                <p className="text-muted-foreground max-w-sm text-base leading-relaxed">
                  Posts you save will appear here for easy access.
