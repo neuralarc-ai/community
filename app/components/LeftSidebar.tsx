@@ -191,8 +191,6 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile,
       <div
         className={cn(
           "flex-col bg-[#0F0F0F] border-r border-white/5 backdrop-blur-xl transition-transform duration-300 ease-in-out z-40 fixed left-0 overflow-y-auto",
-          `top-[${headerHeight}]`,
-          `h-[calc(100vh-${headerHeight})]`,
           "lg:w-64 md:w-56",
           isMobile ? 
             (isOpen ? "w-full max-w-[14rem] translate-x-0" : "w-full max-w-[14rem] -translate-x-full") :
@@ -200,6 +198,8 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile,
           className // Apply external classes
         )}
         style={{
+          top: headerHeight, 
+          height: `calc(100vh - ${headerHeight})`,
           '--main-color': navItems[activeIndex]?.mainColor || '#f97316', // Fallback to orange
           '--main-color-opacity': navItems[activeIndex]?.mainColorOpacity || 'rgba(249, 115, 22, 0.11)', // Fallback to orange
           '--total-radio': totalNavItems,
@@ -240,3 +240,5 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile,
     </>
   );
 }
+
+
