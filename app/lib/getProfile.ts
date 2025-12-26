@@ -1,15 +1,19 @@
 import { createClient } from './supabaseClient'
 
-export async function getCurrentUserProfile() {
+export async function getCurrentUserProfile(userId?: string) {
   const supabase = createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  let targetUserId = userId;
+  if (!targetUserId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    targetUserId = user.id;
+  }
 
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('*, avatar_url, total_flux, posts_count, comments_count, conclaves_attended')
-    .eq('id', user.id)
+    .eq('id', targetUserId)
     .single()
 
   if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -18,7 +22,7 @@ export async function getCurrentUserProfile() {
 
   return {
     ...profile,
-    email: user.email,
+    email: profile.email,
   }
 }
 

@@ -395,7 +395,7 @@ export default function Dashboard() {
                   recentPosts.map((post) => (
                     <div key={post.id} className="flex items-center gap-4 sm:gap-6 p-4 sm:p-6 hover:bg-white/[0.04] transition-all duration-200 group cursor-pointer">
                         <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-[#0F0F0F] rounded-xl flex items-center justify-center border border-white/5 group-hover:border-white/20 group-hover:bg-white/5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300">
-                            <MessageCircle size={22} className="text-muted-foreground group-hover:text-white transition-colors" />
+                            <MessageCircle className="w-8 h-8 text-muted-foreground group-hover:text-white transition-colors" />
                         </div>
                         <div className="flex-1 min-w-0 grid gap-1">
                             <div className="flex items-center justify-between">

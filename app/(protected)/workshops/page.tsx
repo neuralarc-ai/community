@@ -87,12 +87,12 @@ function WorkshopsContent() {
 
   return (
     <div className="container max-w-[1400px] py-8 mx-auto px-6 space-y-12">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Conclave</h1>
             <p className="text-lg text-muted-foreground">Schedule and manage online conclaves</p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-2 sm:gap-4">
             {userRole === 'admin' && (
               <Button
                 variant="outline"
