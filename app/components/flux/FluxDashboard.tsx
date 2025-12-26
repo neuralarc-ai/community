@@ -186,7 +186,7 @@ const FluxDashboard = () => {
                     <td className="py-3 px-4 text-center">{index + 1}</td>
                     <td className="py-3 px-4 flex items-center text-left">
                       <Image
-                        src={profile.avatar_url || '/default-avatar.png'} // Fallback for avatar
+                        src={profile.avatar_url || '/default-avatar.jpg'} // Fallback for avatar
                         alt={profile.full_name || 'User'}
                         width={32}
                         height={32}

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 
 interface AvatarProps {
@@ -9,11 +9,21 @@ interface AvatarProps {
 }
 
 const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 28, className }) => {
-  // Use UI Avatars service as a fallback if no source is provided
-  const avatarSrc = src || `https://ui-avatars.com/api/?name=${encodeURIComponent(alt || 'User')}&background=FFFFFF&color=000000&size=${size}`;
+  const [imageError, setImageError] = useState(false);
+
+  // Use UI Avatars service as a fallback if no source is provided or if there's an error
+  const avatarSrc = (!src || imageError)
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(alt || 'User')}&background=FFFFFF&color=000000&size=${size}`
+    : src;
 
   // Check if it's an SVG to use unoptimized
   const isSvg = avatarSrc.includes('.svg') || avatarSrc.includes('dicebear.com') || avatarSrc.includes('data:image/svg+xml');
+
+  const handleImageError = () => {
+    if (!imageError) {
+      setImageError(true);
+    }
+  };
 
   return (
     <div
@@ -27,6 +37,7 @@ const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 28, className }) => {
         className="rounded-full object-cover"
         sizes={`${size}px`}
         unoptimized={isSvg}
+        onError={handleImageError}
       />
     </div>
   );

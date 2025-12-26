@@ -11,11 +11,11 @@ const roomService = new RoomServiceClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { roomName, participantIdentity, trackSid, muted } = await request.json();
+    const { roomName, participantIdentity, canPublish } = await request.json();
 
-    if (!roomName || !participantIdentity || !trackSid || typeof muted !== 'boolean') {
+    if (!roomName || !participantIdentity || typeof canPublish !== 'boolean') {
       const response = NextResponse.json(
-        { error: 'Missing required fields: roomName, participantIdentity, trackSid, muted' },
+        { error: 'Missing required fields: roomName, participantIdentity, canPublish' },
         { status: 400 }
       );
       return setCorsHeaders(request, response);
@@ -48,14 +48,16 @@ export async function POST(request: NextRequest) {
       return setCorsHeaders(request, response);
     }
 
-    // Mute or unmute the track
-    await roomService.mutePublishedTrack(roomName, participantIdentity, trackSid, muted);
+    // Update participant permissions
+    await roomService.updateParticipant(roomName, participantIdentity, undefined, {
+      canPublish: canPublish
+    });
 
     const finalResponse = NextResponse.json({ success: true });
     return setCorsHeaders(request, finalResponse);
 
   } catch (error) {
-    console.error('Error muting/unmuting participant track:', error);
+    console.error('Error managing participant role:', error);
     const errorResponse = NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

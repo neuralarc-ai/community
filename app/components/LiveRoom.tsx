@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   LiveKitRoom,
@@ -12,12 +12,13 @@ import {
   useTracks,
   AudioConference,
   useRoomContext,
+  useLocalParticipant,
 } from '@livekit/components-react'
 import '@livekit/components-styles'
 import { Track } from 'livekit-client'
 import { Button } from '@/components/ui/button'
 import { Mic, MicOff, Video, VideoOff, Circle, Square, Mail } from 'lucide-react'
-import ConclaveControls from '@/components/conclave/controls/ConclaveControls'
+import { ConclaveControls } from '@/components/conclave/stages/ConclaveControls'
 
 interface LiveRoomProps {
   workshopId: string
@@ -44,6 +45,25 @@ export default function LiveRoom({
   const [isEnding, setIsEnding] = useState(false)
   const router = useRouter()
   const room = useRoomContext()
+  const { localParticipant } = useLocalParticipant()
+
+  // Parse local participant metadata
+  const localParticipantMetadata = useMemo(() => {
+    try {
+      return JSON.parse(localParticipant?.metadata || '{}');
+    } catch {
+      return {};
+    }
+  }, [localParticipant?.metadata]);
+
+  const isLocalAdmin = localParticipantMetadata.role === 'admin';
+
+  useEffect(() => {
+    // Auto-enable microphone for admins in audio conclaves
+    if (localParticipant && isLocalAdmin && mode === 'audio' && localParticipant.permissions?.canPublish) {
+      localParticipant.setMicrophoneEnabled(true);
+    }
+  }, [localParticipant, isLocalAdmin, mode]);
 
   const handleDisconnectAndNotifyParent = async () => {
     if (room) {
@@ -121,6 +141,18 @@ export default function LiveRoom({
   const handleEndWorkshop = async () => {
     setIsEnding(true)
     try {
+      // Call backend to remove participant
+      if (localParticipant) {
+        await fetch('/api/livekit/manage-participant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomName: workshopId, // roomName is workshopId
+            participantIdentity: localParticipant.identity,
+          }),
+        });
+      }
+
       const success = await onEndLive()
       if (success) {
         // Disconnect from the room if ending was successful

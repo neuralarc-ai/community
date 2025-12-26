@@ -44,10 +44,30 @@ export async function POST(request: NextRequest) {
     }
 
     const isHost = workshop.host_id === user.id
-    
-    // In Conclave mode, listeners start with canPublish: false
-    // They must be promoted by the host to speak
-    const canPublish = isHost
+
+    // Fetch user profile for avatar and role
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('avatar_url, username, full_name, role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      // Continue even if profile fetching fails, with default role
+    }
+
+    const isAdmin = profile?.role === 'admin';
+
+    // Determine if the user should have publishing permissions
+    let canPublish = false;
+    if (workshop.type === 'VIDEO') {
+      // DO NOT TOUCH VIDEO CONCLAVE: keep existing behavior where everyone can publish
+      canPublish = true;
+    } else {
+      // AUDIO CONCLAVE: only Host and Admins can publish (speak)
+      canPublish = isHost || isAdmin;
+    }
 
     // Create LiveKit access token
     const at = new AccessToken(
@@ -57,8 +77,12 @@ export async function POST(request: NextRequest) {
         identity: user.id,
         name: participantName,
         metadata: JSON.stringify({
-          role: isHost ? 'host' : 'listener',
-          handRaised: false
+          role: isHost ? 'host' : (isAdmin ? 'admin' : 'user'),
+          handRaised: false,
+          canSpeak: canPublish, // Use the determined canPublish status
+          avatarUrl: profile?.avatar_url || null,
+          username: profile?.username || participantName,
+          fullName: profile?.full_name || participantName
         })
       }
     )
@@ -66,7 +90,7 @@ export async function POST(request: NextRequest) {
     at.addGrant({
       roomJoin: true,
       room: roomName,
-      canPublish,
+      canPublish: canPublish, // Use the determined canPublish status
       canSubscribe: true,
       canPublishData: true, // Required for "Raise Hand" data packets
       canUpdateOwnMetadata: true, // Required for participants to raise/lower hands
@@ -75,13 +99,13 @@ export async function POST(request: NextRequest) {
     const token = await at.toJwt()
 
     // Award flux points for joining a conclave
-    const fluxAwardResult = await awardFlux(user.id, 'CONCLAVE')
+    const fluxAwardResult = await awardFlux(user.id, 'CONCLAVE_JOIN')
     console.log('Flux award result for conclave join:', fluxAwardResult)
 
     const finalResponse = NextResponse.json({
       token,
       serverUrl: process.env.LIVEKIT_URL,
-      canPublish,
+      canPublish: canPublish,
       type: workshop.type
     });
     return setCorsHeaders(request, finalResponse);
