@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
 import ConclaveRoom from '@/components/conclave/ConclaveRoom'
 import { ChevronLeft } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export default function ConclavePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -14,11 +15,19 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
   const [token, setToken] = useState<string | null>(null)
   const [serverUrl, setServerUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const supabase = createClient()
+  const isHost = workshop?.host_id === userId // Determine if the current user is the host
 
   const handleEndLive = async () => {
     // For now, just return true - this can be enhanced later
+    router.push(`/workshops`); // Redirect to the workshops page
     return true
+  }
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev)
   }
 
   useEffect(() => {
@@ -32,10 +41,10 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
         }
         setUserId(user.id)
 
-        // Fetch user profile to get username
+        // Fetch user profile to get username and role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('username')
+          .select('username, role')
           .eq('id', user.id)
           .single()
 
@@ -46,6 +55,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
         }
 
         const participantUsername = profile.username;
+        setUserRole(profile.role);
 
         // 2. Fetch Workshop Data
         const { data: workshopData, error } = await supabase
@@ -114,7 +124,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
 
   return (
     <main className="min-h-screen bg-black overflow-hidden flex flex-col">
-      <div className="p-4 flex-1 flex flex-col">
+      <div className="p-4 flex-1">
         {/* Header Area */}
         <div className="mb-6 flex items-center justify-between px-2">
           <div className="flex items-center gap-4">
@@ -139,10 +149,13 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           serverUrl={serverUrl}
           workshop={workshop}
           userId={userId}
+          userRole={userRole}
           onEndLive={handleEndLive}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={toggleSidebar}
+          roomName={`conclave-${id}`}
         />
       </div>
     </main>
   )
 }
-
