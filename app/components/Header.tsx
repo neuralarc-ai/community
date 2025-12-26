@@ -124,7 +124,7 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
               <div className="w-24 h-8 bg-white/5 rounded-md animate-pulse" /> 
             ) : profile ? (
               <div className="flex items-center gap-3">
-                <Link href="/profile" className="flex items-center gap-3 group">
+                <Link href={`/profile/${profile.id}`} className="flex items-center gap-3 group">
                     <div className="relative">
                         <Avatar src={profile.avatar_url} alt={profile.full_name || 'User'} size={32} className="ring-2 ring-transparent group-hover:ring-white/20 transition-all" />
                     </div>

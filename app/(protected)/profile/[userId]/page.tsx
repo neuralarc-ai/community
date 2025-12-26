@@ -13,6 +13,7 @@ import PostItem from '@/app/components/PostItem';
 import PostList from '@/app/components/PostList';
 import Link from 'next/link';
 import AvatarEditor from '@/app/components/AvatarEditor';
+import { Skeleton } from '@/app/components/ui/skeleton';
 
 export default function ProfilePage({ params }: { params: { userId: string } }) {
   const { userId } = React.use(params);
@@ -169,15 +170,19 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
                 {/* Avatar - Centered with negative margin to pull it up */}
                 <div className="mt-12 mb-4 relative group">
                     <div className="rounded-full p-1.5 bg-[#141414] ring-1 ring-[#A6C8D5]/30 shadow-[0_0_20px_rgba(166,200,213,0.2)]">
-                        <Avatar 
-                            src={profile.avatar_url} 
-                            alt={profile.full_name} 
-                            size={96} 
-                            className="rounded-full" 
-                        />
+                        {loading ? (
+                            <Skeleton className="rounded-full w-24 h-24" />
+                        ) : (
+                            <Avatar 
+                                src={profile?.avatar_url} 
+                                alt={profile?.full_name || 'User'} 
+                                size={96} 
+                                className="rounded-full" 
+                            />
+                        )}
                     </div>
                     {/* Edit Button */}
-                    {userId === currentUserId && (
+                    {userId === currentUserId && !loading && (
                         <button 
                             onClick={() => setShowAvatarEditor(true)}
                             className="absolute bottom-0 right-0 p-2 bg-[#A6C8D5] rounded-full text-white shadow-lg hover:bg-[#A6C8D5]/80 transition-transform hover:scale-105"
@@ -191,9 +196,19 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
                 {/* Profile Info - Centered */}
                 <div className="space-y-4 w-full text-center">
                     <div className="space-y-1">
-                        <h2 className="font-heading font-bold text-2xl text-white tracking-tight">{profile.full_name}</h2>
-                        <p className="text-sm text-muted-foreground font-medium">u/{profile.username}</p>
-                        {profile.bio && (
+                        {loading ? (
+                            <Skeleton className="h-7 w-48 mx-auto mb-2" />
+                        ) : (
+                            <h2 className="font-heading font-bold text-2xl text-white tracking-tight">{profile?.full_name}</h2>
+                        )}
+                        {loading ? (
+                            <Skeleton className="h-4 w-32 mx-auto" />
+                        ) : (
+                            <p className="text-sm text-muted-foreground font-medium">u/{profile?.username}</p>
+                        )}
+                        {loading ? (
+                            <Skeleton className="h-12 w-full mx-auto mt-2" />
+                        ) : profile?.bio && (
                             <p className="text-sm text-muted-foreground mt-2 px-4 whitespace-pre-wrap">{profile.bio}</p>
                         )}
                     </div>
@@ -204,33 +219,49 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Flux</p>
                             <div className="flex items-center gap-2">
                                 <Award className="w-4 h-4 text-white" />
-                                <span className="font-heading font-bold text-lg text-white">{profile.total_flux !== undefined ? profile.total_flux.toLocaleString() : '0'}</span>
+                                {loading ? (
+                                    <Skeleton className="h-5 w-12" />
+                                ) : (
+                                    <span className="font-heading font-bold text-lg text-white">{profile?.total_flux !== undefined ? profile.total_flux.toLocaleString() : '0'}</span>
+                                )}
                             </div>
                         </div>
                         <div className="flex flex-col items-center">
                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Joined</p>
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4 text-white" />
-                                <span className="font-heading font-bold text-lg text-white">{new Date(profile.created_at).toLocaleDateString()}</span>
+                                {loading ? (
+                                    <Skeleton className="h-5 w-24" />
+                                ) : (
+                                    <span className="font-heading font-bold text-lg text-white">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '-'}</span>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <Link href="/flux-dashboard" className="w-full">
-                        <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
-                            <Award className="w-4 h-4 mr-2" />
-                            Flux Leaderboard
-                        </Button>
-                    </Link>
+                    {loading ? (
+                        <Skeleton className="w-full h-10" />
+                    ) : (
+                        <Link href="/flux-dashboard" className="w-full">
+                            <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
+                                <Award className="w-4 h-4 mr-2" />
+                                Flux Leaderboard
+                            </Button>
+                        </Link>
+                    )}
                     <div className="h-1"></div>
                     {userId === currentUserId && (
-                      <Link href="/profile/settings" className="w-full">
-                          <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
-                              <Settings className="w-4 h-4 mr-2" />
-                              Profile Settings
-                          </Button>
-                      </Link>
+                        loading ? (
+                            <Skeleton className="w-full h-10" />
+                        ) : (
+                            <Link href="/profile/settings" className="w-full">
+                                <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    Profile Settings
+                                </Button>
+                            </Link>
+                        )
                     )}
                 </div>
             </CardContent>
@@ -242,31 +273,38 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
     <TwoColumnLayout rightSidebar={ProfileSidebar}>
       {/* Profile Header */}
       <div className="space-y-6">
+        <h1 className="text-4xl font-extrabold text-white tracking-tighter mb-8">
+          {loading ? <Skeleton className="h-10 w-64" /> : (userId === currentUserId ? "My Profile" : profile?.full_name)}
+        </h1>
         {/* Navigation Tabs */}
-        <div className="bg-card/40 backdrop-blur-md rounded-xl border border-[#A6C8D5]/20 p-1.5">
-            <div className="flex items-center space-x-1">
-                {[
-                    { id: 'overview', label: 'Overview', icon: FileText },
-                    { id: 'posts', label: 'Posts', icon: MessageCircle },
-                    { id: 'comments', label: 'Comments', icon: MessageCircle },
-                    { id: 'saved', label: 'Saved', icon: Bookmark },
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`
-                            flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1 justify-center
-                            ${activeTab === tab.id 
-                                ? 'bg-[#A6C8D5]/10 text-white shadow-sm border border-[#A6C8D5]/20' 
-                                : 'text-muted-foreground hover:bg-[#A6C8D5]/5 hover:text-white'}
-                        `}
-                    >
-                        <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : 'text-muted-foreground'}`} />
-                        {tab.label}
-                    </button>
-                ))}
+        {loading ? (
+            <Skeleton className="h-12 w-full rounded-xl" />
+        ) : (
+            <div className="bg-card/40 backdrop-blur-md rounded-xl border border-[#A6C8D5]/20 p-1.5">
+                <div className="flex items-center space-x-1">
+                    {[
+                        { id: 'overview', label: 'Overview', icon: FileText },
+                        { id: 'posts', label: 'Posts', icon: MessageCircle },
+                        { id: 'comments', label: 'Comments', icon: MessageCircle },
+                        { id: 'saved', label: 'Saved', icon: Bookmark },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`
+                                flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1 justify-center
+                                ${activeTab === tab.id 
+                                    ? 'bg-[#A6C8D5]/10 text-white shadow-sm border border-[#A6C8D5]/20' 
+                                    : 'text-muted-foreground hover:bg-[#A6C8D5]/5 hover:text-white'}
+                            `}
+                        >
+                            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : 'text-muted-foreground'}`} />
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
             </div>
-        </div>
+        )}
 
         {/* Content Area */}
         {activeTab === 'posts' ? (
@@ -289,15 +327,17 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
                ))}
              </PostList>
            ) : (
-             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors">
-               <MessageCircle className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
+             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors group">
+               <MessageCircle className="w-12 h-12 text-muted-foreground mb-4 opacity-50 group-hover:text-white group-hover:opacity-75 transition-all duration-300" />
                <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">No posts yet</h3>
                <p className="text-muted-foreground max-w-sm text-base leading-relaxed mb-6">
                  Share your thoughts with the community.
                </p>
-               <Button className="rounded-lg font-semibold px-8 py-3 text-white bg-white/10 hover:bg-white/20 border border-white/10 hover:border-white/20 transition-all">
-                  Create Post
-               </Button>
+               <Link href="/posts/new">
+                 <Button className="rounded-lg font-semibold px-8 py-3 text-white bg-[#A6C8D5] hover:bg-[#A6C8D5]/90 border border-[#A6C8D5]/20 hover:border-[#A6C8D5]/30 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(166,200,213,0.3)]">
+                    <Plus className="w-4 h-4 mr-2"/> Create Post
+                 </Button>
+               </Link>
              </div>
            )
         ) : activeTab === 'comments' ? (
@@ -352,9 +392,23 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
            )
         ) : (
           /* Overview Tab (Default) */
-          loadingData ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          loadingData || loading ? (
+            <div className="space-y-8">
+              {/* Stat Cards Skeletons */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Card key={i} className="bg-card/40 backdrop-blur-md border border-[#A6C8D5]/20 shadow-xl">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-8 w-8 rounded-lg" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="h-10 w-20" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <Skeleton className="h-48 w-full rounded-xl" />
             </div>
           ) : (
             <div className="space-y-8">

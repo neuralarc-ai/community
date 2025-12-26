@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import Link from 'next/link'
 import Avatar from './Avatar';
 import ReplyInput from './ReplyInput'
 import VoteButton from './VoteButton'
