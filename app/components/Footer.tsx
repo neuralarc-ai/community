@@ -7,7 +7,7 @@ export default function Footer() {
     const [isTermsOfUseOpen, setIsTermsOfUseOpen] = useState(false)
     const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState(false)
     return (
-        <footer>
+        <footer className="fixed bottom-0 left-0 w-full z-50">
             <TermsOfUseDialog 
                 open={isTermsOfUseOpen}
                 onClose={() => setIsTermsOfUseOpen(false)}

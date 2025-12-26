@@ -126,6 +126,7 @@ export interface Profile {
   posts_count?: number;
   comments_count?: number;
   conclaves_attended?: number;
+  bio?: string;
 }
 
 export interface User {

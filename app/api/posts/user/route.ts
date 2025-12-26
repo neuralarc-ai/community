@@ -7,51 +7,52 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const searchParams = request.nextUrl.searchParams;
+    const userId = searchParams.get('userId');
+
+    let targetUserId = userId;
+    if (!targetUserId) {
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      targetUserId = user.id;
     }
 
     // Fetch user's posts
     const { data: posts, error } = await supabase
       .from('posts')
-      .select('*')
-      .eq('author_id', user.id)
+      .select('*, profiles(username, full_name, avatar_url, role)') // Fetch author profile directly
+      .eq('author_id', targetUserId)
       .order('created_at', { ascending: false })
 
     if (error) throw error
 
-    // Fetch profile (we know it's the current user, but good for consistency)
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('username, full_name, avatar_url, role')
-      .eq('id', user.id)
-      .single()
-
     // Enhance with scores
     const postsWithScores = await Promise.all(
-      posts.map(async (post) => {
+      posts.map(async (post: any) => {
         const [voteScore, commentCount] = await Promise.all([
           getVoteScore('post', post.id),
           (async () => {
              const { count } = await supabase
               .from('comments')
               .select('*', { count: 'exact', head: true })
-              .eq('post_id', post.id)
-             return count || 0
+              .eq('post_id', post.id);
+             return count || 0;
           })()
-        ])
+        ]);
 
+        const authorProfile = post.profiles;
         return {
           ...post,
           author: {
-            username: profile?.username || 'Anonymous',
-            full_name: profile?.full_name || 'Anonymous',
-            avatar_url: profile?.avatar_url || '',
-            role: profile?.role || 'user', // Default to 'user' if not available
+            username: authorProfile?.username || 'Anonymous',
+            full_name: authorProfile?.full_name || 'Anonymous',
+            avatar_url: authorProfile?.avatar_url || '',
+            role: authorProfile?.role || 'user', // Default to 'user' if not available
           },
           vote_score: voteScore,
           comment_count: commentCount
-        }
+        };
       })
     )
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sora, Manrope } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/app/components/ui/toaster";
+import MainLayoutClientWrapper from "@/app/components/MainLayoutClientWrapper";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -18,6 +19,19 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: "Sphere Community Portal",
   description: "Manage your community with posts, conclaves, and meetings",
+  icons: [
+    {
+      media: "(prefers-color-scheme: light)",
+      url: "/logo Sphere black.png",
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      url: "/logo Sphere black.png",
+    },
+    {
+      url: "/logo Sphere black.png", // Fallback for browsers that don't support media queries
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -27,13 +41,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/logo Sphere black.png" />
-      </head>
       <body
         className={`${sora.variable} ${manrope.variable} antialiased bg-background text-foreground font-sans overflow-x-hidden`}
       >
+        <MainLayoutClientWrapper>
         {children}
+        </MainLayoutClientWrapper>
         <Toaster />
       </body>
     </html>

@@ -352,12 +352,22 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           description: "Conclave invitations have been successfully dispatched to eligible users.",
         });
       } else {
-        const errorData = await response.json();
-        toast({
-          title: "Error!",
-          description: errorData.message || "Failed to send conclave invitations.",
-          variant: "destructive",
-        });
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await response.json();
+          toast({
+            title: "Error!",
+            description: errorData.message || "Failed to send conclave invitations.",
+            variant: "destructive",
+          });
+        } else {
+          const errorText = await response.text();
+          toast({
+            title: "Error!",
+            description: `Server error: ${response.status} ${response.statusText} - ${errorText}`,
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to notify conclave users:', error);
@@ -416,7 +426,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           ) : (
             <div className="mb-6 p-8 rounded-lg border border-dashed border-[#27584F]/30 bg-[#27584F]/5 flex flex-col items-center justify-center text-center">
               <div className="w-12 h-12 rounded-full bg-[#27584F]/10 flex items-center justify-center mb-3 animate-pulse">
-                <Clock className="text-[#27584F]" size={24} />
+                <Clock className="w-8 h-8 text-[#27584F]" />
               </div>
               <h4 className="font-semibold text-white font-sora">Recording Processing</h4>
               <p className="text-xs text-muted-foreground max-w-[200px] mt-1 font-manrope">
@@ -480,66 +490,110 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
         <div className="flex flex-col sm:flex-row gap-3">
           {isHost ? (
             <>
-              {isScheduled && (
-                <Button 
-                  className="w-fit gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora"
-                  onClick={handleStartConclave}
-                  disabled={isStarting}
-                >
-                  <PlayCircle size={20} />
-                  {isStarting ? 'Starting...' : 'Start Conclave'}
-                </Button>
-              )}
-              {isLive && (
-                <Button className="w-full sm:w-auto gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora" asChild>
-                  <a href={`/conclave/${workshop.id}`}>
-                    <Video size={20} />
-                    Join as Host
-                  </a>
-                </Button>
-              )}
-              {isEnded && (
-                <Button 
-                  disabled={!workshop.recording_url} 
-                  className={`w-full sm:w-auto gap-2 py-4 text-base font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
-                  asChild={!!workshop.recording_url}
-                >
-                  {workshop.recording_url ? (
-                    <a href={`/workshops/${workshop.id}/watch`}>
-                      <PlayCircle size={20} />
-                      Watch Recording
+              <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
+                {isScheduled && (
+                  <Button 
+                    className="w-fit gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora"
+                    onClick={handleStartConclave}
+                    disabled={isStarting}
+                  >
+                    <PlayCircle className="w-8 h-8" />
+                    {isStarting ? 'Starting...' : 'Start Conclave'}
+                  </Button>
+                )}
+                {isLive && (
+                  <Button className="w-full sm:w-auto gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora" asChild>
+                    <a href={`/conclave/${workshop.id}`}>
+                      <Video className="w-8 h-8" />
+                      Join as Host
                     </a>
-                  ) : (
-                    <span>
-                      <Video size={20} className="inline mr-2" />
-                      Session Finished
-                    </span>
-                  )}
-                </Button>
-              )}
-              {/* Notify Users Button */}
-              {isScheduled && (
+                  </Button>
+                )}
+                {isEnded && (
+                  <Button 
+                    disabled={!workshop.recording_url} 
+                    className={`w-full sm:w-auto gap-2 py-4 text-base font-bold font-sora ${workshop.recording_url ? 'bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20' : 'bg-zinc-800 text-zinc-500'} text-white shadow-sm`} 
+                    asChild={!!workshop.recording_url}
+                  >
+                    {workshop.recording_url ? (
+                      <a href={`/workshops/${workshop.id}/watch`}>
+                        <PlayCircle className="w-8 h-8" />
+                        Watch Recording
+                      </a>
+                    ) : (
+                      <span>
+                        <Video className="w-8 h-8 inline mr-2" />
+                        Session Finished
+                      </span>
+                    )}
+                  </Button>
+                )}
+                {/* Notify Users Button */}
+                {isScheduled && (
+                  <Button 
+                    className="w-fit gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora"
+                    onClick={handleNotifyConclaveUsers}
+                  >
+                    <Bell className="w-8 h-8" />
+                    Notify Users
+                  </Button>
+                )}
+                {isLive && (
+                  <Button 
+                    variant="destructive" 
+                    size="icon"
+                    className="w-12 h-auto bg-red-950/30 border-red-500/30 text-red-500 hover:bg-red-500/20"
+                    onClick={handleEndWorkshop}
+                    disabled={isEnding}
+                    title="End Conclave"
+                  >
+                    <div className="flex flex-col items-center">
+                      <Square size={14} fill="currentColor" className="mb-0.5" />
+                      <span className="text-[10px] font-bold">{isEnding ? '...' : 'End'}</span>
+                    </div>
+                  </Button>
+                )}
+              </div>
+              <div className="flex flex-row gap-2 mt-2">
                 <Button 
-                  className="w-fit gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora"
-                  onClick={handleNotifyConclaveUsers}
+                  variant="outline" 
+                  size="icon"
+                  className="w-12 h-auto bg-[#18181b]/50 border-[#27584F]/30 text-[#27584F] hover:bg-[#27584F]/10"
+                  onClick={handleArchiveToggle}
+                  disabled={isArchiving}
+                  title={workshop.is_archived ? 'Unarchive Conclave' : 'Archive Conclave'}
                 >
-                  <Bell size={20} />
-                  Notify Users
+                  <div className="flex flex-col items-center">
+                    <Archive size={14} fill="currentColor" className="mb-0.5" />
+                    <span className="text-[10px] font-bold">{isArchiving ? '...' : (workshop.is_archived ? 'Unarchive' : 'Archive')}</span>
+                  </div>
                 </Button>
-              )}
+                <Button 
+                  variant="destructive" 
+                  size="icon"
+                  className="w-12 h-auto bg-red-950/30 border-red-500/30 text-red-500 hover:bg-red-500/20"
+                  onClick={handleDeleteConclave}
+                  title="Delete Conclave"
+                >
+                  <div className="flex flex-col items-center">
+                    <X size={14} fill="currentColor" className="mb-0.5" />
+                    <span className="text-[10px] font-bold">Delete</span>
+                  </div>
+                </Button>
+              </div>
             </>
           ) : ( /* Attendee Logic */
             <>
               {isScheduled && (
                 <Button disabled className="w-full sm:w-auto gap-2 bg-zinc-800 text-zinc-500 py-4 text-base font-bold cursor-not-allowed font-sora">
-                  <Clock size={20} />
+                  <Clock className="w-8 h-8" />
                   Event Scheduled
                 </Button>
               )}
               {isLive && (
                 <Button className="w-full sm:w-auto gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora" asChild>
                   <a href={`/conclave/${workshop.id}`}>
-                    <Video size={20} />
+                    <Video className="w-8 h-8" />
                     Join Now
                   </a>
                 </Button>
@@ -552,63 +606,18 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 >
                   {workshop.recording_url ? (
                     <a href={`/workshops/${workshop.id}/watch`}>
-                      <PlayCircle size={20} />
+                      <PlayCircle className="w-8 h-8" />
                       Watch Recording
                     </a>
                   ) : (
                     <span>
-                      <Video size={20} className="inline mr-2" />
+                        <Video className="w-8 h-8 inline mr-2" />
                       Session Finished
                     </span>
                   )}
                 </Button>
               )}
             </>
-          )}
-          
-          {isHost && (
-            <div className="flex flex-col sm:flex-row gap-2 flex-wrap">
-              {isLive && (
-                <Button 
-                  variant="destructive" 
-                  size="icon"
-                  className="w-12 h-auto bg-red-950/30 border-red-500/30 text-red-500 hover:bg-red-500/20"
-                  onClick={handleEndWorkshop}
-                  disabled={isEnding}
-                  title="End Conclave"
-                >
-                  <div className="flex flex-col items-center">
-                    <Square size={14} fill="currentColor" className="mb-0.5" />
-                    <span className="text-[10px] font-bold">{isEnding ? '...' : 'End'}</span>
-                  </div>
-                </Button>
-              )}
-              <Button 
-                variant="outline" 
-                size="icon"
-                className="w-12 h-auto bg-[#18181b]/50 border-[#27584F]/30 text-[#27584F] hover:bg-[#27584F]/10"
-                onClick={handleArchiveToggle}
-                disabled={isArchiving}
-                title={workshop.is_archived ? 'Unarchive Conclave' : 'Archive Conclave'}
-              >
-                <div className="flex flex-col items-center">
-                  <Archive size={14} fill="currentColor" className="mb-0.5" />
-                  <span className="text-[10px] font-bold">{isArchiving ? '...' : (workshop.is_archived ? 'Unarchive' : 'Archive')}</span>
-                </div>
-              </Button>
-              <Button 
-                variant="destructive" 
-                size="icon"
-                className="w-12 h-auto bg-red-950/30 border-red-500/30 text-red-500 hover:bg-red-500/20"
-                onClick={handleDeleteConclave}
-                title="Delete Conclave"
-              >
-                <div className="flex flex-col items-center">
-                  <X size={14} fill="currentColor" className="mb-0.5" />
-                  <span className="text-[10px] font-bold">Delete</span>
-                </div>
-              </Button>
-            </div>
           )}
         </div>
       </CardContent>

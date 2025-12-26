@@ -6,8 +6,15 @@ export async function GET(request: NextRequest) {
     const supabase = await createServerClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const searchParams = request.nextUrl.searchParams;
+    const userId = searchParams.get('userId');
+
+    let targetUserId = userId;
+    if (!targetUserId) {
+      if (authError || !user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      targetUserId = user.id;
     }
 
     // Fetch user's comments with the associated post title
@@ -20,7 +27,7 @@ export async function GET(request: NextRequest) {
           title
         )
       `)
-      .eq('author_id', user.id)
+      .eq('author_id', targetUserId)
       .order('created_at', { ascending: false })
 
     if (error) throw error

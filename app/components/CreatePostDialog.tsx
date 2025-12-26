@@ -10,6 +10,7 @@ import { useToast } from '@/app/components/ui/use-toast'
 import { uploadPostImages } from '@/app/lib/uploadPostImages';
 import { createClient } from '@/app/lib/supabaseClient';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/app/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface CreatePostDialogProps {
   isOpen: boolean;
@@ -168,14 +169,14 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] p-0 bg-background/90 backdrop-blur-lg border border-white/10 rounded-2xl">
-        <DialogHeader className="p-6 border-b border-white/10 flex flex-row items-center justify-between">
-          <DialogTitle className="text-2xl font-bold text-white tracking-tight">Create New Post</DialogTitle>
+      <DialogContent className="max-w-[95vw] sm:max-w-[700px] p-0 bg-background/90 backdrop-blur-lg border border-white/10 rounded-2xl">
+        <DialogHeader className="p-4 sm:p-6 border-b border-white/10 flex flex-row items-center justify-between">
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-white tracking-tight">Create New Post</DialogTitle>
         </DialogHeader>
         <div className="p-6">
             <div className="max-w-2xl mx-auto space-y-10">
                 <Card className="bg-card/40 backdrop-blur-md border border-white/5 overflow-hidden shadow-2xl hover:border-yellow-500/30 transition-all duration-300">
-                    <CardContent className="p-10 relative">
+                    <CardContent className="p-4 sm:p-10 relative">
                         <form 
                             onSubmit={handleSubmit} 
                             onDragOver={handleDragOver}
@@ -204,7 +205,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                           onClick={() => handleRemoveImage(index)}
                                           className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-red-500 transition-colors"
                                         >
-                                          <X size={16} />
+                                          <X className="w-8 h-8" />
                                         </button>
                                       </div>
                                     ))}
@@ -214,7 +215,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                 {/* Title Field */}
                                 <div className="space-y-4">
                                     <label htmlFor="title" className="flex items-center gap-2 text-sm font-bold text-white/90 ml-1 uppercase tracking-wider font-heading">
-                                        <Type size={14} className="text-yellow-500" />
+                                        <Type className="w-8 h-8 text-yellow-500" />
                                         Title <span className="text-transparent"></span>
                                     </label>
                                     <div className="relative group">
@@ -223,7 +224,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                             id="title"
                                             value={title}
                                             onChange={(e) => setTitle(e.target.value)}
-                                            className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white text-lg placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-lg placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
                                             placeholder="Enter your post title..."
                                         />
                                     </div>
@@ -232,7 +233,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                 {/* Body Field */}
                                 <div className="space-y-4">
                                     <label htmlFor="body" className="flex items-center gap-2 text-sm font-bold text-white/90 ml-1 uppercase tracking-wider font-heading">
-                                        <AlignLeft size={14} className="text-yellow-500" />
+                                        <AlignLeft className="w-8 h-8 text-yellow-500" />
                                         Body <span className="text-yellow-500/50"></span>
                                     </label>
                                     <div className="relative group">
@@ -241,7 +242,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                             value={body}
                                             onChange={(e) => setBody(e.target.value)}
                                             rows={6}
-                                            className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white text-base placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all resize-none leading-relaxed group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-base placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all resize-none leading-relaxed group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
                                         placeholder="Start a new post..."
                                     />
                                     </div>
@@ -250,7 +251,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                 {/* Tags Field */}
                                 <div className="space-y-4">
                                     <label htmlFor="tags" className="flex items-center gap-2 text-sm font-bold text-white/90 ml-1 uppercase tracking-wider font-heading">
-                                        <Tag size={14} className="text-yellow-500" />
+                                        <Tag className="w-8 h-8 text-yellow-500" />
                                         Tags <span className="text-muted-foreground/50 font-normal text-xs lowercase italic">(optional)</span>
                                     </label>
                                     <div className="relative group">
@@ -259,7 +260,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                             id="tags"
                                             value={tags}
                                             onChange={(e) => setTags(e.target.value)}
-                                            className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white text-base placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-base placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
                                             placeholder="e.g., general, question, feedback"
                                         />
                                     </div>
@@ -270,7 +271,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                             </div>
 
                             {/* Actions */}
-                            <div className="pt-10 flex items-center justify-end gap-6 border-t border-white/10 mt-6">
+                            <div className="pt-6 flex flex-col sm:flex-row items-center justify-end gap-4 sm:gap-6 border-t border-white/10 mt-6">
                                 <input
                                   type="file"
                                   ref={fileInputRef}
@@ -283,18 +284,18 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                     type="button"
                                     variant="ghost"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="text-muted-foreground hover:text-white hover:bg-white/5 px-4 py-6 rounded-2xl transition-all"
+                                    className="text-muted-foreground hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all"
                                     style={{ backgroundColor: selectedFiles.length > 0 ? '#e6b31c' : '' }}
                                 >
-                                    <ImageIcon size={24} className={selectedFiles.length > 0 ? 'text-black' : 'text-yellow-500'} />
+                                    <ImageIcon className={cn("w-8 h-8", selectedFiles.length > 0 ? 'text-black' : 'text-yellow-500')} />
                                 </Button>
-                                <Button variant="ghost" type="button" onClick={onClose} className="text-muted-foreground hover:text-white hover:bg-white/5 px-8 py-6 rounded-2xl transition-all font-manrope">
+                                <Button variant="ghost" type="button" onClick={onClose} className="text-muted-foreground hover:text-white hover:bg-white/5 px-6 py-3 rounded-xl transition-all font-manrope">
                                     Cancel
                                 </Button>
                                 <Button
                                     type="submit"
                                     disabled={loading || (!title.trim() && !body.trim() && selectedFiles.length === 0)}
-                                    className="px-12 py-7 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xl rounded-2xl shadow-[0_0_40px_rgba(234,179,8,0.25)] hover:shadow-[0_0_60px_rgba(234,179,8,0.4)] transition-all flex items-center gap-4 active:scale-[0.98] font-manrope"
+                                    className="w-full sm:w-auto px-8 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-base rounded-xl shadow-[0_0_40px_rgba(234,179,8,0.25)] hover:shadow-[0_0_60px_rgba(234,179,8,0.4)] transition-all flex items-center justify-center gap-2 active:scale-[0.98] font-manrope"
                                     style={{ backgroundColor: '#e6b31c', color: 'black' }}
                                 >
                                     {loading ? (
@@ -304,7 +305,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                         </>
                                     ) : (
                                         <>
-                                            <Send size={24} />
+                                            <Send className="w-8 h-8" />
                                             <span>Create Post</span>
                                         </>
                                     )}

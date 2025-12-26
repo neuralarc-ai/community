@@ -55,7 +55,7 @@ export function ConclaveControls({ onLeave }: ConclaveControlsProps) {
           ${handRaised ? 'bg-[#e6b31c] text-white' : 'border border-gray-600 text-gray-300 hover:border-gray-500 hover:text-white'}`}
         title={handRaised ? 'Lower Hand' : 'Raise Hand'}
       >
-        <Hand size={18} />
+        <Hand className="w-8 h-8" />
         <span className="font-manrope text-sm">{handRaised ? 'Hand Raised' : 'Raise Hand'}</span>
       </button>
 
@@ -64,7 +64,7 @@ export function ConclaveControls({ onLeave }: ConclaveControlsProps) {
         className="bg-red-500 text-white w-14 h-14 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
         title="Leave Conclave"
       >
-        <LogOut size={24} />
+        <LogOut className="w-8 h-8" />
       </button>
       <RoomAudioRenderer />
     </div>

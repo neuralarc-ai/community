@@ -14,16 +14,9 @@ export default function TermsOfUseDialog({ open, onClose }: TermsOfUseDialogProp
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[800px] bg-card border-[#27584F]/30 text-foreground max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="sticky top-0 bg-card z-10 p-6 border-b border-[#27584F]/30">
+        <DialogHeader className="p-6 border-b border-[#27584F]/30">
           <DialogTitle className="flex items-center justify-between text-2xl font-bold text-foreground">
             Terms of Use – Sphere Community Portal
-            <Button
-              variant="ghost"
-              onClick={onClose}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-5 w-5" />
-            </Button>
           </DialogTitle>
         </DialogHeader>
         <div className="px-6 py-4 prose dark:prose-invert max-w-none text-foreground">

@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
 import ConclaveRoom from '@/components/conclave/ConclaveRoom'
-import { cn } from '@/lib/utils'
+import { ChevronLeft } from 'lucide-react'
 
 export default function ConclavePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -60,6 +60,10 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           .select('*')
           .eq('id', id)
           .single()
+
+        console.log('Workshop ID:', id)
+        console.log('Workshop Data:', workshopData)
+        console.log('Supabase Error:', error)
 
         if (error || !workshopData) {
           console.error('Workshop not found', error)
@@ -120,13 +124,18 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
       <div className="p-4 flex-1">
         {/* Header Area */}
         <div className="mb-6 flex items-center justify-between px-2">
-          <div>
-            <h1 className="text-2xl font-bold text-white">{workshop.title}</h1>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-              <span className="text-xs text-zinc-400 uppercase tracking-widest font-bold">
-                Live {workshop.type} Conclave
-              </span>
+          <div className="flex items-center gap-4">
+            <button onClick={() => router.back()} className="text-white hover:text-zinc-400 transition-colors">
+              <ChevronLeft size={24} />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-white">{workshop.title}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                <span className="text-xs text-zinc-400 uppercase tracking-widest font-bold">
+                  Live {workshop.type} Conclave
+                </span>
+              </div>
             </div>
           </div>
         </div>

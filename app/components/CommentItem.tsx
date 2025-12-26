@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import Link from 'next/link'
 import Avatar from './Avatar';
 import ReplyInput from './ReplyInput'
 import VoteButton from './VoteButton'
@@ -75,7 +76,9 @@ const CommentItem = memo(function CommentItem({
       {/* Avatar Column */}
       <div className="flex flex-col items-center z-10 flex-shrink-0">
          <div className="w-10 h-10 rounded-full p-0.5 bg-[#0A0A0A] ring-1 ring-white/10">
-            <Avatar src={comment.author?.avatar_url || null} alt={`${comment.author?.username || 'Anonymous'}'s avatar`} size={36} className="rounded-full" />
+            <Link href={`/profile/${comment.author_id}`}>
+              <Avatar src={comment.author?.avatar_url || null} alt={`${comment.author?.username || 'Anonymous'}'s avatar`} size={36} className="rounded-full" />
+            </Link>
          </div>
       </div>
 
@@ -83,9 +86,9 @@ const CommentItem = memo(function CommentItem({
       <div className="flex-grow min-w-0 pt-1">
         {/* Header */}
         <div className="flex items-center text-sm mb-1.5 gap-2">
-          <span className="font-semibold text-white hover:underline cursor-pointer">
+          <Link href={`/profile/${comment.author_id}`} className="font-semibold text-white hover:underline cursor-pointer">
             u/{comment.author?.username || 'Anonymous'}
-          </span>
+          </Link>
           <span className="text-muted-foreground text-xs">•</span>
           <span className="text-muted-foreground text-xs">{formatTime(comment.created_at)}</span>
         </div>
