@@ -182,21 +182,21 @@ const FluxDashboard = () => {
               </thead>
               <tbody>
                 {leaderboard.map((profile, index) => (
-                  <tr key={profile.id} className={`border-b border-zinc-800 last:border-b-0 ${profile.id === user?.id ? 'bg-zinc-800' : 'hover:bg-zinc-800'}`}>
-                    <td className="py-3 px-4 text-center">{index + 1}</td>
+                  <tr key={profile.id} className={`border-b border-[#A6C8D5]/20 last:border-b-0 transition-all duration-300 group ${profile.id === user?.id ? 'bg-card/60 border-[#A6C8D5]/30 shadow-[0_0_30px_rgba(166,200,213,0.1)]' : 'hover:bg-card/60 hover:border-[#FFB6C1] hover:shadow-[0_0_30px_rgba(255,182,193,0.1)]'}`}>
+                    <td className="py-3 px-4 text-center text-white group-hover:text-white/80 transition-colors">{index + 1}</td>
                     <td className="py-3 px-4 flex items-center text-left">
                       <Image
                         src={profile.avatar_url || '/default-avatar.png'} // Fallback for avatar
                         alt={profile.full_name || 'User'}
                         width={32}
                         height={32}
-                        className="rounded-full mr-3"
+                        className="rounded-full mr-3 ring-1 ring-white/10 group-hover:ring-[#FFB6C1]/50 transition-all"
                       />
-                      <span>{profile.full_name}</span>
+                      <span className="font-medium text-white group-hover:text-[#FFB6C1] transition-colors">{profile.full_name}</span>
                     </td>
-                    <td className="py-3 px-4 text-center">{profile.total_flux}</td>
-                    <td className="py-3 px-4 text-center">{profile.posts_count}</td>
-                    <td className="py-3 px-4 text-center">{profile.comments_count}</td>
+                    <td className="py-3 px-4 text-center text-white group-hover:text-[#FFB6C1] transition-colors">{profile.total_flux}</td>
+                    <td className="py-3 px-4 text-center text-white group-hover:text-[#FFB6C1] transition-colors">{profile.posts_count}</td>
+                    <td className="py-3 px-4 text-center text-white group-hover:text-[#FFB6C1] transition-colors">{profile.comments_count}</td>
                   </tr>
                 ))}
               </tbody>

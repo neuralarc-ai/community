@@ -1,21 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import TwoColumnLayout from '@/app/components/TwoColumnLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Avatar from '@/app/components/Avatar';
 import { Settings, Calendar, Award, Plus, MessageCircle, FileText, Bookmark, Share2, Heart, MessageSquare, Edit2 } from 'lucide-react';
 import { getCurrentUserProfile } from '@/app/lib/getProfile';
+import { createClient } from '@/app/lib/supabaseClient';
 import { Profile, Post } from '@/app/types';
 import PostItem from '@/app/components/PostItem';
 import PostList from '@/app/components/PostList';
 import Link from 'next/link';
 import AvatarEditor from '@/app/components/AvatarEditor';
 
-export default function ProfilePage() {
+export default function ProfilePage({ params }: { params: { userId: string } }) {
+  const { userId } = React.use(params);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
@@ -29,11 +32,18 @@ export default function ProfilePage() {
   const [showAvatarEditor, setShowAvatarEditor] = useState(false);
 
   useEffect(() => {
-    getCurrentUserProfile().then((data) => {
-        setProfile(data);
-        setLoading(false);
-    });
-  }, []);
+    const fetchProfileAndUser = async () => {
+      setLoading(true);
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
+      getCurrentUserProfile(userId).then((data) => {
+          setProfile(data);
+          setLoading(false);
+      });
+    };
+    fetchProfileAndUser();
+  }, [userId]); // Added userId to dependency array
 
   useEffect(() => {
     if (activeTab === 'saved') fetchSavedPosts();
@@ -42,9 +52,10 @@ export default function ProfilePage() {
     if (activeTab === 'overview') {
         setLoadingData(true);
         Promise.all([
-            fetch('/api/posts/user').then(res => res.ok ? res.json() : []),
-            fetch('/api/comments/user').then(res => res.ok ? res.json() : []),
-            fetch('/api/posts/saved').then(res => res.ok ? res.json() : []),
+            fetch(`/api/posts/user?userId=${userId}`).then(res => res.ok ? res.json() : []),
+            fetch(`/api/comments/user?userId=${userId}`).then(res => res.ok ? res.json() : []),
+            // Saved posts are specific to the current user, only fetch if viewing own profile
+            userId === currentUserId ? fetch(`/api/posts/saved`).then(res => res.ok ? res.json() : []) : Promise.resolve([]),
         ]).then(([posts, comments, savedPosts]) => {
             setMyPosts(posts);
             setMyComments(comments);
@@ -56,12 +67,12 @@ export default function ProfilePage() {
             setLoadingData(false);
         }).catch(() => setLoadingData(false));
     }
-  }, [activeTab]);
+  }, [activeTab, userId, currentUserId]); // Added userId and currentUserId to dependency array
 
   const fetchMyPosts = async () => {
     setLoadingData(true);
     try {
-      const res = await fetch('/api/posts/user');
+      const res = await fetch(`/api/posts/user?userId=${userId}`);
       if (res.ok) {
           const posts = await res.json();
           setMyPosts(posts);
@@ -73,7 +84,7 @@ export default function ProfilePage() {
   const fetchMyComments = async () => {
     setLoadingData(true);
     try {
-      const res = await fetch('/api/comments/user');
+      const res = await fetch(`/api/comments/user?userId=${userId}`);
       if (res.ok) {
           const comments = await res.json();
           setMyComments(comments);
@@ -134,7 +145,7 @@ export default function ProfilePage() {
           <Link href={`/posts/${comment.post.id}`} className="text-[#A6C8D5] hover:text-[#A6C8D5]/80 hover:underline transition-colors font-bold truncate max-w-[250px] md:max-w-[400px]">
              {comment.post.title}
           </Link>
-          <span className="text-white/20">•</span>
+          <span className="text-white/20"> • </span>
           <span className="text-muted-foreground font-mono">{new Date(comment.created_at).toLocaleDateString()}</span>
         </div>
       </div>
@@ -156,7 +167,7 @@ export default function ProfilePage() {
             
             <CardContent className="pt-0 px-6 pb-6 flex flex-col items-center text-center">
                 {/* Avatar - Centered with negative margin to pull it up */}
-                <div className="-mt-12 mb-4 relative group">
+                <div className="mt-12 mb-4 relative group">
                     <div className="rounded-full p-1.5 bg-[#141414] ring-1 ring-[#A6C8D5]/30 shadow-[0_0_20px_rgba(166,200,213,0.2)]">
                         <Avatar 
                             src={profile.avatar_url} 
@@ -166,13 +177,15 @@ export default function ProfilePage() {
                         />
                     </div>
                     {/* Edit Button */}
+                    {userId === currentUserId && (
                         <button 
-                        onClick={() => setShowAvatarEditor(true)}
-                        className="absolute bottom-0 right-0 p-2 bg-[#A6C8D5] rounded-full text-white shadow-lg hover:bg-[#A6C8D5]/80 transition-transform hover:scale-105"
-                        title="Edit Avatar"
-                    >
-                        <Edit2 size={14} />
-                    </button>
+                            onClick={() => setShowAvatarEditor(true)}
+                            className="absolute bottom-0 right-0 p-2 bg-[#A6C8D5] rounded-full text-white shadow-lg hover:bg-[#A6C8D5]/80 transition-transform hover:scale-105"
+                            title="Edit Avatar"
+                        >
+                            <Edit2 size={14} />
+                        </button>
+                    )}
                 </div>
 
                 {/* Profile Info - Centered */}
@@ -211,12 +224,14 @@ export default function ProfilePage() {
                         </Button>
                     </Link>
                     <div className="h-1"></div>
-                    <Link href="/profile/settings" className="w-full">
-                        <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
-                            <Settings className="w-4 h-4 mr-2" />
-                            Profile Settings
-                        </Button>
-                    </Link>
+                    {userId === currentUserId && (
+                      <Link href="/profile/settings" className="w-full">
+                          <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
+                              <Settings className="w-4 h-4 mr-2" />
+                              Profile Settings
+                          </Button>
+                      </Link>
+                    )}
                 </div>
             </CardContent>
         </Card>

@@ -29,13 +29,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/logo Sphere black.png" />
+        <link rel="icon" href="/logo Sphere black.png" media="(prefers-color-scheme: light)" />
+        <link rel="icon" href="/logo Sphere black.png" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" href="/logo Sphere black.png" /> {/* Fallback for browsers that don't support media queries */}
       </head>
       <body
         className={`${sora.variable} ${manrope.variable} antialiased bg-background text-foreground font-sans overflow-x-hidden`}
       >
         <MainLayoutClientWrapper>
-          {children}
+        {children}
         </MainLayoutClientWrapper>
         <Toaster />
       </body>

@@ -172,8 +172,12 @@ export default function PostItem({
               </span>
            )}
             <div className="flex items-center gap-2">
-              <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={28} />
-              <span className="font-medium text-white">u/{post.author?.username || 'Anonymous'}</span>
+              <Link href={`/profile/${post.author_id}`}>
+                <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={28} />
+              </Link>
+              <Link href={`/profile/${post.author_id}`} className="font-medium text-white">
+                u/{post.author?.username || 'Anonymous'}
+              </Link>
             </div>
               {post.author?.role === 'admin' && (
               <span className="ml-2 px-2 py-0.5 bg-admin-yellow/20 text-admin-yellow rounded-full text-[10px] font-bold uppercase tracking-wider border border-admin-yellow/30">

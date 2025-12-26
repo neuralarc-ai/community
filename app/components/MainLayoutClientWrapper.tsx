@@ -40,8 +40,8 @@ export default function MainLayoutClientWrapper({ children }: MainLayoutClientWr
       
       <div className="flex flex-1 overflow-hidden"> {/* Ensure flex-1 for content area, overflow hidden to prevent horizontal scroll */}
         {/* LeftSidebar - Responsive visibility and positioning */}
-        <LeftSidebar
-          isOpen={isSidebarOpen}
+      <LeftSidebar
+        isOpen={isSidebarOpen}
           onToggle={handleToggleSidebar}
           isMobile={!isDesktop}
           onCloseMobile={handleCloseMobileSidebar}
@@ -66,9 +66,9 @@ export default function MainLayoutClientWrapper({ children }: MainLayoutClientWr
           )}
         >
           <div className="mx-auto max-w-screen-xl">
-            {children}
+        {children}
           </div>
-        </main>
+      </main>
       </div>
     </div>
   );
