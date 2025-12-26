@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/app/lib/supabaseServerClient';
 import { sendEmail } from '@/app/lib/mail';
 import { ConclaveInvitationEmail } from '@/app/emails/ConclaveInvitationEmail';
-import ReactDOMServer from 'react-dom/server';
+import { render } from '@react-email/render';
 import { Workshop } from '@/app/types';
 
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
+  const supabase = await createServerClient();
 
   try {
     const { workshopId } = await req.json();
@@ -49,16 +49,15 @@ export async function POST(req: NextRequest) {
 
     if (emailsToSend.length > 0) {
       await sendEmail({
-        from: process.env.SENDER_EMAIL || 'notifications@neuralarc.ai',
         to: emailsToSend.join(','), // sendEmail expects a comma-separated string for multiple recipients
         subject: `Conclave Live: ${workshop.title}`,
-        html: ReactDOMServer.renderToString(ConclaveInvitationEmail({
+        html: await render(ConclaveInvitationEmail({
           userName: 'Attendee', // This might need to be dynamic if you fetch user names
           conclaveTitle: workshop.title,
           conclaveDate: workshop.start_time,
           conclaveTime: workshop.start_time,
           conclaveLink: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/conclave/${workshop.id}`,
-          hostName: (workshop.host as { display_name: string })?.display_name || 'Host',
+          hostName: (workshop.host as any)?.display_name || 'Host',
           conclaveDescription: workshop.description,
         })),
       });
