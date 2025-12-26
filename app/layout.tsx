@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Sora, Manrope } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/app/components/ui/toaster";
-import MainLayoutClientWrapper from "@/app/components/MainLayoutClientWrapper";
+import LayoutWrapper from "@/app/components/LayoutWrapper";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -44,9 +44,9 @@ export default function RootLayout({
       <body
         className={`${sora.variable} ${manrope.variable} antialiased bg-background text-foreground font-sans overflow-x-hidden`}
       >
-        <MainLayoutClientWrapper>
+        <LayoutWrapper>
         {children}
-        </MainLayoutClientWrapper>
+        </LayoutWrapper>
         <Toaster />
       </body>
     </html>
