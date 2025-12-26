@@ -352,12 +352,22 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           description: "Conclave invitations have been successfully dispatched to eligible users.",
         });
       } else {
-        const errorData = await response.json();
-        toast({
-          title: "Error!",
-          description: errorData.message || "Failed to send conclave invitations.",
-          variant: "destructive",
-        });
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await response.json();
+          toast({
+            title: "Error!",
+            description: errorData.message || "Failed to send conclave invitations.",
+            variant: "destructive",
+          });
+        } else {
+          const errorText = await response.text();
+          toast({
+            title: "Error!",
+            description: `Server error: ${response.status} ${response.statusText} - ${errorText}`,
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to notify conclave users:', error);

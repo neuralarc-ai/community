@@ -5,6 +5,7 @@ import LeftSidebar from './LeftSidebar';
 import Header from '@/app/components/Header';
 import { useMediaQuery } from '@/lib/utils';
 import { cn } from '@/lib/utils';
+import Footer from './Footer';
 
 const MOBILE_HEADER_HEIGHT = '56px'; // h-14
 const DESKTOP_HEADER_HEIGHT = '64px'; // h-16
@@ -68,6 +69,7 @@ export default function MainLayoutClientWrapper({ children }: MainLayoutClientWr
           <div className="mx-auto max-w-screen-xl">
         {children}
           </div>
+        <Footer />
       </main>
       </div>
     </div>
