@@ -167,7 +167,14 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
           const profile = participantProfiles.get(participant.identity);
           const isParticipantHost = profile?.role === 'host';
           const isParticipantAdmin = profile?.role === 'admin';
-          const canParticipantPublish = participant.permissions?.canPublish === true; // Use LiveKit permissions
+          
+          let canParticipantPublish = false;
+          try {
+            const pMetadata = JSON.parse(participant.metadata || '{}');
+            canParticipantPublish = pMetadata.canSpeak === true || participant.permissions?.canPublish === true;
+          } catch {
+            canParticipantPublish = participant.permissions?.canPublish === true;
+          }
 
           return (
             <div key={participant.identity} className="flex items-center justify-between bg-zinc-900 p-2 rounded-md hover:bg-zinc-800 transition-colors">

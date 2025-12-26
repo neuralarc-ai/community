@@ -14,6 +14,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
   const [token, setToken] = useState<string | null>(null)
   const [serverUrl, setServerUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const supabase = createClient()
   const isHost = workshop?.host_id === userId // Determine if the current user is the host
@@ -39,10 +40,10 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
         }
         setUserId(user.id)
 
-        // Fetch user profile to get username
+        // Fetch user profile to get username and role
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('username')
+          .select('username, role')
           .eq('id', user.id)
           .single()
 
@@ -53,6 +54,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
         }
 
         const participantUsername = profile.username;
+        setUserRole(profile.role);
 
         // 2. Fetch Workshop Data
         const { data: workshopData, error } = await supabase
@@ -137,6 +139,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           serverUrl={serverUrl}
           workshop={workshop}
           userId={userId}
+          userRole={userRole}
           onEndLive={handleEndLive}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={toggleSidebar}
