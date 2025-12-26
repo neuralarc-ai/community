@@ -12,11 +12,12 @@ interface LeftSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
   isMobile: boolean;
-  isCollapsible?: boolean;
   onCloseMobile: () => void;
+  className?: string; // Add className prop for external styling
+  headerHeight: string;
 }
 
-export default function LeftSidebar({ isOpen, onToggle, isMobile, isCollapsible, onCloseMobile }: LeftSidebarProps) {
+export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile, className, headerHeight }: LeftSidebarProps) {
   const pathname = usePathname();
   const [userRole, setUserRole] = useState<Profile['role'] | null>(null);
   const supabase = createClient();
@@ -157,7 +158,7 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, isCollapsible,
 
         .radio-nav-container label {
           cursor: pointer;
-          padding: 0.75rem;
+          padding: 0.75rem 1rem; /* Responsive padding */
           position: relative;
           color: rgb(163, 163, 163);
           transition: all 0.3s ease-in-out;
@@ -167,6 +168,7 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, isCollapsible,
           align-items: center;
           gap: 0.5rem;
           margin-bottom: 0.25rem; /* Spacing between items */
+          font-size: 0.95rem; /* Slightly smaller text for better fit */
         }
 
         .radio-nav-container label:last-child {
@@ -181,23 +183,21 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, isCollapsible,
       `}</style>
       {isMobile && isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden" // Hide overlay on desktop
           onClick={onCloseMobile}
           aria-hidden="true"
         />
       )}
       <div
         className={cn(
-          "transition-all duration-300 ease-in-out flex flex-col bg-[#0F0F0F] border-r border-white/5 backdrop-blur-xl pt-16",
-          isMobile ?
-            {
-              "fixed left-0 top-0 z-40 h-full w-full max-w-[16rem]": isOpen,
-              "-translate-x-full": !isOpen,
-            }
-            :
-            {
-              "relative w-64 shrink-0": true,
-            }
+          "flex-col bg-[#0F0F0F] border-r border-white/5 backdrop-blur-xl transition-transform duration-300 ease-in-out z-40 fixed left-0 overflow-y-auto",
+          `top-[${headerHeight}]`,
+          `h-[calc(100vh-${headerHeight})]`,
+          "lg:w-64 md:w-56",
+          isMobile ? 
+            (isOpen ? "w-full max-w-[14rem] translate-x-0" : "w-full max-w-[14rem] -translate-x-full") :
+            "hidden md:flex", // On desktop/tablet, it's always visible and flex. On mobile, it's hidden by default, then slides in.
+          className // Apply external classes
         )}
         style={{
           '--main-color': navItems[activeIndex]?.mainColor || '#f97316', // Fallback to orange
