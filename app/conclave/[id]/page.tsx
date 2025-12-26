@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
 import ConclaveRoom from '@/components/conclave/ConclaveRoom'
+import { cn } from '@/lib/utils'
 
 export default function ConclavePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -13,11 +14,18 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
   const [token, setToken] = useState<string | null>(null)
   const [serverUrl, setServerUrl] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const supabase = createClient()
+  const isHost = workshop?.host_id === userId // Determine if the current user is the host
 
   const handleEndLive = async () => {
     // For now, just return true - this can be enhanced later
+    router.push(`/workshops`); // Redirect to the workshops page
     return true
+  }
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev)
   }
 
   useEffect(() => {
@@ -109,7 +117,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
 
   return (
     <main className="min-h-screen bg-black overflow-hidden flex flex-col">
-      <div className="p-4 flex-1 flex flex-col">
+      <div className="p-4 flex-1">
         {/* Header Area */}
         <div className="mb-6 flex items-center justify-between px-2">
           <div>
@@ -130,9 +138,11 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           workshop={workshop}
           userId={userId}
           onEndLive={handleEndLive}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={toggleSidebar}
+          roomName={`conclave-${id}`}
         />
       </div>
     </main>
   )
 }
-

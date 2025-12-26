@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useRoleManager } from '@/hooks/useRoleManager'; // Import the new hook
+import { Participant } from 'livekit-client';
 
 interface ParticipantListProps {
   workshopId: string;
@@ -29,6 +31,13 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
   const isLocalAdmin = localParticipantProfile?.role === 'admin';
   const [searchTerm, setSearchTerm] = useState('');
   const [isHandRaised, setIsHandRaised] = useState(false);
+
+  // Use the useRoleManager for local participant to get management functions
+  const {
+    promoteToSpeaker,
+    demoteToListener,
+    muteParticipant,
+  } = useRoleManager({ participant: localParticipant as Participant, roomName: room.name });
 
   const sortedParticipants = useMemo(() => {
     const roomMetadata = room.metadata ? JSON.parse(room.metadata) : {};
@@ -86,52 +95,9 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
     fetchProfiles();
   }, [allParticipants]);
 
-  const handleToggleSpeakPermission = async (participantIdentity: string, currentCanSpeak: boolean) => {
-    if (!isLocalHost && !isLocalAdmin) return;
 
-    const newCanSpeakStatus = !currentCanSpeak;
-    console.log(`Attempting to set speak permission for ${participantIdentity} in room: ${room.name} to ${newCanSpeakStatus}`);
-
-    try {
-      const response = await fetch('/api/livekit/toggle-speak-permission', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomName: room.name, participantIdentity, canSpeak: newCanSpeakStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to toggle speak permission');
-      }
-      console.log(`Successfully toggled speak permission for ${participantIdentity} to ${newCanSpeakStatus}`);
-    } catch (error) {
-      console.error(`Error toggling speak permission for ${participantIdentity}:`, error);
-    }
-  };
-
-  const handleMuteVideoToggle = async (participantIdentity: string) => {
-    if (!isLocalHost && !isLocalAdmin) return;
-    
-    const participant = allParticipants.find(p => p.identity === participantIdentity);
-    if (!participant) return;
-
-    const currentMutedState = participant.isCameraEnabled;
-    const newMutedState = !currentMutedState; // This is the DESIRED muted state
-
-    console.log(`Attempting to toggle video for ${participantIdentity} in room: ${room.name} to muted: ${newMutedState}`);
-    try {
-      const response = await fetch('/api/livekit/mute-participant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomName: room.name, participantIdentity, trackType: 'video', muted: newMutedState }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to toggle mute');
-      }
-      console.log(`Successfully toggled video for ${participantIdentity}`);
-    } catch (error) {
-      console.error(`Error toggling video for ${participantIdentity}:`, error);
-    }
-  };
+  // handleToggleSpeakPermission is replaced by promoteToSpeaker and demoteToListener from useRoleManager
+  // handleMuteVideoToggle is replaced by muteParticipant from useRoleManager
 
   const handleRemoveParticipant = async (participantIdentity: string) => {
     if (!isLocalHost && !isLocalAdmin) return;
@@ -139,7 +105,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
     // This requires server-side API call to remove a participant
     console.log(`Attempting to remove ${participantIdentity}`);
     try {
-      const response = await fetch('/api/livekit/remove-participant', {
+      const response = await fetch('/api/livekit/manage-participant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ roomName: room.name, participantIdentity }),
@@ -201,8 +167,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
           const profile = participantProfiles.get(participant.identity);
           const isParticipantHost = profile?.role === 'host';
           const isParticipantAdmin = profile?.role === 'admin';
-          const participantMetadata = participant.metadata ? JSON.parse(participant.metadata) : {};
-          const canParticipantSpeak = participantMetadata.canSpeak === true;
+          const canParticipantPublish = participant.permissions?.canPublish === true; // Use LiveKit permissions
 
           return (
             <div key={participant.identity} className="flex items-center justify-between bg-zinc-900 p-2 rounded-md hover:bg-zinc-800 transition-colors">
@@ -244,8 +209,8 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-zinc-800 border border-zinc-700 text-white">
-                    <DropdownMenuItem onClick={() => handleToggleSpeakPermission(participant.identity, canParticipantSpeak)}>
-                      {canParticipantSpeak ? (
+                    <DropdownMenuItem onClick={() => canParticipantPublish ? demoteToListener(participant.identity) : promoteToSpeaker(participant.identity)}>
+                      {canParticipantPublish ? (
                         <>
                           <ToggleLeft className="mr-2 h-4 w-4" /> Revoke Speak Permission
                         </>
@@ -255,8 +220,19 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
                         </>
                       )}
                     </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleMuteVideoToggle(participant.identity)}>
-                        {participant.isCameraEnabled ? 'Mute Video' : 'Unmute Video'}
+                      <DropdownMenuItem onClick={() => muteParticipant(participant.identity, 'audio', !participant.isMicrophoneEnabled)}>
+                        {participant.isMicrophoneEnabled ? (
+                          <><MicOff className="mr-2 h-4 w-4" /> Mute Audio</>
+                        ) : (
+                          <><Mic className="mr-2 h-4 w-4" /> Unmute Audio</>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => muteParticipant(participant.identity, 'video', !participant.isCameraEnabled)}>
+                        {participant.isCameraEnabled ? (
+                          <><VideoOff className="mr-2 h-4 w-4" /> Mute Video</>
+                        ) : (
+                          <><Video className="mr-2 h-4 w-4" /> Unmute Video</>
+                        )}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleRemoveParticipant(participant.identity)} className="text-red-500">
                         <XCircle className="mr-2 h-4 w-4" />
@@ -271,26 +247,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
         })}
       </div>
 
-      {/* Host Controls */}
-      {isHost && (
-        <div className="border-t border-zinc-700 pt-4 mt-4 flex justify-between gap-2">
-          <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-            Invite
-          </Button>
-          {localParticipant?.isMicrophoneEnabled ? (
-            <Button className="flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={() => localParticipant?.setMicrophoneEnabled(false)}>
-              Mute My Audio
-            </Button>
-          ) : (
-            <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white" onClick={() => localParticipant?.setMicrophoneEnabled(true)}>
-              Unmute My Audio
-            </Button>
-          )}
-          <Button className="flex-1 bg-admin-yellow hover:bg-admin-yellow/90 text-white" onClick={handleRaiseHandToggle}>
-            {isHandRaised ? 'Lower Hand' : 'Raise Hand'}
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

@@ -75,6 +75,12 @@ function SpotlightTile({ participant }: { participant: any }) {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      // Only fetch profile if participant.identity is a valid string
+      if (!participant.identity || participant.identity === '') {
+        setProfile(null);
+        return;
+      }
+
       const supabase = createClient();
       const { data, error } = await supabase
         .from('profiles')
@@ -83,7 +89,7 @@ function SpotlightTile({ participant }: { participant: any }) {
         .single();
 
       if (error) {
-        console.error('Error fetching profile for spotlight participant:', error);
+        console.error('Error fetching profile for spotlight participant:', JSON.stringify(error));
       } else {
         setProfile(data);
       }
@@ -124,6 +130,12 @@ function SidebarTile({ participant }: { participant: any }) {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      // Only fetch profile if participant.identity is a valid string
+      if (!participant.identity || participant.identity === '') {
+        setProfile(null);
+        return;
+      }
+
       const supabase = createClient();
       const { data, error } = await supabase
         .from('profiles')
@@ -132,7 +144,7 @@ function SidebarTile({ participant }: { participant: any }) {
         .single();
 
       if (error) {
-        console.error('Error fetching profile for sidebar participant:', error);
+        console.error('Error fetching profile for sidebar participant:', JSON.stringify(error));
       } else {
         setProfile(data);
       }

@@ -124,3 +124,82 @@ export async function GET(
   }
 }
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const supabase = await createServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Fetch workshop to check host_id
+    const { data: workshop, error: fetchWorkshopError } = await supabase
+      .from('workshops')
+      .select('host_id, title')
+      .eq('id', id)
+      .single()
+
+    if (fetchWorkshopError || !workshop) {
+      return NextResponse.json(
+        { error: 'Workshop not found' },
+        { status: 404 }
+      )
+    }
+
+    // Only host can delete workshop
+    console.log("User ID:", user.id)
+    console.log("Workshop Host ID:", workshop.host_id)
+    console.log("Workshop ID:", id)
+    if (user.id !== workshop.host_id) {
+      return NextResponse.json(
+        { error: 'Forbidden - Only the host can delete this workshop' },
+        { status: 403 }
+      )
+    }
+
+    // Delete related data first (waitlist entries)
+    const { error: deleteWaitlistError } = await supabase
+      .from('workshop_waitlist')
+      .delete()
+      .eq('workshop_id', id)
+
+    if (deleteWaitlistError) {
+      console.error('Error deleting waitlist entries:', deleteWaitlistError)
+      // Continue with workshop deletion even if waitlist deletion fails
+    }
+
+    // Delete the workshop
+    const { error: deleteError } = await supabase
+      .from('workshops')
+      .delete()
+      .eq('id', id)
+
+    if (deleteError) {
+      console.error('Error deleting workshop:', deleteError)
+      return NextResponse.json(
+        { error: 'Failed to delete workshop' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      message: 'Workshop deleted successfully',
+      workshopTitle: workshop.title
+    })
+  } catch (error) {
+    console.error('Error deleting workshop:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete workshop' },
+      { status: 500 }
+    )
+  }
+}
+
