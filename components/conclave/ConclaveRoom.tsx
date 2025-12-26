@@ -22,6 +22,7 @@ interface ConclaveRoomProps {
     host_id: string
   }
   userId: string
+  userRole: string | null
   onEndLive: () => Promise<boolean | void>
   isSidebarOpen?: boolean
   roomName: string
@@ -31,6 +32,7 @@ interface ConclaveRoomProps {
 function ConclaveRoomContent({
   workshop,
   isHost,
+  userRole,
   onEndLive,
   isSidebarOpen,
   onToggleSidebar,
@@ -38,6 +40,7 @@ function ConclaveRoomContent({
 }: {
   workshop: ConclaveRoomProps['workshop']
   isHost: boolean
+  userRole: string | null
   onEndLive: () => Promise<boolean | void>
   isSidebarOpen?: boolean
   onToggleSidebar: () => void
@@ -51,7 +54,7 @@ function ConclaveRoomContent({
       <div className="flex flex-1 relative">
         <div className="flex-1">
           {workshop.type === 'AUDIO' ? (
-            <AudioConclaveView onLeave={onEndLive} />
+            <AudioConclaveView onLeave={onEndLive} userRole={userRole} />
           ) : (
             <VideoStage />
           )}
@@ -89,6 +92,7 @@ export default function ConclaveRoom({
   serverUrl,
   workshop,
   userId,
+  userRole,
   onEndLive,
   isSidebarOpen,
   onToggleSidebar,
@@ -110,6 +114,7 @@ export default function ConclaveRoom({
         <ConclaveRoomContent
           workshop={workshop}
           isHost={isHost}
+          userRole={userRole}
           onEndLive={onEndLive}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={onToggleSidebar}

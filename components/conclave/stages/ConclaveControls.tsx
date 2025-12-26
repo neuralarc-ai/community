@@ -5,15 +5,12 @@ import { useMemo } from 'react';
 
 interface ConclaveControlsProps {
   onLeave: () => void;
+  userRole: string | null;
 }
 
-export function ConclaveControls({ onLeave }: ConclaveControlsProps) {
+export function ConclaveControls({ onLeave, userRole }: ConclaveControlsProps) {
   const { localParticipant } = useLocalParticipant();
   
-  // Use LiveKit permissions to drive UI visibility
-  const canPublish = localParticipant?.permissions?.canPublish === true;
-  const isMicEnabled = localParticipant?.isMicrophoneEnabled;
-
   const metadata = useMemo(() => {
     try {
       return JSON.parse(localParticipant?.metadata || '{}');
@@ -22,7 +19,13 @@ export function ConclaveControls({ onLeave }: ConclaveControlsProps) {
     }
   }, [localParticipant?.metadata]);
 
-  const handRaised = metadata.handRaised;
+  // Use the explicitly passed userRole as the primary source of truth
+  // Fall back to metadata or LiveKit permissions for secondary checks
+  const isAdmin = userRole === 'admin';
+  const isHost = userRole === 'host' || metadata.role === 'host';
+  
+  const canPublish = isAdmin || isHost || metadata.canSpeak === true || localParticipant?.permissions?.canPublish === true;
+  const isMicEnabled = localParticipant?.isMicrophoneEnabled;
 
   const toggleMic = async () => {
     if (localParticipant && canPublish) {
@@ -35,6 +38,8 @@ export function ConclaveControls({ onLeave }: ConclaveControlsProps) {
     const newMetadata = { ...metadata, handRaised: !handRaised };
     await localParticipant?.setAttributes({ metadata: JSON.stringify(newMetadata) });
   };
+
+  const handRaised = metadata.handRaised;
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-800/90 backdrop-blur-md rounded-full px-8 py-4 shadow-xl border border-gray-700 flex items-center gap-6 z-50">
