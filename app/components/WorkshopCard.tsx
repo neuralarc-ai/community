@@ -430,7 +430,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               </div>
               <h4 className="font-semibold text-white font-sora">Recording Processing</h4>
               <p className="text-xs text-muted-foreground max-w-[200px] mt-1 font-manrope">
-                The session has ended. We\'re currently processing the recording for you.
+                The session has ended. We're currently processing the recording for you.
               </p>
             </div>
           )

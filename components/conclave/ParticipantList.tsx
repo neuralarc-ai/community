@@ -144,9 +144,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
     <div className="flex flex-col h-full bg-zinc-950 text-white rounded-lg shadow-lg p-4">
       <div className="flex items-center justify-between border-b border-zinc-700 pb-3 mb-4">
         <h2 className="text-xl font-semibold">Participants ({allParticipants.length})</h2>
-        <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-          <MoreVertical className="h-5 w-5" />
-        </Button>
       </div>
 
       <div className="mb-4">
@@ -204,47 +201,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
                   <VideoOff className="h-4 w-4 text-red-500" />
                 )}
 
-                {(isLocalHost || isLocalAdmin) && !participant.isLocal && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-zinc-800 border border-zinc-700 text-white">
-                    <DropdownMenuItem onClick={() => canParticipantPublish ? demoteToListener(participant.identity) : promoteToSpeaker(participant.identity)}>
-                      {canParticipantPublish ? (
-                        <>
-                          <ToggleLeft className="mr-2 h-4 w-4" /> Revoke Speak Permission
-                        </>
-                      ) : (
-                        <>
-                          <ToggleRight className="mr-2 h-4 w-4" /> Allow to Speak
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => muteParticipant(participant.identity, 'audio', !participant.isMicrophoneEnabled)}>
-                        {participant.isMicrophoneEnabled ? (
-                          <><MicOff className="mr-2 h-4 w-4" /> Mute Audio</>
-                        ) : (
-                          <><Mic className="mr-2 h-4 w-4" /> Unmute Audio</>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => muteParticipant(participant.identity, 'video', !participant.isCameraEnabled)}>
-                        {participant.isCameraEnabled ? (
-                          <><VideoOff className="mr-2 h-4 w-4" /> Mute Video</>
-                        ) : (
-                          <><Video className="mr-2 h-4 w-4" /> Unmute Video</>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleRemoveParticipant(participant.identity)} className="text-red-500">
-                        <XCircle className="mr-2 h-4 w-4" />
-                        Remove
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
               </div>
             </div>
           );

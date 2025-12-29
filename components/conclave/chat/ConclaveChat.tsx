@@ -206,7 +206,8 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
           />
           <button
             type="submit"
-            className={`bg-blue-600 text-white p-2 rounded-r-md hover:bg-blue-700 ${!canPublishData ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`bg-gray-600 text-white p-2 rounded-r-md hover:bg-gray-700 ${!canPublishData ? 'opacity-50 cursor-not-allowed' : ''}`}
+
             disabled={!canPublishData}
           >
             Send

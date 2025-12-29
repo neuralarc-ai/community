@@ -33,7 +33,8 @@ export default function SidebarTabs({ onClose, workshopId, isHost }: SidebarTabs
           </Button>
           <Button
             variant="ghost"
-            className={cn("text-sm", activeTab === 'participants' ? "bg-gray-700 text-white" : "text-gray-400 hover:bg-gray-700")}
+            className={cn("text-sm", activeTab === 'participants' ? "bg-gray-700 text-gray-200" : "text-gray-400 hover:bg-gray-700")}
+
             onClick={() => setActiveTab('participants')}
           >
             Participants ({allParticipants.length})
