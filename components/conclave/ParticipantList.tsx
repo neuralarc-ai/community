@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParticipants, useLocalParticipant, useRoomContext, useParticipantInfo } from '@livekit/components-react';
 import Avatar from '@/app/components/Avatar';
 import { createClient } from '@/app/lib/supabaseClient';
-import { Mic, MicOff, Video, VideoOff, MoreVertical, XCircle, Slash, Crown, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, MoreVertical, XCircle, Slash, Crown, ToggleLeft, ToggleRight, Hand } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -163,8 +163,9 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
           const isParticipantAdmin = profile?.role === 'admin';
           
           let canParticipantPublish = false;
+          let pMetadata = {}; // Initialize pMetadata outside the try-catch
           try {
-            const pMetadata = JSON.parse(participant.metadata || '{}');
+            pMetadata = JSON.parse(participant.metadata || '{}');
             canParticipantPublish = pMetadata.canSpeak === true || participant.permissions?.canPublish === true;
           } catch {
             canParticipantPublish = participant.permissions?.canPublish === true;
@@ -181,6 +182,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
                 <span className="font-medium text-white">
                   {profile?.full_name || profile?.username || 'Anonymous'}
                   {participant.isLocal && ' (me)'}
+                  {pMetadata.handRaised && <Hand className="ml-2 h-4 w-4 text-yellow-500 inline-block" />}
                   {isParticipantHost && <Crown className="ml-1 h-4 w-4 inline-block text-yellow-400" />}
                   {isParticipantAdmin && <span className="ml-2 px-2 py-0.5 bg-admin-yellow/20 text-admin-yellow rounded-full text-[10px] font-bold uppercase tracking-wider border border-admin-yellow/30">Admin</span>}
                 </span>

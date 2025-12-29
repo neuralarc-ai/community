@@ -19,9 +19,12 @@ export default function CompleteProfilePage() {
   const [loading, setLoading] = useState(false)
   const [usernameChecking, setUsernameChecking] = useState(false)
   const [joinDate, setJoinDate] = useState('')
-  const [maxDobDate, setMaxDobDate] = useState('')
   const router = useRouter()
-  const supabase = createClient()
+    const supabase = createClient()
+
+  const twelveYearsAgo = new Date()
+  twelveYearsAgo.setFullYear(twelveYearsAgo.getFullYear() - 12)
+  const maxDate = twelveYearsAgo.toISOString().split('T')[0]
 
   useEffect(() => {
     const checkAuthAndProfile = async () => {
@@ -32,11 +35,6 @@ export default function CompleteProfilePage() {
       }
 
       setJoinDate(new Date(user.created_at).toLocaleDateString())
-
-      const twelveYearsAgo = new Date()
-      twelveYearsAgo.setFullYear(twelveYearsAgo.getFullYear() - 12)
-      const formattedMaxDate = twelveYearsAgo.toISOString().split('T')[0]
-      setMaxDobDate(formattedMaxDate)
 
       const profile = await getCurrentUserProfile()
       if (profile) {
@@ -188,7 +186,7 @@ export default function CompleteProfilePage() {
                   name="dob"
                   type="date"
                   required
-                  max={maxDobDate}
+                  max={maxDate}
                   className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm focus:border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-red-accent transition-all duration-200 sm:text-sm"
                   value={formData.dob}
                   onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
