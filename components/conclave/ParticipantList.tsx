@@ -103,7 +103,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
     if (!isLocalHost && !isLocalAdmin) return;
 
     // This requires server-side API call to remove a participant
-    console.log(`Attempting to remove ${participantIdentity}`);
     try {
       const response = await fetch('/api/livekit/manage-participant', {
         method: 'POST',
@@ -113,7 +112,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
       if (!response.ok) {
         throw new Error('Failed to remove participant');
       }
-      console.log(`Successfully removed ${participantIdentity}`);
     } catch (error) {
       console.error(`Error removing ${participantIdentity}:`, error);
     }
@@ -135,7 +133,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
       if (!response.ok) {
         throw new Error('Failed to toggle hand raise');
       }
-      console.log(`Successfully toggled hand raise to ${newHandRaisedStatus}`);
     } catch (error) {
       console.error('Error toggling hand raise:', error);
       // Revert optimistic update on error

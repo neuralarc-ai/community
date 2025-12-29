@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { X, MoreHorizontal, MessageCircle, Clock, Zap } from 'lucide-react';
@@ -92,7 +90,7 @@ export default function TrendingNews() {
                   <div className="flex -space-x-2">
                     {item.avatars.map((avatar, i) => (
                       <div key={i} className="relative w-6 h-6 rounded-full border-2 border-[#141414] overflow-hidden">
-                        <img src={avatar} alt="User" className="object-cover" />
+                        <Image src={avatar} alt="User" fill className="object-cover" unoptimized={true} />
                       </div>
                     ))}
                   </div>

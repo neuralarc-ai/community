@@ -45,7 +45,6 @@ function PostsContent() {
         table: 'posts', // Listen to changes on the posts table
       },
       (payload) => {
-        console.log('Post vote_score change detected:', payload)
         const updatedPost = payload.new as Post;
         setPosts(currentPosts => 
           currentPosts.map(post => 
@@ -74,11 +73,9 @@ function PostsContent() {
 
   const fetchPosts = async () => {
     setLoading(true)
-    console.log("Fetching posts...")
     try {
       const searchQuery = searchParams.get('search')
       const url = searchQuery ? `/api/posts?search=${encodeURIComponent(searchQuery)}` : '/api/posts'
-      console.log("Posts API URL:", url)
       const response = await fetch(url)
 
       if (!response.ok) {
@@ -111,7 +108,6 @@ function PostsContent() {
       setPosts([]) // Set empty array on error
     } finally {
       setLoading(false)
-      console.log("Posts loading finished.")
     }
   }
 

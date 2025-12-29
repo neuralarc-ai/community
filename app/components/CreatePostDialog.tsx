@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -22,8 +23,8 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [tags, setTags] = useState('')
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [previews, setPreviews] = useState<string[]>([])
+  const [selectedFiles, setSelectedFiles] = useState<Array<{ id: string; file: File }>>([]);
+  const [previews, setPreviews] = useState<Array<{ id: string; url: string }>>([]);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [dragActive, setDragActive] = useState(false) // New state for drag-and-drop
@@ -54,18 +55,22 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
         return
       }
 
-      setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles])
-      const newPreviews = newFiles.map(file => URL.createObjectURL(file))
-      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews])
+      const filesWithIds = newFiles.map(file => ({ id: crypto.randomUUID(), file }));
+      setSelectedFiles((prevFiles) => [...prevFiles, ...filesWithIds]);
+      const newPreviews = filesWithIds.map(item => ({ id: item.id, url: URL.createObjectURL(item.file) }));
+      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
     }
   }
 
-  const handleRemoveImage = (indexToRemove: number) => {
-    setSelectedFiles((prevFiles) => prevFiles.filter((_, index) => index !== indexToRemove))
+  const handleRemoveImage = (idToRemove: string) => {
+    setSelectedFiles((prevFiles) => prevFiles.filter((item) => item.id !== idToRemove));
     setPreviews((prevPreviews) => {
-      URL.revokeObjectURL(prevPreviews[indexToRemove]) // Clean up memory
-      return prevPreviews.filter((_, index) => index !== indexToRemove)
-    })
+      const previewToRemove = prevPreviews.find(item => item.id === idToRemove);
+      if (previewToRemove) {
+        URL.revokeObjectURL(previewToRemove.url); // Clean up memory
+      }
+      return prevPreviews.filter((item) => item.id !== idToRemove);
+    });
   }
 
   const handleDragOver = (e: React.DragEvent<HTMLFormElement>) => {
@@ -113,7 +118,7 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
           title: "Uploading images...",
           description: "Please wait while your images are being uploaded.",
         });
-        imageUrls = await uploadPostImages(user.id, selectedFiles);
+        imageUrls = await uploadPostImages(user.id, selectedFiles.map(item => item.file));
         toast({
             title: "Images uploaded!",
             description: `${imageUrls.length} image(s) uploaded successfully.`,
@@ -197,12 +202,12 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
                                   <div className="grid gap-4 mb-4" style={{
                                     gridTemplateColumns: previews.length === 1 ? '1fr' : previews.length === 2 ? '1fr 1fr' : '3fr 2fr'
                                   }}>
-                                    {previews.map((src, index) => (
-                                      <div key={index} className="relative rounded-lg overflow-hidden border border-white/10 shadow-lg">
-                                        <img src={src} alt={`Preview ${index + 1}`} className="w-full h-full object-cover max-h-[300px]" />
+                                    {previews.map((item) => (
+                                      <div key={item.id} className="relative rounded-lg overflow-hidden border border-white/10 shadow-lg">
+                                        <Image src={item.url} alt={`Preview ${item.id}`} fill className="object-cover" unoptimized={true} />
                                         <button
                                           type="button"
-                                          onClick={() => handleRemoveImage(index)}
+                                          onClick={() => handleRemoveImage(item.id)}
                                           className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-red-500 transition-colors"
                                         >
                                           <X className="w-8 h-8" />

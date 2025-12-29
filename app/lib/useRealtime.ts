@@ -138,7 +138,6 @@ export function useRealtime(callbacks: RealtimeCallbacks) {
     // Subscribe to the channel
     channel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        console.log('Realtime subscription active')
       } else if (status === 'CHANNEL_ERROR') {
         console.error('Realtime subscription error')
       }

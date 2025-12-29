@@ -126,8 +126,6 @@ export async function POST(request: NextRequest) {
 
     // Award flux points for creating a comment
     const fluxAwardResult = await awardFlux(user.id, 'COMMENT')
-    console.log('Flux award result for comment creation:', fluxAwardResult)
-
     const commentWithAuthor: Comment = {
       ...newComment,
       author: {

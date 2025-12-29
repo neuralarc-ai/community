@@ -100,8 +100,6 @@ export async function POST(request: NextRequest) {
 
     // Award flux points for joining a conclave
     const fluxAwardResult = await awardFlux(user.id, 'CONCLAVE_JOIN')
-    console.log('Flux award result for conclave join:', fluxAwardResult)
-
     const finalResponse = NextResponse.json({
       token,
       serverUrl: process.env.LIVEKIT_URL,

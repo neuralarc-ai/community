@@ -1,11 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { Users, MessageSquare, Presentation, Video, MessageCircle, Calendar, UserPlus, Activity, ShieldAlert, Mail, Clock } from 'lucide-react'
 import { mockActivity } from '@/app/data/mockData'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import ChartCard from '@/app/components/charts/ChartCard'
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts'
+import dynamic from 'next/dynamic'
+
+const ResponsiveContainer = dynamic(() => import('recharts').then((mod) => mod.ResponsiveContainer), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const LineChart = dynamic(() => import('recharts').then((mod) => mod.LineChart), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const Line = dynamic(() => import('recharts').then((mod) => mod.Line), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const XAxis = dynamic(() => import('recharts').then((mod) => mod.XAxis), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const YAxis = dynamic(() => import('recharts').then((mod) => mod.YAxis), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const CartesianGrid = dynamic(() => import('recharts').then((mod) => mod.CartesianGrid), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const Tooltip = dynamic(() => import('recharts').then((mod) => mod.Tooltip), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const BarChart = dynamic(() => import('recharts').then((mod) => mod.BarChart), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
+const Bar = dynamic(() => import('recharts').then((mod) => mod.Bar), { ssr: false, loading: () => <div className="h-[100px] w-full flex items-center justify-center text-muted-foreground">Loading Chart...</div> })
 import type { Icon as LucideIcon } from 'lucide-react';
 import { Profile, Post } from '@/app/types'
 import Avatar from './Avatar'
@@ -55,7 +65,6 @@ export default function Dashboard() {
           table: 'posts',
         },
         (payload) => {
-          console.log('Post change detected:', payload)
           if (payload.eventType === 'INSERT') {
             setTotalPosts(prevCount => (prevCount !== null ? prevCount + 1 : 1))
             const newPost = payload.new as Post
@@ -82,7 +91,7 @@ export default function Dashboard() {
     }
   }, [activeTab, supabase])
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoadingUsers(true)
     try {
       const response = await fetch('/api/admin/users')
@@ -95,9 +104,9 @@ export default function Dashboard() {
     } finally {
       setLoadingUsers(false)
     }
-  }
+  }, [supabase]) // Add supabase to dependencies
 
-  const fetchTotalMembers = async () => {
+  const fetchTotalMembers = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/users')
       if (response.ok) {
@@ -107,9 +116,9 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to fetch total members:', error)
     }
-  }
+  }, [supabase]) // Add supabase to dependencies
 
-  const fetchTotalWorkshops = async () => {
+  const fetchTotalWorkshops = useCallback(async () => {
     try {
       const response = await fetch('/api/workshops?showArchived=false')
       if (response.ok) {
@@ -119,9 +128,9 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to fetch total workshops:', error)
     } 
-  }
+  }, [supabase]) // Add supabase to dependencies
 
-  const fetchTotalPosts = async () => {
+  const fetchTotalPosts = useCallback(async () => {
     try {
       const response = await fetch('/api/posts')
       if (response.ok) {
@@ -131,9 +140,9 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to fetch total posts:', error)
     }
-  }
+  }, [supabase]) // Add supabase to dependencies
 
-  const fetchRecentPosts = async () => {
+  const fetchRecentPosts = useCallback(async () => {
     try {
       const response = await fetch('/api/posts?limit=5') // Assuming your API supports a limit parameter
       if (response.ok) {
@@ -143,34 +152,33 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Failed to fetch recent posts:', error)
     }
-  }
-
-  const mockMemberGrowthData = [
+  }, [supabase]) // Add supabase to dependencies
+  const mockMemberGrowthData = useMemo(() => [
     { name: 'Jan', value: 100 },
     { name: 'Feb', value: 120 },
     { name: 'Mar', value: 150 },
     { name: 'Apr', value: 130 },
     { name: 'May', value: 180 },
     { name: 'Jun', value: totalMembers || 200 }, // Use actual totalMembers for the last point
-  ];
+  ], [totalMembers]);
 
-  const mockDiscussionData = [
+  const mockDiscussionData = useMemo(() => [
     { name: 'Category A', discussions: 400 },
     { name: 'Category B', discussions: 300 },
     { name: 'Category C', discussions: 200 },
     { name: 'Category D', discussions: 278 },
     { name: 'Category E', discussions: 189 },
-  ];
+  ], []);
 
-  const mockPostsActivityData = [
+  const mockPostsActivityData = useMemo(() => [
     { name: 'Week 1', posts: 10 },
     { name: 'Week 2', posts: 15 },
     { name: 'Week 3', posts: 12 },
     { name: 'Week 4', posts: 18 },
-  ];
+  ], []);
 
 
-  const renderStatCard = (stat: StatCardData) => {
+  const renderStatCard = useCallback((stat: StatCardData) => {
     const isMembersCard = stat.id === 'members';
     const isPostsCard = stat.id === 'posts';
     const isConclavesCard = stat.id === 'conclaves';
@@ -328,7 +336,7 @@ export default function Dashboard() {
         </CardContent>
       </Card>
     );
-  };
+  }, [totalMembers, mockMemberGrowthData, mockDiscussionData, mockPostsActivityData]);;
 
   return (
     <div className="space-y-12">

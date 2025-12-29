@@ -126,7 +126,6 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
         // TODO: Implement sending a LiveKit metadata update to inform other clients to hide this message.
         // For now, this will only hide it for new loads/VOD. A full implementation would involve LiveKit data channels
         // to broadcast this change in real-time to active participants.
-        console.log(`Message ${messageId} hidden.`);
       } catch (error) {
         console.error('Supabase hide message error:', error);
       }
@@ -144,7 +143,6 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
           const errorData = await response.json();
           console.error('Moderation API error:', errorData.error);
         } else {
-          console.log(`User ${identity} ${action === 'mute_chat' ? 'muted' : 'unmuted'} from chat.`);
           // LiveKit will automatically update localParticipant.permissions for the muted user.
         }
       } catch (error) {

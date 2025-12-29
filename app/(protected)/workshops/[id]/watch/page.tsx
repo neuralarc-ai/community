@@ -2,7 +2,12 @@
 
 import { useState, useEffect, use } from 'react'
 import { createClient } from '@/app/lib/supabaseClient'
-import VodPlayer from '@/app/components/VodPlayer'
+import dynamic from 'next/dynamic'
+
+const VodPlayer = dynamic(() => import('@/app/components/VodPlayer'), {
+  loading: () => <div className="flex items-center justify-center h-[300px] w-full bg-black text-muted-foreground rounded-xl">Loading Video Player...</div>,
+  ssr: false,
+})
 import { Button } from '@/components/ui/button'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
