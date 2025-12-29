@@ -3,22 +3,9 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
-import dynamic from 'next/dynamic'
-const ConclaveRoom = dynamic(() => import('@/components/conclave/ConclaveRoom'), {
-  loading: () => (
-    <div className="flex flex-col items-center justify-center h-[600px] bg-black text-white rounded-xl">
-      <div className="relative w-16 h-16 mb-6">
-        <div className="absolute inset-0 border-4 border-white/10 rounded-full"></div>
-        <div className="absolute inset-0 border-4 border-purple-500 rounded-full border-t-transparent animate-spin"></div>
-      </div>
-      <h1 className="text-xl font-bold tracking-tight">Loading Conclave Room...</h1>
-      <p className="text-zinc-500 mt-2">Preparing your immersive experience...</p>
-    </div>
-  ),
-  ssr: false,
-})
-import { ChevronLeft } from 'lucide-react'
+import ConclaveRoom from '@/components/conclave/ConclaveRoom'
 import { cn } from '@/lib/utils'
+import { ChevronLeft } from 'lucide-react'
 
 export default function ConclavePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
