@@ -139,8 +139,8 @@ export default function CompleteProfilePage() {
               className="w-full h-full object-contain rounded-lg"
             />
           </div>
-          <h2 className="text-xl font-semibold text-gray-400 uppercase tracking-wider">JOIN OUR COMMUNITY</h2>
-          <h1 className="text-4xl font-bold text-white text-center">Create Your Identity</h1>
+          <h2 className="text-xl font-semibold text-gray-400 uppercase tracking-wider">SPHERE</h2>
+          <h1 className="text-3xl font-bold text-white text-center">Made for Helionots</h1>
         </div>
 
         {/* Right Column: Profile Form */}
@@ -238,9 +238,6 @@ export default function CompleteProfilePage() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
-            <p className="mt-4 text-center text-xs text-gray-500">
-              By completing your profile, you agree to our <a href="/terms-of-use" className="text-red-500 hover:underline">Terms of Service</a>
-            </p>
           </form>
         </div>
       </div>
