@@ -21,12 +21,18 @@ export async function getCurrentUserProfile(userId?: string) {
   }
 
   if (!profile) {
-    return null; // Return null if no profile is found
+    return null;
   }
 
+  // Fetch the user's email separately from auth.users
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) {
+    console.error("Error fetching user for profile:", userError);
+  }
+  
   return {
     ...profile,
-    email: profile.email,
+    email: user?.email || null,
   }
 }
 

@@ -40,11 +40,24 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
   }
 
   return data.map(post => ({
-    ...post,
-    author_id: post.author_id, // Map user_id to author_id
-    body: post.body, // Map content to body
-    comment_count: post.comments_count[0]?.count || 0,
+    id: post.id,
+    author_id: post.user_id,
+    title: post.title,
+    body: post.content,
+    tags: post.tags || [],
+    created_at: post.created_at,
+    updated_at: post.created_at, // Using created_at as updated_at since it's not selected
+    author: post.profiles && post.profiles.length > 0 ? {
+      username: post.profiles[0].username,
+      full_name: post.profiles[0].username, // Using username as full_name if not available
+      avatar_url: post.profiles[0].avatar_url,
+      role: 'user' as const // Default to user role
+    } : undefined,
+    vote_score: post.vote_score,
     user_vote: post.user_votes[0]?.vote_type || 0,
+    comment_count: post.comments_count[0]?.count || 0,
+    is_pinned: post.is_pinned,
+    image_urls: post.image_url ? [post.image_url] : undefined
   })) as Post[];
 });
 
@@ -74,13 +87,14 @@ export const getSavedPostIds = cache(async (userId: string): Promise<Set<string>
 });
 
 export default async function PostsServerContent({ searchQuery }: PostsServerContentProps) {
-  const currentUserProfile = await getUserProfile();
-  const [posts, savedPostIdsArray]: [Post[], Set<string>] = await Promise.all([
+  const [posts, currentUserProfile] = await Promise.all([
     getPosts(searchQuery),
-    currentUserProfile ? getSavedPostIds(currentUserProfile.id) : Promise.resolve(new Set<string>()),
+    getUserProfile(),
   ]);
 
-  const savedPostIds = new Set(savedPostIdsArray); // Convert array back to Set
+  const savedPostIds = currentUserProfile
+    ? await getSavedPostIds(currentUserProfile.id)
+    : new Set<string>();
 
   // Sort posts: pinned posts first, then by creation date
   const sortedPosts = posts.sort((a: Post, b: Post) => {

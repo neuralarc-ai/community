@@ -13,10 +13,22 @@ export async function createServerClient() {
           return cookieStore.get(name)?.value
         },
         set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options })
+          try {
+            cookieStore.set({ name, value, ...options })
+          } catch (error) {
+            // Cookies can only be modified in Server Actions or Route Handlers
+            // Silently fail in server components - the cookie will be handled by middleware
+            // This prevents the error from crashing the app
+          }
         },
         remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options })
+          try {
+            cookieStore.set({ name, value: '', ...options })
+          } catch (error) {
+            // Cookies can only be modified in Server Actions or Route Handlers
+            // Silently fail in server components - the cookie will be handled by middleware
+            // This prevents the error from crashing the app
+          }
         },
       },
     }
