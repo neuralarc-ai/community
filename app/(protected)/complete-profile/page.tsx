@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { User, AtSign, CalendarDays, ArrowRight } from 'lucide-react' // Added icons
 
 export default function CompleteProfilePage() {
   const [formData, setFormData] = useState({
@@ -127,105 +128,122 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 animated-background">
-      <img src="/images/default-avatar.jpg" alt="Profile Completion Illustration" className="mx-auto h-48 w-48 rounded-full mb-8 object-cover" />
-      <Card className="max-w-2xl w-full space-y-8 bg-card border-border text-foreground shadow-lg p-8">
-        <CardHeader>
-          <CardTitle className="mt-6 text-center text-3xl font-bold text-foreground tracking-tight">
-            Complete Your Profile
-          </CardTitle>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
-            Please fill out your profile information to continue
-          </p>
-        </CardHeader>
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-6 lg:p-10 bg-[#1A1A1A]">
+      <div className="flex flex-col md:flex-row rounded-lg overflow-hidden max-w-4xl w-full shadow-2xl">
+        {/* Left Column: Image and Identity */}
+        <div className="flex-1 bg-[#222222] p-8 flex flex-col items-center justify-center text-white space-y-4">
+          <div className="relative w-48 h-48 mb-4">
+            <img
+              src="/sphere logo.png" // Using public/sphere logo.png as placeholder
+              alt="Abstract geometric design"
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-400 uppercase tracking-wider">JOIN OUR COMMUNITY</h2>
+          <h1 className="text-4xl font-bold text-white text-center">Create Your Identity</h1>
+        </div>
 
-        <CardContent>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4 animate-fade-in-up">
-              <div>
-                <Label htmlFor="full_name" className="block text-sm font-medium text-foreground">
-                  Full Name *
-                </Label>
-                <Input
-                  id="full_name"
-                  name="full_name"
-                  type="text"
-                  required
-                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm focus:border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-red-accent transition-all duration-200 sm:text-sm"
-                  placeholder="Enter your full name"
-                  value={formData.full_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                />
-              </div>
+        {/* Right Column: Profile Form */}
+        <div className="flex-1 bg-[#282828] p-8 space-y-6 text-white">
+          <div className="text-center md:text-left">
+            <h2 className="text-3xl font-bold">Complete Your Profile</h2>
+            <p className="text-gray-400 mt-1">Tell us a bit about yourself?</p>
+          </div>
 
-              <div>
-                <Label htmlFor="username" className="block text-sm font-medium text-foreground">
-                  Username *
-                </Label>
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm focus:border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-red-accent transition-all duration-200 sm:text-sm"
-                  placeholder="Choose a unique username"
-                  value={formData.username}
-                  onChange={(e) => handleUsernameChange(e.target.value)}
-                />
-                {usernameChecking && (
-                  <p className="mt-1 text-sm text-muted-foreground">Checking username...</p>
-                )}
-              </div>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Full Name */}
+            <div>
+              <Label htmlFor="full_name" className="block text-sm font-medium text-gray-300 mb-2">
+                <User className="inline-block mr-2 h-4 w-4" /> Full Name
+              </Label>
+              <Input
+                id="full_name"
+                name="full_name"
+                type="text"
+                required
+                className="block w-full px-4 py-2 rounded-md bg-[#333333] border border-[#444444] text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors duration-200"
+                placeholder="Enter your full name"
+                value={formData.full_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="dob" className="block text-sm font-medium text-foreground">
-                  Date of Birth *
-                </Label>
-                <Input
-                  id="dob"
-                  name="dob"
-                  type="date"
-                  required
-                  max={maxDate}
-                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm focus:border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-red-accent transition-all duration-200 sm:text-sm"
-                  value={formData.dob}
-                  onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
-                />
-              </div>
+            {/* Username */}
+            <div>
+              <Label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
+                <AtSign className="inline-block mr-2 h-4 w-4" /> Username
+              </Label>
+              <Input
+                id="username"
+                name="username"
+                type="text"
+                required
+                className="block w-full px-4 py-2 rounded-md bg-[#333333] border border-[#444444] text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors duration-200"
+                placeholder="Choose a username"
+                value={formData.username}
+                onChange={(e) => handleUsernameChange(e.target.value)}
+              />
+              {usernameChecking && (
+                <p className="mt-1 text-sm text-gray-500">Checking username...</p>
+              )}
+            </div>
 
-              <div>
-                <Label htmlFor="join_date" className="block text-sm font-medium text-foreground">
-                  Date of Joining
-                </Label>
-                <Input
-                  id="join_date"
-                  name="join_date"
-                  type="text"
-                  readOnly
-                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm sm:text-sm cursor-not-allowed"
-                  value={joinDate}
-                />
-              </div>
+            {/* Birthdate */}
+            <div>
+              <Label htmlFor="dob" className="block text-sm font-medium text-gray-300 mb-2">
+                <CalendarDays className="inline-block mr-2 h-4 w-4" /> Birthdate
+              </Label>
+              <Input
+                id="dob"
+                name="dob"
+                type="date"
+                required
+                max={maxDate}
+                className="block w-full px-4 py-2 rounded-md bg-[#333333] border border-[#444444] text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-colors duration-200"
+                value={formData.dob}
+                onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
+              />
+              <p className="mt-1 text-xs text-gray-500">(Must be 12+)</p>
+            </div>
+
+            {/* Joining Date */}
+            <div>
+              <Label htmlFor="join_date" className="block text-sm font-medium text-gray-300 mb-2">
+                <CalendarDays className="inline-block mr-2 h-4 w-4" /> Joining Date
+              </Label>
+              <Input
+                id="join_date"
+                name="join_date"
+                type="text"
+                readOnly
+                className="block w-full px-4 py-2 rounded-md bg-[#333333] border border-[#444444] text-gray-400 cursor-not-allowed"
+                value={joinDate}
+              />
             </div>
 
             {error && (
-              <div className="text-destructive text-sm text-center">
+              <div className="text-red-500 text-sm text-center">
                 {error}
               </div>
             )}
 
+            {/* Submit Button */}
             <div>
               <Button
                 type="submit"
                 disabled={loading || usernameChecking || !formData.full_name || !formData.username || !formData.dob || !!error}
-                className="w-full bg-red-accent text-primary-foreground hover:bg-red-accent-hover focus:ring-background disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="w-full flex items-center justify-center px-4 py-2 bg-white text-black font-semibold rounded-md hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
               >
                 {loading ? 'Creating Profile...' : 'Complete Profile'}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
+            <p className="mt-4 text-center text-xs text-gray-500">
+              By completing your profile, you agree to our <a href="/terms-of-use" className="text-red-500 hover:underline">Terms of Service</a>
+            </p>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
