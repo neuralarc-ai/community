@@ -64,10 +64,6 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           .eq('id', id)
           .single()
 
-        console.log('Workshop ID:', id)
-        console.log('Workshop Data:', workshopData)
-        console.log('Supabase Error:', error)
-
         if (error || !workshopData) {
           console.error('Workshop not found', error)
           router.push('/workshops')

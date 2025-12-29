@@ -25,10 +25,13 @@ export default function Lightbox({ src, isOpen, onClose }: LightboxProps) {
         >
           X
         </button>
-        <img
+        <Image
           src={src}
           alt="Lightbox Image"
-          className="max-w-[90vw] max-h-[90vh] object-contain"
+          fill
+          sizes="90vw"
+          className="object-contain"
+          priority
         />
       </DialogContent>
     </Dialog>

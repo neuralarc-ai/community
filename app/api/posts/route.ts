@@ -239,8 +239,6 @@ export async function POST(request: NextRequest) {
 
     // Award flux points for creating a post
     const fluxAwardResult = await awardFlux(user.id, 'POST')
-    console.log('Flux award result for post creation:', fluxAwardResult)
-
     const postWithAuthor = {
       ...newPost,
       author: {

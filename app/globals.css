@@ -4,82 +4,75 @@
 
 @layer base {
   :root {
-    /* Base Background: #0A0A0A */
-    --background: 0 0% 4%;
-    /* Text Primary: #FFFFFF */
-    --foreground: 0 0% 100%;
+    /* Monochrome Theme */
+    --background: 0 0% 8%; /* Dark background */
+    --foreground: 0 0% 95%; /* Light gray text */
 
-    /* Card/Surface: #141414 */
-    --card: 0 0% 8%;
-    /* Text Primary */
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 12%; /* Slightly lighter card background */
+    --card-foreground: 0 0% 95%;
 
-    /* Popover/Elevated: #1A1A1A */
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Primary Button: Dark Surface + Light Text */
-    --primary: 0 0% 10%; 
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 18%; /* Darker gray for primary elements */
+    --primary-foreground: 0 0% 95%;
 
-    /* Secondary: Transparent/Bordered or #0F0F0F */
-    --secondary: 0 0% 6%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 25%; /* Mid-gray for secondary elements */
+    --secondary-foreground: 0 0% 95%;
 
-    /* Muted: #7A7A7A */
-    --muted: 0 0% 48%; 
-    --muted-foreground: 0 0% 48%;
+    --muted: 0 0% 40%; /* Lighter gray for muted text */
+    --muted-foreground: 0 0% 80%;
 
-    /* Accent: #B5B5B5 (Text Secondary) */
-    --accent: 0 0% 71%;
-    --accent-foreground: 0 0% 4%;
+    --accent: 0 0% 100%; /* White for subtle highlights */
+    --accent-foreground: 0 0% 8%;
 
-    /* Destructive */
-    --destructive: 0 0% 20%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 0% 15%; /* Dark gray for destructive actions */
+    --destructive-foreground: 0 0% 95%;
 
-    /* Borders: rgba(255,255,255,0.08) => approx HSL 0 0% 12% */
-    --border: 0 0% 12%;
+    --border: 0 0% 10%; /* Darker gray border */
     --input: 0 0% 12%;
     
-    /* Focus Ring / Glow */
-    --ring: 0 0% 100%;
+    --ring: 0 0% 20%; /* Dark gray for focus ring */
     
     --radius: 0.75rem;
     
-    /* Custom Status Colors - Mapped to Monochrome/Nebula */
-    --warning: 0 0% 100%;
-    --success: 0 0% 100%;
+    /* Custom Status Colors - Now monochrome */
+    --warning: 0 0% 70%;
+    --success: 0 0% 70%;
 
-    /* Custom colors for dynamic cards */
-    --color-cyan-rgb: 0, 188, 212;
-    --color-green-rgb: 76, 175, 80;
-    --color-yellow-rgb: 255, 193, 7;
-    --color-purple-rgb: 156, 39, 176;
+    /* Red Accent */
+    --red-accent: 0 80% 50%;
+    --red-accent-hover: 0 80% 60%;
+    --button-base: 4 73% 78%; /* HSL for EFB3AF */
+    --button-hover: 4 73% 68%; /* Slightly darker for hover */
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 0 0% 10%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 6%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 48%;
-    --muted-foreground: 0 0% 48%;
-    --accent: 0 0% 71%;
-    --accent-foreground: 0 0% 4%;
-    --destructive: 0 0% 20%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 12%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 18%;
+    --primary-foreground: 0 0% 95%;
+    --secondary: 0 0% 25%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 40%;
+    --muted-foreground: 0 0% 80%;
+    --accent: 0 0% 100%;
+    --accent-foreground: 0 0% 8%;
+    --destructive: 0 80% 50%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 20%;
     --input: 0 0% 12%;
-    --ring: 0 0% 100%;
-    --warning: 0 0% 100%;
-    --success: 0 0% 100%;
+    --ring: 0 80% 50%;
+    --warning: 0 0% 70%;
+    --success: 0 0% 70%;
+    --red-accent: 0 80% 50%;
+    --red-accent-hover: 0 80% 60%;
+    --button-base: 4 73% 78%; /* HSL for EFB3AF */
+    --button-hover: 4 73% 68%; /* Slightly darker for hover */
   }
 }
 
@@ -143,6 +136,22 @@
     opacity: 1;
     transform: translate(0%, 0%) rotate(45deg); /* End at 0,0 */
   }
+
+  /* Fade In Up Animation */
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 /* Custom Scrollbar Styles */
@@ -164,3 +173,28 @@
   background: #E0E0E0; /* Lighter white on hover */
 }
 
+.animated-background {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-background::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, hsla(var(--red-accent), 0.1) 0%, transparent 70%);
+  animation: move-glow 15s infinite alternate ease-in-out;
+  z-index: -1;
+}
+
+@keyframes move-glow {
+  0% {
+    transform: translate(0%, 0%) rotate(0deg);
+  }
+  100% {
+    transform: translate(50%, 50%) rotate(360deg);
+  }
+}

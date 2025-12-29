@@ -10,7 +10,7 @@ interface LayoutWrapperProps {
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
-  const isSpecialPage = pathname.startsWith('/conclave/') || pathname === '/login';
+  const isSpecialPage = pathname.startsWith('/conclave/') || pathname === '/login' || pathname === '/complete-profile';
 
   if (isSpecialPage) {
     return <>{children}</>;

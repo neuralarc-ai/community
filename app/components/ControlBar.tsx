@@ -72,7 +72,6 @@ export default function ControlBar({
 
   const handleShareScreen = async () => {
     // Implement screen sharing logic here
-    console.log("Share screen clicked");
     // Example: Toggle screen share
     if (localParticipant.isScreenShareEnabled) {
       await localParticipant.setScreenShareEnabled(false);
@@ -83,7 +82,6 @@ export default function ControlBar({
 
   const handleInvite = () => {
     // Implement invite logic here
-    console.log("Invite clicked");
     // For now, let's just copy the current URL to clipboard
     navigator.clipboard.writeText(window.location.href);
     alert("Room link copied to clipboard!");

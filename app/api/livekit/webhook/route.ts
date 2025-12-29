@@ -15,8 +15,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    console.log('LiveKit webhook received:', body)
-
     if (body.event === 'egress_ended') {
       const { egress_id, room_name, file } = body
       
@@ -64,7 +62,6 @@ export async function POST(request: NextRequest) {
         return errorResponse;
       }
 
-      console.log(`Workshop ${workshopId} recording completed: ${recordingUrl}`)
     }
 
     // ✅ FIX 5: Explicitly type as <any>

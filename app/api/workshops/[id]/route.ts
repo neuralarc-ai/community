@@ -155,9 +155,6 @@ export async function DELETE(
     }
 
     // Only host can delete workshop
-    console.log("User ID:", user.id)
-    console.log("Workshop Host ID:", workshop.host_id)
-    console.log("Workshop ID:", id)
     if (user.id !== workshop.host_id) {
       return NextResponse.json(
         { error: 'Forbidden - Only the host can delete this workshop' },
