@@ -106,12 +106,12 @@ export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: Cre
 
     try {
       const supabase = createClient();
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (userError || !user) {
+      if (sessionError || !session?.user) {
         throw new Error('User not authenticated.');
       }
-
+      const user = session.user;
       let imageUrls: string[] = [];
       if (selectedFiles.length > 0) {
         toast({
