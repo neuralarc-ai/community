@@ -1,4 +1,4 @@
-import { createClient } from '@/app/lib/supabaseServerClient';
+import { createServerClient } from '@/app/lib/supabaseServerClient';
 import { getCurrentUserProfile } from '@/app/lib/getProfile';
 import { Post, Profile } from '@/app/types';
 import { cache } from 'react';
@@ -8,17 +8,18 @@ interface PostsServerContentProps {
 }
 
 export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]> => {
-  const supabase = createClient();
+  const supabase = await createServerClient();
   const query = supabase
     .from('posts')
     .select(`
       id,
       created_at,
+      updated_at,
       title,
-      content,
+      body: content,
       image_url,
       vote_score,
-      user_id,
+      author_id: user_id,
       is_pinned,
       tags,
       comments_count: comments(count),
@@ -40,6 +41,8 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
 
   return data.map(post => ({
     ...post,
+    author_id: post.author_id, // Map user_id to author_id
+    body: post.body, // Map content to body
     comment_count: post.comments_count[0]?.count || 0,
     user_vote: post.user_votes[0]?.vote_type || 0,
   })) as Post[];
@@ -56,7 +59,7 @@ export const getUserProfile = cache(async (): Promise<Profile | null> => {
 });
 
 export const getSavedPostIds = cache(async (userId: string): Promise<Set<string>> => {
-  const supabase = createClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase
     .from('saved_posts')
     .select('post_id')
@@ -71,9 +74,9 @@ export const getSavedPostIds = cache(async (userId: string): Promise<Set<string>
 });
 
 export default async function PostsServerContent({ searchQuery }: PostsServerContentProps) {
-  const [posts, currentUserProfile, savedPostIdsArray] = await Promise.all([
+  const currentUserProfile = await getUserProfile();
+  const [posts, savedPostIdsArray]: [Post[], Set<string>] = await Promise.all([
     getPosts(searchQuery),
-    getUserProfile(),
     currentUserProfile ? getSavedPostIds(currentUserProfile.id) : Promise.resolve(new Set<string>()),
   ]);
 

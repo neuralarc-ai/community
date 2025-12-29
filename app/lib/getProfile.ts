@@ -20,6 +20,10 @@ export async function getCurrentUserProfile(userId?: string) {
     throw error
   }
 
+  if (!profile) {
+    return null; // Return null if no profile is found
+  }
+
   return {
     ...profile,
     email: profile.email,

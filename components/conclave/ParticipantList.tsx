@@ -163,7 +163,8 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
           const isParticipantAdmin = profile?.role === 'admin';
           
           let canParticipantPublish = false;
-          let pMetadata = {}; // Initialize pMetadata outside the try-catch
+          interface ParticipantMetadata { canSpeak?: boolean; handRaised?: boolean; }
+          let pMetadata: ParticipantMetadata = {}; // Initialize pMetadata outside the try-catch
           try {
             pMetadata = JSON.parse(participant.metadata || '{}');
             canParticipantPublish = pMetadata.canSpeak === true || participant.permissions?.canPublish === true;
