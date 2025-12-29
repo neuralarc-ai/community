@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
-import AvatarEditor from '@/app/components/AvatarEditor'
+import dynamic from 'next/dynamic'
+
+const AvatarEditor = dynamic(() => import('@/app/components/AvatarEditor'), {
+  loading: () => <div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div></div>,
+  ssr: false,
+})
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'

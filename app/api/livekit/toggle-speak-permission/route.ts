@@ -19,10 +19,7 @@ export async function POST(req: NextRequest) {
   const roomService = new RoomServiceClient(livekitHost, apiKey, apiSecret);
 
   try {
-    console.log(`[API] Attempting to get participant: ${participantIdentity} in room: ${roomName}`);
     const participantInfo = await roomService.getParticipant(roomName, participantIdentity);
-    console.log(`[API] Participant found: ${participantInfo.identity}`);
-
     const existingMetadata = participantInfo.metadata ? JSON.parse(participantInfo.metadata) : {};
 
     const newMetadata = JSON.stringify({
@@ -30,12 +27,9 @@ export async function POST(req: NextRequest) {
       canSpeak: canSpeak,
     });
 
-    console.log(`[API] Updating participant metadata for ${participantIdentity} to: ${newMetadata}`);
     await roomService.updateParticipant(roomName, participantIdentity, {
       metadata: newMetadata,
     });
-    console.log(`[API] Successfully updated participant metadata for ${participantIdentity}`);
-
 
     return NextResponse.json({ message: `Successfully set speak permission for ${participantIdentity} to ${canSpeak}` });
   } catch (error: any) { // Casting error to 'any' to access properties like 'message'

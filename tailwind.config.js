@@ -73,6 +73,8 @@ module.exports = {
         warning: 'hsl(var(--warning))',
         success: 'hsl(var(--success))',
         border: 'hsl(var(--border))',
+        'button-base': 'hsl(var(--button-base))',
+        'button-hover': 'hsl(var(--button-hover))',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

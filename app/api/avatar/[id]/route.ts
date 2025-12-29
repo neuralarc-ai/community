@@ -36,7 +36,6 @@ export async function GET(
     }
 
     // Fetch the image from the determined URL
-    console.log(`Attempting to fetch avatar from: ${avatarUrl}`);
     const imageResponse = await fetch(avatarUrl);
 
     if (!imageResponse.ok) {

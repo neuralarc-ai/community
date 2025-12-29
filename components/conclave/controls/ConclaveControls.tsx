@@ -148,7 +148,6 @@ export default function ConclaveControls({
 
       if (res.ok) {
         // toast({ title: 'Success', description: 'Notifications sent to all eligible users.' });
-        console.log('Conclave notifications sent successfully!');
       } else {
         const errorData = await res.json();
         // toast({ title: 'Error', description: errorData.message || 'Failed to send notifications.' });

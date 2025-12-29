@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Post } from '@/app/types'; // Assuming Post type will include image_urls
 import PostActions from './PostActions';
@@ -149,11 +150,14 @@ export default function PostItem({
     return (
       <div className={`${gridClass} mb-4`}>
         {imageUrls.map((url, index) => (
-          <div key={index} onClick={() => handleImageClick(url)} className="block overflow-hidden cursor-pointer">
-            <img 
+          <div key={index} onClick={() => handleImageClick(url)} className="block overflow-hidden cursor-pointer relative">
+            <Image 
               src={url} 
               alt={`Post image ${index + 1}`} 
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className={`${imageClasses[index] || ''} rounded-xl transition-transform duration-300 hover:scale-105 hover:rounded-none`} 
+              priority
             />
           </div>
         ))}

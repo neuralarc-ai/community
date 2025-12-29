@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Lightbox from '@/app/components/Lightbox';
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -44,10 +45,13 @@ const renderImages = (imageUrls: string[], handleImageClick: (src: string) => vo
     <div className={`${gridClass} mb-4`}>
       {imageUrls.map((url, index) => (
         <div key={index} onClick={() => handleImageClick(url)} className="block overflow-hidden cursor-pointer">
-          <img 
+          <Image 
             src={url} 
             alt={`Post image ${index + 1}`} 
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className={`${imageClasses[index] || ''} transition-transform duration-300 hover:scale-105`} 
+            priority
           />
         </div>
       ))}
@@ -166,8 +170,6 @@ export default function PostDetailPage() {
       const response = await fetch(`/api/posts/${postId}`)
       if (response.ok) {
         const postData = await response.json()
-        console.log('Post data received:', postData)
-        console.log('Image URLs:', postData.image_urls)
         setPost(postData)
         setUserCommentVotes(extractUserVotesFromComments(postData.comments || []))
       }
@@ -359,7 +361,6 @@ export default function PostDetailPage() {
 
                     {/* Render Images if available */}
                     {(() => {
-                      console.log('Rendering images, post.image_urls:', post.image_urls)
                       return post.image_urls && post.image_urls.length > 0 && renderImages(post.image_urls, handleImageClick)
                     })()}
 

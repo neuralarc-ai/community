@@ -19,6 +19,7 @@ export default function CompleteProfilePage() {
   const [loading, setLoading] = useState(false)
   const [usernameChecking, setUsernameChecking] = useState(false)
   const [joinDate, setJoinDate] = useState('')
+  const [maxDobDate, setMaxDobDate] = useState('')
   const router = useRouter()
   const supabase = createClient()
 
@@ -31,6 +32,11 @@ export default function CompleteProfilePage() {
       }
 
       setJoinDate(new Date(user.created_at).toLocaleDateString())
+
+      const twelveYearsAgo = new Date()
+      twelveYearsAgo.setFullYear(twelveYearsAgo.getFullYear() - 12)
+      const formattedMaxDate = twelveYearsAgo.toISOString().split('T')[0]
+      setMaxDobDate(formattedMaxDate)
 
       const profile = await getCurrentUserProfile()
       if (profile) {
@@ -123,22 +129,23 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cyber-bg py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-2xl w-full space-y-8 bg-cyber-component border-cyber-border text-cyber-text shadow-lg p-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 animated-background">
+      <img src="/images/default-avatar.jpg" alt="Profile Completion Illustration" className="mx-auto h-48 w-48 rounded-full mb-8 object-cover" />
+      <Card className="max-w-2xl w-full space-y-8 bg-card border-border text-foreground shadow-lg p-8">
         <CardHeader>
-          <CardTitle className="mt-6 text-center text-3xl font-bold text-cyber-text tracking-tight">
+          <CardTitle className="mt-6 text-center text-3xl font-bold text-foreground tracking-tight">
             Complete Your Profile
           </CardTitle>
-          <p className="mt-2 text-center text-sm text-cyber-secondary">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Please fill out your profile information to continue
           </p>
         </CardHeader>
 
         <CardContent>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
+            <div className="space-y-4 animate-fade-in-up">
               <div>
-                <Label htmlFor="full_name" className="block text-sm font-medium text-cyber-text">
+                <Label htmlFor="full_name" className="block text-sm font-medium text-foreground">
                   Full Name *
                 </Label>
                 <Input
@@ -146,7 +153,7 @@ export default function CompleteProfilePage() {
                   name="full_name"
                   type="text"
                   required
-                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm focus:border-cyber-accent focus:ring-cyber-accent sm:text-sm"
+                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm focus:border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-red-accent transition-all duration-200 sm:text-sm"
                   placeholder="Enter your full name"
                   value={formData.full_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
@@ -154,7 +161,7 @@ export default function CompleteProfilePage() {
               </div>
 
               <div>
-                <Label htmlFor="username" className="block text-sm font-medium text-cyber-text">
+                <Label htmlFor="username" className="block text-sm font-medium text-foreground">
                   Username *
                 </Label>
                 <Input
@@ -162,18 +169,18 @@ export default function CompleteProfilePage() {
                   name="username"
                   type="text"
                   required
-                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm focus:border-cyber-accent focus:ring-cyber-accent sm:text-sm"
+                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm focus:border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-red-accent transition-all duration-200 sm:text-sm"
                   placeholder="Choose a unique username"
                   value={formData.username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
                 />
                 {usernameChecking && (
-                  <p className="mt-1 text-sm text-cyber-muted">Checking username...</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Checking username...</p>
                 )}
               </div>
 
               <div>
-                <Label htmlFor="dob" className="block text-sm font-medium text-cyber-text">
+                <Label htmlFor="dob" className="block text-sm font-medium text-foreground">
                   Date of Birth *
                 </Label>
                 <Input
@@ -181,14 +188,15 @@ export default function CompleteProfilePage() {
                   name="dob"
                   type="date"
                   required
-                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm focus:border-cyber-accent focus:ring-cyber-accent sm:text-sm"
+                  max={maxDobDate}
+                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm focus:border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-red-accent transition-all duration-200 sm:text-sm"
                   value={formData.dob}
                   onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
                 />
               </div>
 
               <div>
-                <Label htmlFor="join_date" className="block text-sm font-medium text-cyber-text">
+                <Label htmlFor="join_date" className="block text-sm font-medium text-foreground">
                   Date of Joining
                 </Label>
                 <Input
@@ -196,7 +204,7 @@ export default function CompleteProfilePage() {
                   name="join_date"
                   type="text"
                   readOnly
-                  className="mt-1 block w-full bg-cyber-input border-cyber-border text-cyber-text rounded-md shadow-sm sm:text-sm cursor-not-allowed"
+                  className="mt-2 block w-full bg-input border-border text-foreground rounded-md shadow-sm sm:text-sm cursor-not-allowed"
                   value={joinDate}
                 />
               </div>
@@ -212,7 +220,7 @@ export default function CompleteProfilePage() {
               <Button
                 type="submit"
                 disabled={loading || usernameChecking || !formData.full_name || !formData.username || !formData.dob || !!error}
-                className="w-full bg-cyber-accent text-cyber-bg hover:bg-cyber-accentHover focus:ring-cyber-accent disabled:opacity-50"
+                className="w-full bg-red-accent text-primary-foreground hover:bg-red-accent-hover focus:ring-background disabled:opacity-50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 {loading ? 'Creating Profile...' : 'Complete Profile'}
               </Button>
