@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@/app/lib/supabaseClient';
-import { Zap, MessageSquare, Users, ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Zap, MessageSquare, Users } from 'lucide-react';
 import Image from 'next/image';
 
 interface Profile {
@@ -34,7 +33,6 @@ const FluxDashboard = () => {
   const [user, setUser] = useState<any>(null);
 
   const supabase = createClient();
-  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -132,17 +130,9 @@ const FluxDashboard = () => {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 p-8">
-      <div className="flex items-center gap-4 mb-8">
-            <button 
-              onClick={() => router.push('/profile')}
-              className="p-2 rounded-full bg-white/5 hover:bg-yellow-500/20 text-muted-foreground hover:text-white transition-all border border-white/5"
-            >
-              <ArrowLeft size={20} />
-            </button>
-            <div>
-              <h1 className="text-3xl font-heading font-bold text-white tracking-tight">Flux Dashboard</h1>
-              <p className="text-muted-foreground font-sans">Track your community impact and see your rank</p>
-            </div>
+      <div className="mb-8">
+            <h1 className="text-3xl font-heading font-bold text-white tracking-tight">Flux Dashboard</h1>
+            <p className="text-muted-foreground font-sans">Track your community impact and see your rank</p>
         </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700 hover:border-[#FFB6C1] transition-colors duration-300">

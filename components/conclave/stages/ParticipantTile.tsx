@@ -57,14 +57,13 @@ export function ParticipantTile({ participant }: ParticipantTileProps) {
             size={96}
             className="w-24 h-24 sm:w-28 sm:h-28 grayscale-[0.2] group-hover:grayscale-0 transition-all"
           />
+          {/* Hand Raised Indicator */}
+          {handRaised && (
+            <div className="absolute -top-2 -right-2 bg-yellow-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-xl border-2 border-white/50 animate-bounce animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 z-20" data-state={handRaised ? 'open' : 'closed'}>
+              <Hand size={18} />
+            </div>
+          )}
         </div>
-
-        {/* Hand Raised Indicator */}
-        {handRaised && (
-          <div className="absolute -top-2 -right-2 bg-white text-yellow-500 w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-xl border-2 border-white/50 animate-bounce z-20">
-            <Hand size={18} />
-          </div>
-        )}
 
         {/* Mute Status */}
         {!participant.isMicrophoneEnabled && (isTargetSpeaker || isLocalHost) && ( // Only show mute indicator if they are a speaker or local host can see it

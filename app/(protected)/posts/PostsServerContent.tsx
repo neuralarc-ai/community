@@ -14,11 +14,12 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
     .select(`
       id,
       created_at,
+      updated_at,
       title,
-      content,
-      image_url,
+      body: content,
+      image_urls,
       vote_score,
-      user_id,
+      author_id: user_id,
       is_pinned,
       tags,
       comments_count: comments(count),
@@ -40,9 +41,9 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
 
   return data.map(post => ({
     id: post.id,
-    author_id: post.user_id,
+    author_id: post.author_id,
     title: post.title,
-    body: post.content,
+    body: post.body,
     tags: post.tags || [],
     created_at: post.created_at,
     updated_at: post.created_at, // Using created_at as updated_at since it's not selected
@@ -56,7 +57,7 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
     user_vote: post.user_votes[0]?.vote_type || 0,
     comment_count: post.comments_count[0]?.count || 0,
     is_pinned: post.is_pinned,
-    image_urls: post.image_url ? [post.image_url] : undefined
+    image_urls: post.image_urls || []
   })) as Post[];
 });
 

@@ -10,6 +10,8 @@ The Community Portal is a discussion platform where users can:
 -   **Create Posts** with rich text content.
 -   **Engage in Discussions** with deeply nested, threaded comments.
 -   **Vote** on posts and comments to curate content.
+-   **Join Workshops** to learn and collaborate.
+-   **Participate in Conclaves** for focused discussions.
 
 ## Getting Started
 
@@ -62,7 +64,7 @@ The app uses Supabase Auth.
 
 ## Documentation
 
-For a detailed technical breakdown, please refer to [architecture.md](./architecture.md).
+For a detailed technical breakdown, please refer to the [System Architecture document](./architecture.md).
 
 ## Learn More
 

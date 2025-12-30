@@ -9,8 +9,8 @@ module.exports = {
   theme: {
   	extend: {
       fontFamily: {
-        sans: ["var(--font-manrope)", "sans-serif"],
-        heading: ["var(--font-sora)", "sans-serif"],
+        sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        heading: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
         mono: ['Fira Code', 'monospace'],
       },
       boxShadow: {

@@ -4,6 +4,7 @@ import { useChat, useLocalParticipant, useRemoteParticipants } from '@livekit/co
 import { useRoomContext } from '@livekit/components-react';
 import { createClient } from '@/app/lib/supabaseClient'; // Assuming you have a supabaseClient.ts for client-side
 import Avatar from '@/app/components/Avatar';
+import { useToast } from '@/app/components/ui/use-toast'; // For error toasts
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,99 +12,216 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'; // Adjust path based on your UI library
 
+interface ChatMessage {
+    id: string;
+    workshop_id: string;
+    user_id: string;
+    user_name: string;
+    message: string;
+    created_at: string;
+    is_hidden?: boolean;
+    is_pending?: boolean; // For optimistic updates
+}
+
 interface ConclaveChatProps {
   workshopId: string;
   isHost: boolean;
 }
 
 export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }) => {
-  const { send, chatMessages } = useChat();
+  const { toast } = useToast();
+  const { send } = useChat(); // Removed chatMessages from here
   const { localParticipant } = useLocalParticipant();
   const room = useRoomContext();
   const remoteParticipants = useRemoteParticipants();
 
   const [participantProfiles, setParticipantProfiles] = useState<Map<string, { full_name: string; username: string; avatar_url: string }>>(new Map());
+  const [messages, setMessages] = useState<ChatMessage[]>([]); // New state for persisted and real-time messages
+  const [messageInput, setMessageInput] = useState(''); // Renamed to avoid conflict with 'message' in ChatMessage
 
-  // Fetch participant profiles
+  // Refactored participant profile fetching for quicker updates and caching
   useEffect(() => {
-    const fetchProfiles = async () => {
-      const supabase = createClient();
-      const identities = new Set<string>();
+    const supabase = createClient();
 
-      if (localParticipant) {
-        identities.add(localParticipant.identity);
-      }
-      remoteParticipants.forEach(p => identities.add(p.identity));
-
-      if (identities.size === 0) {
-        setParticipantProfiles(new Map());
+    const fetchAndCacheProfile = async (identity: string) => {
+      if (!identity) {
+        console.warn('Attempted to fetch profile with an empty identity. Skipping.');
         return;
       }
-
-      const { data: profiles, error } = await supabase
+      if (participantProfiles.has(identity)) {
+        return;
+      }
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('id, full_name, username, avatar_url')
-        .in('id', Array.from(identities));
+        .eq('id', identity)
+        .single();
 
       if (error) {
-        console.error('Error fetching participant profiles:', error);
+        console.error('Error fetching participant profile:', error.message || error);
         return;
       }
 
-      const newProfilesMap = new Map<string, { full_name: string; username: string; avatar_url: string }>();
-      profiles.forEach(p => {
-        newProfilesMap.set(p.id, { full_name: p.full_name, username: p.username, avatar_url: p.avatar_url });
-      });
-      setParticipantProfiles(newProfilesMap);
+      if (profile) {
+        setParticipantProfiles(prev => {
+          const newMap = new Map(prev);
+          newMap.set(profile.id, { full_name: profile.full_name, username: profile.username, avatar_url: profile.avatar_url });
+          return newMap;
+        });
+      }
     };
 
-    fetchProfiles();
-  }, [localParticipant, remoteParticipants, room?.name]);
+    // Fetch profiles for existing local and remote participants
+    if (localParticipant) {
+      fetchAndCacheProfile(localParticipant.identity);
+    }
+    remoteParticipants.forEach(p => fetchAndCacheProfile(p.identity));
 
-  const [message, setMessage] = useState('');
+    // Listen for new participants joining the room
+    const handleParticipantConnected = (participant: any) => {
+      console.log('LiveKit: Participant connected:', participant.identity);
+      fetchAndCacheProfile(participant.identity);
+    };
+
+    room?.on('participantConnected', handleParticipantConnected);
+
+    return () => {
+      room?.off('participantConnected', handleParticipantConnected);
+    };
+  }, [localParticipant, remoteParticipants, room, participantProfiles]);
+
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom on new messages
-  useEffect(() => {
+  const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
         top: chatContainerRef.current.scrollHeight,
         behavior: 'smooth',
       });
     }
-  }, [chatMessages]);
+  };
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const fetchInitialMessages = async () => {
+      const { data, error } = await supabase
+        .from('conclave_chat_messages')
+        .select('*')
+        .eq('workshop_id', workshopId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('Error fetching initial chat messages:', error);
+        toast({
+          variant: "destructive",
+          description: "Failed to load chat history.",
+        });
+      } else if (data) {
+        setMessages(data.reverse() as ChatMessage[]);
+        setTimeout(scrollToBottom, 0);
+      }
+    };
+
+    fetchInitialMessages();
+
+    const channel = supabase
+      .channel(`conclave_chat:${workshopId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'conclave_chat_messages',
+        filter: `workshop_id=eq.${workshopId}`
+      }, payload => {
+        console.log('Supabase Realtime: Received new message payload:', payload);
+        const newMessage = payload.new as ChatMessage;
+        setMessages(prevMessages => {
+          console.log('Supabase Realtime: Current messages state (prevMessages):', prevMessages);
+          // Prevent duplicates if we optimistically added it
+          const exists = prevMessages.some(msg => msg.id === newMessage.id || (msg.is_pending && msg.message === newMessage.message && msg.user_id === newMessage.user_id));
+          if (!exists) {
+            const updatedMessages = [...prevMessages, newMessage];
+            console.log('Supabase Realtime: Added new message, updated state:', updatedMessages);
+            return updatedMessages;
+          }
+          // If it's an optimistic message, replace it with the actual one from Supabase
+          const updatedMessages = prevMessages.map(msg => msg.is_pending && msg.message === newMessage.message && msg.user_id === newMessage.user_id ? { ...newMessage, is_pending: false } : msg);
+          console.log('Supabase Realtime: Replaced optimistic message, updated state:', updatedMessages);
+          return updatedMessages;
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [workshopId]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (message.trim() === '') return;
+    if (messageInput.trim() === '') return;
 
-    // 1. Send via LiveKit for instant delivery
-    await send(message);
+    const messageContent = messageInput.trim();
 
-    // 2. Save to Supabase for VOD
-    try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('User not authenticated for chat persistence');
-        return;
-      }
-
-      const { error } = await supabase.from('conclave_chat_messages').insert({
+    // Optimistic Update
+    const tempMessage: ChatMessage = {
+        id: 'temp-' + Date.now(),
         workshop_id: workshopId,
-        user_id: user.id,
-                user_name: participantProfiles.get(localParticipant?.identity || '')?.full_name || participantProfiles.get(localParticipant?.identity || '')?.username || 'Anonymous', // Use fetched profile name
-        message: message,
-      });
+        user_id: localParticipant?.identity || 'anonymous', // Use LiveKit identity as client-side user ID
+        user_name: participantProfiles.get(localParticipant?.identity || '')?.full_name || participantProfiles.get(localParticipant?.identity || '')?.username || 'Anonymous',
+        message: messageContent,
+        created_at: new Date().toISOString(),
+        is_pending: true,
+    };
 
-      if (error) {
-        console.error('Error saving chat message to Supabase:', error);
-      }
+    setMessages(prevMessages => [...prevMessages, tempMessage]);
+    setMessageInput(''); // Clear input field immediately
+
+    try {
+        // 1. Send via LiveKit for instant delivery
+        await send(messageContent);
+
+        // 2. Save to Supabase for persistence
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.error('User not authenticated for chat persistence');
+          throw new Error('User not authenticated');
+        }
+
+        const { data, error } = await supabase.from('conclave_chat_messages').insert({
+            workshop_id: workshopId,
+            user_id: user.id,
+            user_name: participantProfiles.get(localParticipant?.identity || '')?.full_name || participantProfiles.get(localParticipant?.identity || '')?.username || 'Anonymous',
+            message: messageContent,
+        }).select();
+
+        if (error) {
+            throw error;
+        }
+
+        // Replace the temporary message with the actual one from Supabase
+        setMessages(prevMessages =>
+            prevMessages.map(msg =>
+                msg.id === tempMessage.id
+                    ? { ...data[0] as ChatMessage, is_pending: false }
+                    : msg
+            )
+        );
     } catch (error) {
-      console.error('Supabase chat persistence error:', error);
+        console.error('Error sending message:', error);
+        toast({
+          variant: "destructive",
+          description: "Failed to send message.",
+        });
+        // Remove the temporary message on failure
+        setMessages(prevMessages => prevMessages.filter(msg => msg.id !== tempMessage.id));
     }
-
-    setMessage('');
   };
 
   const handleModerationAction = async (identity: string, action: 'mute_chat' | 'unmute_chat' | 'hide_message', messageId?: string) => {
@@ -159,47 +277,46 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
         <h2 className="text-lg font-semibold">Live Chat</h2>
       </div>
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto min-h-0 flex flex-col p-4 space-y-2 custom-scrollbar">
-        {chatMessages.map((msg, index) => (
-          <div key={index} className="flex items-start space-x-2">
-            <Avatar
-              src={participantProfiles.get(msg.from?.identity || '')?.avatar_url}
-              alt={participantProfiles.get(msg.from?.identity || '')?.full_name || participantProfiles.get(msg.from?.identity || '')?.username || 'User'}
-              size={28}
-            />
-            <div className="flex-1">
-              <span className="font-bold mr-2">{participantProfiles.get(msg.from?.identity || '')?.full_name || participantProfiles.get(msg.from?.identity || '')?.username || 'Anonymous'}:</span>
-              <span>{msg.message}</span>
+        {messages.map((msg, index) => (
+          !msg.is_hidden && ( // Only display messages that are not hidden
+            <div key={msg.id} className="flex items-start space-x-2">
+              <Avatar
+                src={participantProfiles.get(msg.user_id || '')?.avatar_url}
+                alt={msg.user_name || 'User'}
+                size={28}
+              />
+              <div className="flex-1">
+                <span className="font-bold mr-2">{msg.user_name}:</span>
+                <span>{msg.message}</span>
+                {msg.is_pending && <span className="text-xs italic text-gray-400"> (Sending...)</span>}
+              </div>
+              {isHost && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                      <button className="ml-2 p-1 hover:bg-gray-700 rounded-full">
+                        ...
+                      </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => handleModerationAction(msg.user_id!, 'mute_chat')}>
+                      Timeout User
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleModerationAction(msg.user_id!, 'hide_message', msg.id)}>
+                      Hide Message
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
-            {isHost && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <button className="ml-2 p-1 hover:bg-gray-700 rounded-full">
-                      ...
-                    </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleModerationAction(msg.from?.identity!, 'mute_chat')}>
-                    Timeout User
-                  </DropdownMenuItem>
-                  {/* Assuming messageId can be derived or passed. For LiveKit chat messages, there isn't a direct message ID.
-                      This would require storing messages in Supabase first and using the returned ID for this action,
-                      or adding custom metadata to LiveKit messages with a Supabase ID.
-                      For now, `hide_message` is placeholder, needs further integration if you want real-time hide. */}
-                  {/* <DropdownMenuItem onClick={() => handleModerationAction(msg.messageId, 'hide_message')}>
-                    Hide Message
-                  </DropdownMenuItem> */}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
+          )
         ))}
       </div>
       <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-700 flex-none">
         <div className="flex">
           <input
             type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
             placeholder={canPublishData ? "Say something..." : "You have been muted by a moderator."}
             className="flex-1 bg-zinc-800 border border-zinc-700 rounded-l-md p-2 text-white placeholder-zinc-400 focus:outline-none focus:border-blue-500"
             disabled={!canPublishData}
@@ -217,4 +334,3 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
     </div>
   );
 };
-

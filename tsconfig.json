@@ -34,6 +34,7 @@
   "exclude": [
     "node_modules",
     "example",
-    "**/AudioStage.tsx"
+    "**/AudioStage.tsx",
+    "codeprofilepage_files"
   ]
 }
