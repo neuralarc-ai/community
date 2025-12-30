@@ -57,7 +57,7 @@ export function ConclaveControls({ onLeave, userRole }: ConclaveControlsProps) {
       {canPublish && (
         <button
           onClick={toggleMic}
-          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200
+          className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200 flex-shrink-0
             ${isMicEnabled ? 'bg-green-500 text-white' : 'bg-gray-700 text-gray-300'}`}
           title={isMicEnabled ? 'Mute' : 'Unmute'}
         >
@@ -80,7 +80,7 @@ export function ConclaveControls({ onLeave, userRole }: ConclaveControlsProps) {
 
       <button
         onClick={onLeave}
-        className="bg-red-500 text-white w-14 h-14 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
+        className="bg-red-500 text-white w-14 h-14 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200 flex-shrink-0"
         title="Leave Conclave"
       >
         <LogOut className="w-8 h-8" />

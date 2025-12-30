@@ -163,7 +163,7 @@ export const ConclaveInvitationEmail = ({
           </td>
         </tr>
       </table>
-    </td>
+    </td>fter raising 
   </tr>
 </table>
 

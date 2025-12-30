@@ -395,15 +395,22 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
             <Calendar size={16} />
             <span className="text-sm">{formatDateTimeLocal(workshop.start_time)}</span> {/* UI Fix: Date & Time Display */}
           </div>
-          <div className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-            isLive ? 'bg-red-500 text-white animate-pulse' : 
-            isEnded ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' : 'bg-blue-500 text-white'
-          }`}>
-            {isEnded ? (
-              <span className="flex items-center gap-1">
-                Ended {workshop.ended_at ? formatDistanceToNowStrict(new Date(workshop.ended_at), { addSuffix: true }) : ''}
-              </span>
-            ) : workshop.status}
+          <div className="flex items-center gap-2">
+            <div className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              workshop.type === 'AUDIO' ? 'bg-teal-500 text-white' : 'bg-teal-500 text-white'
+            }`}>
+              {workshop.type}
+            </div>
+            <div className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              isLive ? 'bg-red-500 text-white animate-pulse' : 
+              isEnded ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' : 'bg-blue-500 text-white'
+            }`}>
+              {isEnded ? (
+                <span className="flex items-center gap-1">
+                  Ended {workshop.ended_at ? formatDistanceToNowStrict(new Date(workshop.ended_at), { addSuffix: true }) : ''}
+                </span>
+              ) : workshop.status}
+            </div>
           </div>
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-white/90 transition-colors font-sora">{workshop.title}</h3> {/* Apply Header Font */}

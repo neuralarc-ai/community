@@ -197,12 +197,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
                   <MicOff className="h-4 w-4 text-red-500" />
                 )}
 
-                {/* Video Status */}
-                {participant.isCameraEnabled ? (
-                  <Video className="h-4 w-4 text-green-500" />
-                ) : (
-                  <VideoOff className="h-4 w-4 text-red-500" />
-                )}
 
               </div>
             </div>
