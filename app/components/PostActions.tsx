@@ -1,9 +1,9 @@
 import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark, ChevronUp, ChevronDown, Bell } from 'lucide-react';
-import { createClient } from '@/app/lib/supabaseClient'; // Assuming supabase client is needed for votes
 import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import VoteColumn from './VoteColumn';
 import { useToast } from '@/app/components/ui/use-toast'; // Added import for useToast
+import Link from 'next/link';
+
+import { useVote } from '@/app/hooks/useVote';
 
 interface PostActionsProps {
   commentCount: number;
@@ -14,12 +14,12 @@ interface PostActionsProps {
   onDelete?: (postId: string) => void;
   isSaved?: boolean;
   onToggleSave?: (postId: string) => void;
-  initialVoteScore: number;
-  userVote: -1 | 0 | 1;
-  onVoteChange: (newScore: number, newUserVote: -1 | 0 | 1) => void;
+  initialVote: -1 | 0 | 1;
+  initialScore: number;
   isPinned?: boolean;
   onTogglePin?: (postId: string, isPinned: boolean) => void;
   onNotifyUsers?: () => Promise<void>; // New prop for notifying users
+  onVoteSuccess?: (newScore: number, newVote: -1 | 0 | 1) => void; // New prop for refreshing post data after a successful vote
 }
 
 export default function PostActions({
@@ -31,13 +31,15 @@ export default function PostActions({
   onDelete,
   isSaved = false,
   onToggleSave,
-  initialVoteScore,
-  userVote,
-  onVoteChange,
+  initialVote,
+  initialScore,
   isPinned,
   onTogglePin,
   onNotifyUsers, // Destructure new prop
 }: PostActionsProps) {
+  const { currentVote, currentScore, handleVote, isLoading, error } = useVote({ initialVote, initialScore, postId });
+
+
   const [showMenu, setShowMenu] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -76,67 +78,24 @@ export default function PostActions({
     }
   };
 
-  const handleVote = async (voteType: 1 | -1, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!currentUserId) {
-      alert('You must be logged in to vote.');
-      return;
-    }
-
-    const supabase = createClient();
-    let newVote = 0;
-    let newScore = initialVoteScore;
-
-    if (userVote === voteType) {
-      // User is undoing their vote
-      newVote = 0;
-      newScore -= voteType;
-    } else {
-      // User is changing their vote or casting a new vote
-      newVote = voteType;
-      newScore += voteType - (userVote || 0);
-    }
-
-    // No longer update local state, rely on prop updates from real-time
-    // setCurrentScore(newScore);
-    // setCurrentUserVote(newVote as -1 | 0 | 1);
-    onVoteChange(newScore, newVote as -1 | 0 | 1);
-
-    const { error } = await supabase.from('votes').upsert(
-      {
-        user_id: currentUserId,
-        target_id: postId,
-        target_type: 'post',
-        value: newVote,
-      },
-      { onConflict: 'user_id,target_id,target_type' }
-    );
-
-    if (error) {
-      console.error('Error submitting vote:', error.message || error);
-      // No need to revert optimistic update, as real-time will correct the score
-      alert('Failed to cast vote.');
-    }
-  };
-
   return (
     <div className="flex items-center space-x-2 text-xs font-medium relative">
       <div className="flex items-center space-x-1 bg-white/5 rounded-full px-2 py-1 transition-all duration-200 group">
         <button
-          onClick={(e) => handleVote(1, e)}
+          onClick={(e) => { e.stopPropagation(); handleVote('up'); }}
           className={`p-1 rounded-full transition-colors ${
-          userVote === 1
+            currentVote === 1
               ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
               : 'text-muted-foreground hover:bg-white/10 hover:text-white'
           }`}
         >
           <ChevronUp size={16} />
         </button>
-        <span className="text-white font-semibold min-w-[20px] text-center">{initialVoteScore}</span>
+        <span className="text-white font-semibold min-w-[20px] text-center">{currentScore}</span>
         <button
-          onClick={(e) => handleVote(-1, e)}
+          onClick={(e) => { e.stopPropagation(); handleVote('down'); }}
           className={`p-1 rounded-full transition-colors ${
-          userVote === -1
+            currentVote === -1
               ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
               : 'text-muted-foreground hover:bg-white/10 hover:text-white'
           }`}

@@ -2,12 +2,15 @@ import { createServerClient } from '@/app/lib/supabaseServerClient';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const { postId, isPinned } = await request.json();
-  const supabase = await createServerClient();
+  try {
+    const { postId, isPinned } = await request.json();
+    console.log('Pin request received:', { postId, isPinned });
+    const supabase = await createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
+    console.log('User not authenticated');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -18,7 +21,9 @@ export async function POST(request: Request) {
     .single();
 
   if (profileError || profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden: Not an admin' }, { status: 403 });
+    console.log('Profile check failed:', { profileError, role: profile?.role });
+    const errorMessage = profileError?.message || 'Forbidden: Not an admin';
+    return NextResponse.json({ error: errorMessage }, { status: 403 });
   }
 
   // If we're pinning a post, unpin all other posts first
@@ -29,8 +34,10 @@ export async function POST(request: Request) {
       .neq('id', postId);
 
     if (unpinError) {
-      console.error('Error unpinning other posts:', unpinError);
-      return NextResponse.json({ error: unpinError.message }, { status: 500 });
+      console.error('Error unpinning other posts:', unpinError.message || unpinError);
+      const errorMessage = unpinError.message || 'Unknown error during unpinning';
+      console.log('Returning unpin error:', errorMessage);
+      return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
   }
 
@@ -41,9 +48,16 @@ export async function POST(request: Request) {
     .select();
 
   if (error) {
-    console.error('Error pinning/unpinning post:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error pinning/unpinning post:', error.message || error);
+    const errorMessage = error.message || 'Unknown error during pinning/unpinning';
+    console.log('Returning pin/unpin error:', errorMessage);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 
-  return NextResponse.json(data[0]);
+    console.log('Pin operation successful, returning data:', data?.[0]);
+    return NextResponse.json(data?.[0] || {});
+  } catch (serverError) {
+    console.error('Unexpected server error in pin endpoint:', serverError);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

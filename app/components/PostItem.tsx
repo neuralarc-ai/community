@@ -255,10 +255,10 @@ export default function PostItem({
                 onDelete={onDelete}
                 isSaved={isSaved}
                 onToggleSave={onToggleSave}
-                  initialVoteScore={post.vote_score}
-                userVote={userVote}
-                onVoteChange={handleVoteChange}
-                  isPinned={post.is_pinned}
+                initialScore={post.vote_score}
+                initialVote={userVote}
+                onVoteSuccess={handleVoteChange}
+                isPinned={post.is_pinned}
                   onTogglePin={onTogglePin}
                   onNotifyUsers={isAdmin ? handleNotifyPostUsers : undefined}
               />
