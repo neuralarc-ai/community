@@ -16,8 +16,8 @@ const transporter = nodemailer.createTransport({
 });
 
 interface EmailOptions {
-  to?: string;
-  bcc?: string;
+  to?: string | string[];
+  bcc?: string | string[];
   subject: string;
   html: string;
 }
@@ -37,10 +37,16 @@ export async function sendEmail({ to, bcc, subject, html }: EmailOptions) {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    return { success: true };
+    if ((to && (Array.isArray(to) ? to.length > 0 : to.trim() !== '')) || (bcc && (Array.isArray(bcc) ? bcc.length > 0 : bcc.trim() !== ''))) {
+      await transporter.sendMail(mailOptions);
+      console.log(`Email sent. To: ${to || 'N/A'}, Bcc: ${bcc || 'N/A'}, Subject: ${subject}`);
+      return { success: true };
+    } else {
+      console.warn('No recipients provided for email. Skipping send.');
+      return { success: false, error: 'No recipients provided' };
+    }
   } catch (error) {
-    console.error(`Failed to send email to ${to}:`, error);
+    console.error(`Failed to send email to ${to || bcc}:`, error);
     return { success: false, error: (error as Error).message };
   }
 }

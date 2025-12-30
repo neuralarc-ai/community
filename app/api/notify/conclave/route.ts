@@ -3,69 +3,98 @@ import { createServerClient } from '@/app/lib/supabaseServerClient';
 import { sendEmail } from '@/app/lib/mail';
 import { ConclaveInvitationEmail } from '@/app/emails/ConclaveInvitationEmail';
 import { render } from '@react-email/render';
+import { setCorsHeaders } from '@/app/lib/setCorsHeaders';
 import { Workshop } from '@/app/types';
 
 export async function POST(req: NextRequest) {
+  // Initialize supabase client with anonymous key for general operations
   const supabase = await createServerClient();
+  // Initialize supabase client with service role key for fetching all profiles (bypassing RLS)
+  const supabaseServiceRole = await createServerClient(true);
 
   try {
     const { workshopId } = await req.json();
 
     if (!workshopId) {
-      return NextResponse.json({ message: 'Workshop ID is required' }, { status: 400 });
+      const response = NextResponse.json({ message: 'Workshop ID is required' }, { status: 400 });
+      return setCorsHeaders(req, response);
     }
 
     // Fetch workshop details
     const { data: workshop, error: workshopError } = await supabase
       .from('workshops')
-      .select('id, title, description, start_time, end_time, host_id, host:profiles(display_name)')
+      .select('id, title, description, start_time, host_id')
       .eq('id', workshopId)
       .single();
 
     if (workshopError || !workshop) {
       console.error('Error fetching workshop:', workshopError);
-      return NextResponse.json({ message: 'Workshop not found' }, { status: 404 });
+      const response = NextResponse.json({ message: 'Workshop not found' }, { status: 404 });
+      return setCorsHeaders(req, response);
     }
 
-    // Fetch registered users (or waitlist users, depending on logic)
-    // For this example, let's assume we're notifying users on a waitlist or registered users.
-    // You might need to adjust this query based on your actual database schema and notification logic.
-    const { data: waitlistUsers, error: waitlistError } = await supabase
-      .from('workshop_waitlist')
-      .select('user_email')
-      .eq('workshop_id', workshopId);
+    // {{ Start of removal of host profile changes }}
+    // The host profile fetching logic is removed as per user's request.
+    // If hostName is still required in the email, it will default to 'Host'
+    const hostName = 'Host';
+    // {{ End of removal of host profile changes }}
 
-    if (waitlistError) {
-      console.error('Error fetching waitlist users:', waitlistError);
-      return NextResponse.json({ message: 'Failed to fetch waitlist users' }, { status: 500 });
+    // 1. Fetch all user profiles with their emails
+    const { data: allProfiles, error: profilesError } = await supabaseServiceRole
+      .from('profiles')
+      .select('id, email'); // Assuming 'id' in profiles is the same as 'auth.users.id'
+
+    if (profilesError) {
+      console.error('Error fetching profiles:', profilesError);
+      const response = NextResponse.json({ message: 'Failed to fetch user profiles' }, { status: 500 });
+      return setCorsHeaders(req, response);
     }
 
-    if (!waitlistUsers || waitlistUsers.length === 0) {
-      return NextResponse.json({ message: 'No users to notify' }, { status: 200 });
+    if (!allProfiles || allProfiles.length === 0) {
+      const response = NextResponse.json({ message: 'No user profiles found to notify' }, { status: 200 });
+      return setCorsHeaders(req, response);
     }
 
-    // Send emails
-    const emailsToSend = waitlistUsers.map(user => user.user_email);
+    // 2. Filter out emails ending with "@neuralarc.ai" and exclude host email
+    const emailsToSend = allProfiles
+      .filter(profile => {
+        const isNeuralArcEmail = profile.email?.endsWith('@neuralarc.ai');
+        const isHostEmail = profile.id === workshop.host_id;
+        return !isNeuralArcEmail && !isHostEmail && profile.email; // Ensure email exists
+      })
+      .map(profile => profile.email as string); // Extract only emails for BCC
 
-    if (emailsToSend.length > 0) {
-      await sendEmail({
-        bcc: emailsToSend.join(','), // sendEmail expects a comma-separated string for multiple recipients
-        subject: `Conclave Live: ${workshop.title}`,
-        html: await render(ConclaveInvitationEmail({
-          userName: 'Attendee', // This might need to be dynamic if you fetch user names
-          conclaveTitle: workshop.title,
-          conclaveDate: workshop.start_time,
-          conclaveTime: workshop.start_time,
-          conclaveLink: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/conclave/${workshop.id}`,
-          hostName: (workshop.host as any)?.display_name || 'Host',
-          conclaveDescription: workshop.description,
-        })),
-      });
+    if (emailsToSend.length === 0) {
+      const response = NextResponse.json({ message: 'No eligible users to notify after filtering' }, { status: 200 });
+      return setCorsHeaders(req, response);
     }
 
-    return NextResponse.json({ message: 'Notifications sent successfully' }, { status: 200 });
+    // Send emails using BCC
+    await sendEmail({
+      to: undefined, // Explicitly set 'to' to undefined
+      bcc: emailsToSend, // Pass the array directly to bcc
+      subject: `Conclave Live: ${workshop.title}`,
+      html: await render(ConclaveInvitationEmail({
+        userName: 'Attendee', // We are not fetching individual names for BCC emails
+        conclaveTitle: workshop.title,
+        conclaveDate: workshop.start_time,
+        conclaveTime: workshop.start_time,
+        conclaveLink: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/conclave/${workshop.id}`,
+        hostName: hostName,
+        conclaveDescription: workshop.description,
+      })),
+    });
+
+    const successResponse = NextResponse.json({ message: 'Conclave invitation emails sent successfully!' }, { status: 200 });
+    return setCorsHeaders(req, successResponse);
   } catch (error) {
     console.error('Error notifying conclave users:', error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    const errorResponse = NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return setCorsHeaders(req, errorResponse);
   }
+}
+
+export async function OPTIONS(request: NextRequest) {
+  const response = new NextResponse(null, { status: 204 });
+  return setCorsHeaders(request, response);
 }

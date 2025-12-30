@@ -4,39 +4,31 @@ interface UseVoteProps {
   initialVote: -1 | 0 | 1;
   initialScore: number;
   postId: string;
+  onVoteSuccess?: (newScore: number, newVote: -1 | 0 | 1) => void; // New optional callback
 }
 
-export function useVote({ initialVote, initialScore, postId }: UseVoteProps) {
+export function useVote({ initialVote, initialScore, postId, onVoteSuccess }: UseVoteProps) {
   const [currentVote, setCurrentVote] = useState<(-1 | 0 | 1)>(initialVote);
   const [currentScore, setCurrentScore] = useState<number>(initialScore);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleVote = async (type: 'up' | 'down') => {
+  const handleVote = async (clickedVoteType: 'up' | 'down') => {
     setIsLoading(true);
     setError(null);
 
-    const newVoteValue = type === 'up' ? 1 : -1;
-    let optimisticVoteChange = 0;
-    let optimisticScoreChange = 0;
+    // 1. Determine the numeric value of the button clicked
+    const voteValue = clickedVoteType === 'up' ? 1 : -1;
 
-    if (currentVote === newVoteValue) {
-      // User is toggling off their existing vote
-      optimisticVoteChange = 0 - currentVote;
-      optimisticScoreChange = -currentVote;
-    } else if (currentVote === 0) {
-      // User is casting a new vote
-      optimisticVoteChange = newVoteValue;
-      optimisticScoreChange = newVoteValue;
-    } else {
-      // User is switching their vote (up to down, or down to up)
-      optimisticVoteChange = newVoteValue - currentVote;
-      optimisticScoreChange = newVoteValue - currentVote;
-    }
+    // 2. Calculate the NEW vote status (Toggle Logic)
+    const newVoteStatus: -1 | 0 | 1 = (currentVote === voteValue) ? 0 : voteValue;
 
-    // Optimistically update UI
-    setCurrentVote((prev) => (prev === newVoteValue ? 0 : newVoteValue));
-    setCurrentScore((prev) => prev + optimisticScoreChange);
+    // 3. Calculate the Delta
+    const scoreDelta = newVoteStatus - currentVote;
+
+    // 4. Update UI Optimistically
+    setCurrentVote(newVoteStatus);
+    setCurrentScore((prevScore) => prevScore + scoreDelta);
 
     try {
       const res = await fetch('/api/posts/vote', {
@@ -44,12 +36,13 @@ export function useVote({ initialVote, initialScore, postId }: UseVoteProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ postId, voteType: type }),
+        body: JSON.stringify({ postId, voteType: clickedVoteType }), // Send the original clicked type to the backend
       });
 
       if (!res.ok) {
         throw new Error('Failed to cast vote');
       }
+      onVoteSuccess?.(currentScore, newVoteStatus); // Call the callback with updated score and vote status
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
       // Revert optimistic updates if API fails

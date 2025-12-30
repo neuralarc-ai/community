@@ -17,7 +17,7 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
       updated_at,
       title,
       body: content,
-      image_url,
+      image_urls,
       vote_score,
       author_id: user_id,
       is_pinned,
@@ -57,7 +57,7 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
     user_vote: post.user_votes[0]?.vote_type || 0,
     comment_count: post.comments_count[0]?.count || 0,
     is_pinned: post.is_pinned,
-    image_urls: post.image_url ? [post.image_url] : undefined
+    image_urls: post.image_urls || []
   })) as Post[];
 });
 

@@ -12,56 +12,68 @@ import { Post, Comment, Profile } from '@/app/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import Avatar from '@/app/components/Avatar'
 import { Button } from '@/components/ui/button'
-import { MessageSquare, Share2, ArrowLeft, Bookmark } from 'lucide-react'
+import { MessageSquare, Share2, ArrowLeft, Bookmark, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
 
-const renderImages = (imageUrls: string[], handleImageClick: (src: string) => void) => {
-  const numImages = imageUrls.length;
-  let gridClass = '';
-  let imageClasses: string[] = [];
+const renderImages = (
+      imageUrls: string[],
+      handleImageClick: (url: string, index: number) => void,
+      currentImageIndex: number, // Add this
+      setCurrentImageIndex: React.Dispatch<React.SetStateAction<number>> // Add this
+    ) => {
+    if (imageUrls.length === 0) return null;
 
-  switch (numImages) {
-    case 1:
-      gridClass = 'grid grid-cols-1 place-items-center';
-      imageClasses = ['max-w-full max-h-[500px] w-auto h-auto object-contain rounded-xl'];
-      break;
-    case 2:
-      gridClass = 'grid grid-cols-2 gap-2';
-      imageClasses = ['w-full h-[250px] object-cover rounded-xl', 'w-full h-[250px] object-cover rounded-xl'];
-      break;
-    case 3:
-      gridClass = 'grid grid-cols-3 gap-2';
-      imageClasses = [
-        'w-full h-[250px] object-cover rounded-xl',
-        'w-full h-[250px] object-cover rounded-xl',
-        'w-full h-[250px] object-cover rounded-xl',
-      ];
-      break;
-    default:
-      return null; // Should not happen with max 3 constraint
-  }
+    const showNavigation = imageUrls.length > 1;
 
-  return (
-    <div className={`${gridClass} mb-4`}>
-      {imageUrls.map((url, index) => (
-        <div key={index} onClick={() => handleImageClick(url)} className="block overflow-hidden cursor-pointer">
-          <Image 
-            src={url} 
-            alt={`Post image ${index + 1}`} 
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className={`${imageClasses[index] || ''} transition-transform duration-300 hover:scale-105`} 
-            priority
+    const goToPreviousImage = () => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === 0 ? imageUrls.length - 1 : prevIndex - 1
+      );
+    };
+
+    const goToNextImage = () => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === imageUrls.length - 1 ? 0 : prevIndex + 1
+      );
+    };
+
+    return (
+      <div className="relative w-full mb-6"> {/* Relative for positioning arrows */}
+        <div className="w-full bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
+          <img
+            src={imageUrls[currentImageIndex]} // Display current image
+            alt={`Post image ${currentImageIndex + 1}`}
+            className="max-h-[600px] object-contain cursor-pointer"
+            onClick={() => handleImageClick(imageUrls[currentImageIndex], currentImageIndex)}
           />
         </div>
-      ))}
-    </div>
-  );
-};
+
+        {showNavigation && (
+          <>
+            <button
+              onClick={goToPreviousImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              onClick={goToNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              aria-label="Next image"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </>
+        )}
+      </div>
+    );
+  };
 
 export default function PostDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // New state for carousel index
   const params = useParams()
   const router = useRouter()
   const postId = params.id as string
@@ -73,11 +85,15 @@ export default function PostDetailPage() {
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(null)
   const [isSaved, setIsSaved] = useState(false)
 
-  useEffect(() => {
-    fetchPost()
-    fetchUserProfile()
-    fetchSavedStatus()
-  }, [postId])
+      useEffect(() => {
+        fetchPost()
+        fetchUserProfile()
+        fetchSavedStatus()
+      }, [postId])
+
+      useEffect(() => {
+        setCurrentImageIndex(0); // Reset index when post changes
+      }, [postId, post?.image_urls]); // Depend on postId and image_urls to reset carousel
 
   const fetchUserProfile = async () => {
     try {
@@ -264,8 +280,8 @@ export default function PostDetailPage() {
     }
   }
 
-  const handleImageClick = (src: string) => {
-    setCurrentImageSrc(src)
+  const handleImageClick = (src: string, index: number) => {
+    setCurrentImageIndex(index)
     setLightboxOpen(true)
   }
 
@@ -273,6 +289,18 @@ export default function PostDetailPage() {
     setLightboxOpen(false)
     setCurrentImageSrc(null)
   }
+
+  const goToPreviousLightboxImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? (post?.image_urls?.length || 0) - 1 : prevIndex - 1
+    );
+  };
+
+  const goToNextLightboxImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === (post?.image_urls?.length || 0) - 1 ? 0 : prevIndex + 1
+    );
+  };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -287,31 +315,28 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <TwoColumnLayout>
         <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
         </div>
-      </TwoColumnLayout>
     )
   }
 
   if (!post) {
     return (
-      <TwoColumnLayout>
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg mb-4">Post not found</p>
             <Link href="/posts" className="text-primary hover:underline inline-block font-medium">
               ← Back to posts
             </Link>
           </div>
-      </TwoColumnLayout>
     )
   }
 
   return (
     <>
-    <TwoColumnLayout>
-<div className="flex items-center gap-4 mb-8">
+      <main className="relative flex-1 py-12 px-4 sm:px-6 lg:px-8 overflow-y-auto">
+        {/* Back button and title */}
+        <div className="max-w-4xl mx-auto flex items-center gap-4 mb-8">
             <button 
               onClick={() => router.back()}
               className="p-2 rounded-full bg-white/5 hover:bg-yellow-500/20 text-muted-foreground hover:text-white transition-all border border-white/5"
@@ -324,59 +349,49 @@ export default function PostDetailPage() {
             </div>
         </div>
 
-        {/* Main Post Card */}
-        <div className="bg-[#121212] backdrop-blur-sm border border-white/5 rounded-xl shadow-sm overflow-hidden mb-6 hover:border-yellow-500/30 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] transition-all duration-300">
-            <div className="flex flex-col">
-                
-                {/* Content */}
-                <div className="flex-1 p-4 sm:p-6">
-                    {/* Metadata */}
-                    <div className="flex items-center text-xs text-muted-foreground mb-3 gap-2">
-                        <div className="flex items-center gap-1">
-                            <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'User'} size={32} />
-                            <span className="font-bold text-white">u/{post.author?.username || 'Anonymous'}</span>
-                            {post.author?.role === 'admin' && (
-                                <span className="ml-1 bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border border-yellow-500/20">Admin</span>
-                            )}
-                        </div>
-                        {post.is_pinned && (
-                            <div className="flex items-center gap-1.5 bg-yellow-500/10 text-yellow-500 px-2.5 py-1 rounded-full border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]">
-                                <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)] animate-pulse" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">Pinned by Admin</span>
-                            </div>
-                        )}
-                        <span>•</span>
-                        <span>{formatTime(post.created_at)}</span>
-                    </div>
+        <div className="max-w-4xl mx-auto">
+          {post ? (
+            <div className="bg-gradient-to-br from-neutral-900 to-black rounded-xl shadow-2xl overflow-hidden mb-8 border border-white/10">
+              <div className="p-6">
+                {/* User Info (Author Avatar, Username, Time) */}
+                <div className="flex items-center space-x-3 mb-5">
+                  <Avatar src={post.author?.avatar_url} alt={post.author?.username || 'U'} />
+                  <div>
+                    <Link href={`/profile/${post.author_id}`} className="text-sm font-semibold text-white hover:text-admin-yellow/80 transition-colors">
+                      {post.author?.username || 'Unknown User'}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">{formatTime(post.created_at)}</p>
+                  </div>
+                </div>
 
-                    {/* Title */}
-                    <h1 className="text-2xl font-heading font-bold text-white mb-4 leading-tight">
-                        {post.title}
-                    </h1>
-                    
-                    {/* Body */}
-                    <div className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans mb-6 text-[15px]">
-                        {post.body}
-                    </div>
+                {/* Title */}
+                <h1 className="text-2xl font-heading font-bold text-white mb-4 leading-tight">
+                  {post.title}
+                </h1>
 
-                    {/* Render Images if available */}
-                    {(() => {
-                      return post.image_urls && post.image_urls.length > 0 && renderImages(post.image_urls, handleImageClick)
-                    })()}
+                {/* Body */}
+                {post.body && (
+                  <div className="text-gray-300 leading-relaxed whitespace-pre-wrap font-sans mb-6 text-[15px]">
+                    {post.body}
+                  </div>
+                )}
 
-                    {/* Tags */}
-                    {post.tags && post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                        {post.tags.map((tag, index) => (
-                            <span key={index} className="px-2.5 py-0.5 bg-white/5 text-muted-foreground border border-white/5 text-xs font-bold rounded-full">
-                                {tag}
-                            </span>
-                        ))}
-                        </div>
-                    )}
+                {/* Render Images if available, below text */}
+                {post.image_urls && post.image_urls.length > 0 && renderImages(post.image_urls, handleImageClick, currentImageIndex, setCurrentImageIndex)}
 
-                    {/* Action Bar */}
-                    <div className="border-t border-white/5 pt-4">
+                {/* Tags */}
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {post.tags.map((tag, index) => (
+                      <span key={index} className="px-2.5 py-0.5 bg-white/5 text-muted-foreground border border-white/5 text-xs font-bold rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Action Bar */}
+                <div className="border-t border-white/5 pt-4">
                         <PostActions
                             postId={post.id}
                             authorId={post.author_id}
@@ -386,18 +401,25 @@ export default function PostDetailPage() {
                             isSaved={isSaved}
                             onToggleSave={handleToggleSave}
                             commentCount={post.comment_count || 0}
-                            initialVoteScore={post.vote_score || 0}
-                            userVote={post.user_vote || 0}
-                            onVoteChange={handleVoteChange}
+                            initialScore={post.vote_score || 0}
+                            initialVote={post.user_vote || 0}
                             isPinned={post.is_pinned}
                             onTogglePin={handleTogglePin}
+                            onVoteSuccess={fetchPost} // Pass fetchPost as the callback
                         />
                     </div>
-                </div>
+              </div>
             </div>
-        </div>
-
-        {/* Comment Section Input Area (Optional: separate card for input or just integrated) 
+          ) : (
+            // ... existing loading/error state ...
+            <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg mb-4">Post not found</p>
+            <Link href="/posts" className="text-primary hover:underline inline-block font-medium">
+              ← Back to posts
+            </Link>
+          </div>
+          )}
+           {/* Comment Section Input Area (Optional: separate card for input or just integrated) 
             For now, we rely on the input inside CommentTree or at the top of comments if we want.
             Typical Reddit has a "Comment as [User]" box here. 
             We'll stick to displaying the tree which usually has an input if we add it, 
@@ -422,8 +444,19 @@ export default function PostDetailPage() {
               onReplyToggle={onReplyToggle}
             />
         </div>
-    </TwoColumnLayout>
-    <Lightbox src={currentImageSrc} isOpen={lightboxOpen} onClose={handleCloseLightbox} />
+        </div>
+      </main>
+
+      {lightboxOpen && (
+        <Lightbox
+          imageUrls={post?.image_urls || []} // Pass the array of image URLs
+          currentImageIndex={currentImageIndex} // Pass the current index
+          isOpen={lightboxOpen}
+          onClose={handleCloseLightbox}
+          onPrevious={goToPreviousLightboxImage} // Pass previous handler
+          onNext={goToNextLightboxImage} // Pass next handler
+        />
+      )}
     </>
   )
 }

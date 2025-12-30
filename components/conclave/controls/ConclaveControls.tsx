@@ -12,6 +12,7 @@ import {
   Users, Radio, Square, ShieldCheck, X, ChevronLeft 
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
 
 interface ConclaveControlsProps {
   workshopId: string
@@ -28,6 +29,7 @@ export default function ConclaveControls({
   type,
   onEndLive
 }: ConclaveControlsProps) {
+  const { toast } = useToast()
   const room = useRoomContext()
   const { localParticipant } = useLocalParticipant()
   const remoteParticipants = useRemoteParticipants()
@@ -147,14 +149,17 @@ export default function ConclaveControls({
       });
 
       if (res.ok) {
-        // toast({ title: 'Success', description: 'Notifications sent to all eligible users.' });
+        console.log('Attempting to show success toast');
+        toast({ title: 'Success', description: 'Notifications sent to all eligible users.' });
       } else {
         const errorData = await res.json();
-        // toast({ title: 'Error', description: errorData.message || 'Failed to send notifications.' });
+        console.log('Attempting to show error toast (API response)');
+        toast({ title: 'Error', description: errorData.message || 'Failed to send notifications.' });
         console.error('Failed to send conclave notifications:', errorData.message);
       }
     } catch (error) {
-      // toast({ title: 'Error', description: 'An unexpected error occurred while sending notifications.' });
+      console.log('Attempting to show error toast (unexpected error)');
+      toast({ title: 'Error', description: 'An unexpected error occurred while sending notifications.' });
       console.error('Error sending conclave notifications:', error);
     } finally {
       setIsNotifying(false);

@@ -5,10 +5,11 @@ import PostActions from './PostActions';
 import Avatar from './Avatar';
 import MagicBento from './MagicBento';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Lightbox from './Lightbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/app/components/ui/use-toast';
+import { ChevronLeft, ChevronRight } from 'lucide-react'; // ADD THIS LINE
 
 interface PostItemProps {
   post: Post;
@@ -72,10 +73,12 @@ export default function PostItem({
 }: PostItemProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageSrc, setCurrentImageSrc] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // ADD THIS LINE
   const { toast } = useToast();
 
-  const handleImageClick = (src: string) => {
+  const handleImageClick = (src: string, index: number) => {
     setCurrentImageSrc(src);
+    setCurrentImageIndex(index); // Set the clicked image's index
     setLightboxOpen(true);
   };
 
@@ -83,6 +86,22 @@ export default function PostItem({
     setLightboxOpen(false);
     setCurrentImageSrc(null);
   };
+
+  const goToPreviousLightboxImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? (post?.image_urls?.length || 0) - 1 : prevIndex - 1
+    );
+  };
+
+  const goToNextLightboxImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === (post?.image_urls?.length || 0) - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  useEffect(() => {
+        setCurrentImageIndex(0); // Reset index when post changes
+    }, [post.id, post.image_urls]); // Depend on post.id and image_urls to reset carousel
 
   const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange(post.id, newScore, newUserVote);
@@ -122,45 +141,51 @@ export default function PostItem({
   };
 
   const renderImages = (imageUrls: string[]) => {
-    const numImages = imageUrls.length;
-    let gridClass = '';
-    let imageClasses: string[] = [];
+    if (imageUrls.length === 0) return null;
 
-    switch (numImages) {
-      case 1:
-        gridClass = 'grid grid-cols-1';
-        imageClasses = ['mx-auto max-h-[500px] w-auto rounded-xl'];
-        break;
-      case 2:
-        gridClass = 'grid grid-cols-2 gap-0'; /* Changed gap to 0 */
-        imageClasses = ['w-full h-full aspect-square object-cover', 'w-full h-full aspect-square object-cover'];
-        break;
-      case 3:
-        gridClass = 'grid grid-cols-3 gap-2';
-        imageClasses = [
-          'w-full h-[250px] object-cover rounded-xl',
-          'w-full h-[250px] object-cover rounded-xl',
-          'w-full h-[250px] object-cover rounded-xl',
-        ];
-        break;
-      default:
-        return null; // Should not happen with max 3 constraint
-    }
+    const showNavigation = imageUrls.length > 1;
+
+    const goToPreviousImage = () => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === 0 ? imageUrls.length - 1 : prevIndex - 1
+      );
+    };
+
+    const goToNextImage = () => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === imageUrls.length - 1 ? 0 : prevIndex + 1
+      );
+    };
 
     return (
-      <div className={`${gridClass} mb-4`}>
-        {imageUrls.map((url, index) => (
-          <div key={index} onClick={() => handleImageClick(url)} className="block overflow-hidden cursor-pointer relative">
-            <Image 
-              src={url} 
-              alt={`Post image ${index + 1}`} 
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className={`${imageClasses[index] || ''} rounded-xl transition-transform duration-300 hover:scale-105 hover:rounded-none`} 
-              priority
-            />
-          </div>
-        ))}
+      <div className="relative w-full mb-4"> {/* Use relative for positioning arrows */}
+        <div className="w-full bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
+          <img
+            src={imageUrls[currentImageIndex]} // Display current image
+            alt={`Post image ${currentImageIndex + 1}`}
+            className="max-h-[500px] w-auto object-contain cursor-pointer" // Adjusted styling for main image
+            onClick={() => handleImageClick(imageUrls[currentImageIndex], currentImageIndex)}
+          />
+        </div>
+
+        {showNavigation && (
+          <>
+            <button
+              onClick={goToPreviousImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={goToNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              aria-label="Next image"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </>
+        )}
       </div>
     );
   };
@@ -215,7 +240,7 @@ export default function PostItem({
           )}
       </Link>
 
-        {/* Render Images if available */}
+        {/* Render Images if available, below text */}
         {post.image_urls && post.image_urls.length > 0 && renderImages(post.image_urls)}
 
       {/* Mobile Vote & Actions */}
@@ -230,10 +255,10 @@ export default function PostItem({
                 onDelete={onDelete}
                 isSaved={isSaved}
                 onToggleSave={onToggleSave}
-                  initialVoteScore={post.vote_score}
-                userVote={userVote}
-                onVoteChange={handleVoteChange}
-                  isPinned={post.is_pinned}
+                initialScore={post.vote_score}
+                initialVote={userVote}
+                onVoteSuccess={handleVoteChange}
+                isPinned={post.is_pinned}
                   onTogglePin={onTogglePin}
                   onNotifyUsers={isAdmin ? handleNotifyPostUsers : undefined}
               />
@@ -245,7 +270,14 @@ export default function PostItem({
   return (
     <article className="mb-6 w-full font-manrope"> {/* Added font-manrope */}
       <PostCardBase post={post}>{postInnerContent}</PostCardBase>
-      <Lightbox src={currentImageSrc} isOpen={lightboxOpen} onClose={handleCloseLightbox} />
+      <Lightbox
+        imageUrls={post.image_urls || []} // Pass the array of image URLs
+        currentImageIndex={currentImageIndex} // Pass the current index
+        isOpen={lightboxOpen}
+        onClose={handleCloseLightbox}
+        onPrevious={goToPreviousLightboxImage} // Pass previous handler
+        onNext={goToNextLightboxImage} // Pass next handler
+      />
     </article>
   );
 }

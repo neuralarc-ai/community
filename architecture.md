@@ -1,5 +1,8 @@
 # System Architecture
 
+For a high-level overview of the project, refer to the [main README file](./README.md).
+
+
 ## Overview
 This project is a Community Portal application built with **Next.js 14+ (App Router)** and **Supabase**. It provides a platform for users to create posts, engage in threaded discussions, vote on content, and manage their profiles.
 
@@ -46,7 +49,24 @@ Core content items.
 -   `author_id`: UUID (Foreign Key to `profiles`).
 -   `title`: Text.
 -   `body`: Text (Content).
--   `tags`: Array of strings.
+    -   `tags`: Array of strings.
+
+### 5. Workshops (`workshops`)
+Interactive learning sessions.
+-   `id`: UUID.
+-   `host_id`: UUID (Foreign Key to `profiles`).
+-   `title`: Text.
+-   `description`: Text.
+-   `scheduled_at`: Timestamp.
+
+### 6. Conclaves (`conclaves`)
+Focused discussion groups.
+-   `id`: UUID.
+-   `organizer_id`: UUID (Foreign Key to `profiles`).
+-   `title`: Text.
+-   `description`: Text.
+-   `starts_at`: Timestamp.
+-   `ends_at`: Timestamp.
 
 ### 3. Comments (`comments`)
 Supports infinite nesting (threaded discussions).
@@ -80,6 +100,16 @@ Polymorphic voting system for posts and comments.
 ### 3. Voting
 -   Optimistic UI updates are used for immediate feedback.
 -   Backend enforces one vote per user per target (Upsert logic).
+
+### 4. Workshops
+-   **Creation:** Authenticated users can create new workshop listings.
+-   **Viewing:** Users can browse upcoming workshops.
+-   **Joining:** Users can register their interest or join a workshop.
+
+### 5. Conclaves
+-   **Creation:** Authenticated users can organize new conclave events.
+-   **Viewing:** Users can see details of scheduled conclaves.
+-   **Participation:** Users can join and engage in conclave discussions during their active period.
 
 ## Security
 -   **RLS (Row Level Security):** Enabled on all tables.

@@ -196,8 +196,21 @@ function PostsContent() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to toggle pin status');
+        let errorMessage = response.statusText;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          // If parsing fails, try to get the raw response text
+          try {
+            const rawResponse = await response.text();
+            console.error('Raw server response:', rawResponse);
+            errorMessage = rawResponse || errorMessage;
+          } catch (textError) {
+            console.error('Could not read server response:', textError);
+          }
+        }
+        throw new Error(`Failed to toggle pin status: ${response.status} - ${errorMessage}`);
       }
 
       // If we pinned a post, we need to unpin all others in our local state
