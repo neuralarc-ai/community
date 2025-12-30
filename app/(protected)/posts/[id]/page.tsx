@@ -401,11 +401,11 @@ export default function PostDetailPage() {
                             isSaved={isSaved}
                             onToggleSave={handleToggleSave}
                             commentCount={post.comment_count || 0}
-                            initialVoteScore={post.vote_score || 0}
-                            userVote={post.user_vote || 0}
-                            onVoteChange={handleVoteChange}
+                            initialScore={post.vote_score || 0}
+                            initialVote={post.user_vote || 0}
                             isPinned={post.is_pinned}
                             onTogglePin={handleTogglePin}
+                            onVoteSuccess={fetchPost} // Pass fetchPost as the callback
                         />
                     </div>
               </div>
