@@ -1,6 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { IconMenu2, IconX } from "@tabler/icons-react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import {
   motion,
@@ -8,10 +9,6 @@ import {
   useScroll,
   useMotionValueEvent,
 } from "motion/react";
-
-import React, { useRef, useState } from "react";
-import Image from "next/image";
-
 
 interface NavbarProps {
   children: React.ReactNode;

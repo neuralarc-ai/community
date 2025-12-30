@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (emailsToSend.length > 0) {
       await sendEmail({
-        to: emailsToSend.join(','), // sendEmail expects a comma-separated string for multiple recipients
+        bcc: emailsToSend.join(','), // sendEmail expects a comma-separated string for multiple recipients
         subject: `Conclave Live: ${workshop.title}`,
         html: await render(ConclaveInvitationEmail({
           userName: 'Attendee', // This might need to be dynamic if you fetch user names

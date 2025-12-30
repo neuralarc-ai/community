@@ -2,6 +2,8 @@ import { createServerClient } from '@/app/lib/supabaseServerClient';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
+  try {
+
   const { postId, isPinned } = await request.json();
   const supabase = await createServerClient();
 
@@ -46,4 +48,8 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(data[0]);
+  } catch (error) {
+    console.error('Unhandled error in POST /api/posts/pin:', error);
+    return NextResponse.json({ error: (error as Error).message || 'Internal Server Error' }, { status: 500 });
+  }
 }

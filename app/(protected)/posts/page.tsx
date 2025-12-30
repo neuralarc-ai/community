@@ -196,7 +196,8 @@ function PostsContent() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to toggle pin status');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to toggle pin status');
       }
 
       // If we pinned a post, we need to unpin all others in our local state
@@ -215,7 +216,6 @@ function PostsContent() {
       // We don't necessarily need to fetchPosts() again if we updated the state correctly,
       // but fetchPosts also handles sorting. Let's keep it for safety but the local update
       // will handle the UI immediately.
-      fetchPosts(); 
     } catch (error) {
       console.error('Error toggling pin:', error);
       alert('Failed to update pin status.');

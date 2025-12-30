@@ -41,9 +41,9 @@ export const getPosts = cache(async (searchQuery: string | null): Promise<Post[]
 
   return data.map(post => ({
     id: post.id,
-    author_id: post.user_id,
+    author_id: post.author_id,
     title: post.title,
-    body: post.content,
+    body: post.body,
     tags: post.tags || [],
     created_at: post.created_at,
     updated_at: post.created_at, // Using created_at as updated_at since it's not selected
