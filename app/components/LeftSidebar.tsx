@@ -223,7 +223,7 @@ export default function LeftSidebar({ isOpen, onToggle, isMobile, onCloseMobile,
                   checked={isActive}
                   readOnly
                 />
-                <Link href={item.href} onClick={onCloseMobile}>
+                <Link href={item.href} onClick={onCloseMobile} prefetch={true}>
                   <label htmlFor={`nav-${item.label.toLowerCase().replace(/\s/g, '-')}`} className="text-base">
                     <item.icon className="w-5 h-5" />
                     {item.label}

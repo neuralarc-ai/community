@@ -5,8 +5,9 @@ import PostActions from './PostActions';
 import Avatar from './Avatar';
 import MagicBento from './MagicBento';
 import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
-import React, { useState, useEffect } from 'react';
-import Lightbox from './Lightbox';
+import React, { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+const Lightbox = dynamic(() => import('./Lightbox'), { ssr: false, loading: () => <div className="flex justify-center items-center h-full w-full bg-black/50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div> });
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/app/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -45,7 +46,7 @@ interface PostCardBaseProps {
   isProfilePage?: boolean;
 }
 
-const PostCardBase = ({ children, post, isProfilePage }: PostCardBaseProps) => (
+const PostCardBase = React.memo(({ children, post, isProfilePage }: PostCardBaseProps) => (
     <div className={`flex bg-card/40 backdrop-blur-sm border rounded-2xl transition-all duration-300 overflow-hidden group
       ${isProfilePage
         ? 'border-[#A6C8D5]/20 hover:border-[#A6C8D5]/30 hover:shadow-[0_0_30px_rgba(166,200,213,0.1)]'
@@ -56,7 +57,7 @@ const PostCardBase = ({ children, post, isProfilePage }: PostCardBaseProps) => (
     `}>
       {children}
     </div>
-);
+));
 
 export default function PostItem({
   post,
@@ -78,38 +79,38 @@ export default function PostItem({
   const { toast } = useToast();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  const handleImageClick = (src: string, index: number) => {
+  const handleImageClick = useCallback((src: string, index: number) => {
     setCurrentImageSrc(src);
-    setCurrentImageIndex(index); // Set the clicked image's index
+    setCurrentImageIndex(index);
     setLightboxOpen(true);
-  };
+  }, [setCurrentImageSrc, setCurrentImageIndex, setLightboxOpen]);
 
-  const handleCloseLightbox = () => {
+  const handleCloseLightbox = useCallback(() => {
     setLightboxOpen(false);
     setCurrentImageSrc(null);
-  };
+  }, [setLightboxOpen, setCurrentImageSrc]);
 
-  const goToPreviousLightboxImage = () => {
+  const goToPreviousLightboxImage = useCallback(() => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? (post?.image_urls?.length || 0) - 1 : prevIndex - 1
     );
-  };
+  }, [setCurrentImageIndex, post?.image_urls?.length]);
 
-  const goToNextLightboxImage = () => {
+  const goToNextLightboxImage = useCallback(() => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === (post?.image_urls?.length || 0) - 1 ? 0 : prevIndex + 1
     );
-  };
+  }, [setCurrentImageIndex, post?.image_urls?.length]);
 
   useEffect(() => {
         setCurrentImageIndex(0); // Reset index when post changes
     }, [post.id, post.image_urls]); // Depend on post.id and image_urls to reset carousel
 
-  const handleVoteChange = (newScore: number, newUserVote: -1 | 0 | 1) => {
+  const handleVoteChange = useCallback((newScore: number, newUserVote: -1 | 0 | 1) => {
     onVoteChange(post.id, newScore, newUserVote);
-  };
+  }, [onVoteChange, post.id]);
 
-  const handleNotifyPostUsers = async () => {
+  const handleNotifyPostUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/notify/post', {
         method: 'POST',
@@ -120,7 +121,7 @@ export default function PostItem({
       });
 
       if (response.ok) {
-        setShowSuccessModal(true); // Open the success modal
+        setShowSuccessModal(true);
       } else {
         const errorData = await response.json();
         toast({
@@ -136,58 +137,54 @@ export default function PostItem({
         description: "An unexpected error occurred.",
         variant: "destructive",
       });
+    } finally {
     }
-  };
+  }, [post.id, toast, setShowSuccessModal]);
 
-  const renderImages = (imageUrls: string[]) => {
-    if (imageUrls.length === 0) return null;
+const MemoizedRenderImages = React.memo(({
+  imageUrls,
+  currentImageIndex,
+  showNavigation,
+  goToPreviousImage,
+  goToNextImage,
+  handleImageClick,
+}: { imageUrls: string[]; currentImageIndex: number; showNavigation: boolean; goToPreviousImage: () => void; goToNextImage: () => void; handleImageClick: (src: string, index: number) => void; }) => {
+  if (imageUrls.length === 0) return null;
 
-    const showNavigation = imageUrls.length > 1;
-
-    const goToPreviousImage = () => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === 0 ? imageUrls.length - 1 : prevIndex - 1
-      );
-    };
-
-    const goToNextImage = () => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === imageUrls.length - 1 ? 0 : prevIndex + 1
-      );
-    };
-
-    return (
-      <div className="relative w-full mb-4"> {/* Use relative for positioning arrows */}
-        <div className="w-full bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
-          <img
-            src={imageUrls[currentImageIndex]} // Display current image
-            alt={`Post image ${currentImageIndex + 1}`}
-            className="max-h-[500px] w-auto object-contain cursor-pointer" // Adjusted styling for main image
-            onClick={() => handleImageClick(imageUrls[currentImageIndex], currentImageIndex)}
-          />
-        </div>
-
-        {showNavigation && (
-          <>
-            <button
-              onClick={goToPreviousImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
-              aria-label="Previous image"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={goToNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
-              aria-label="Next image"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </>
-        )}
+  return (
+    <div className="relative w-full mb-4 h-[500px]"> {/* Use relative for positioning arrows */}
+      <div className="w-full bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
+        <Image
+          src={imageUrls[currentImageIndex]} // Display current image
+          alt={`Post image ${currentImageIndex + 1}`}
+          fill
+          className="object-contain cursor-pointer"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onClick={() => handleImageClick(imageUrls[currentImageIndex], currentImageIndex)}
+        />
       </div>
-    );
-  };
+
+      {showNavigation && (
+        <>
+          <button
+            onClick={goToPreviousImage}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+            aria-label="Previous image"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={goToNextImage}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+            aria-label="Next image"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </>
+      )}
+    </div>
+  );
+});
 
 
   const postInnerContent = (
@@ -240,7 +237,16 @@ export default function PostItem({
       </Link>
 
         {/* Render Images if available, below text */}
-        {post.image_urls && post.image_urls.length > 0 && renderImages(post.image_urls)}
+        {post.image_urls && post.image_urls.length > 0 && (
+          <MemoizedRenderImages
+            imageUrls={post.image_urls}
+            currentImageIndex={currentImageIndex}
+            showNavigation={post.image_urls.length > 1}
+            goToPreviousImage={goToPreviousImage}
+            goToNextImage={goToNextImage}
+            handleImageClick={handleImageClick}
+          />
+        )}
 
       {/* Mobile Vote & Actions */}
       <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-2">

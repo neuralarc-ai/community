@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react'; // ADD THIS LINE // Import React as well for custom component
 
 interface LightboxProps {
@@ -50,10 +51,13 @@ export default function Lightbox({
       )}
 
       {/* Image */}
-      <img
+      <Image
         src={currentSrc}
         alt={`Full screen image ${currentImageIndex + 1}`}
-        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+        fill
+        priority
+        sizes="100vw"
+        className="object-contain rounded-lg shadow-2xl"
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking on the image itself
       />
 

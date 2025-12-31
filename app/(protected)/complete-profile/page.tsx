@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
 import { createProfile, getCurrentUserProfile } from '@/app/lib/getProfile'
@@ -133,10 +134,12 @@ export default function CompleteProfilePage() {
         {/* Left Column: Image and Identity */}
         <div className="flex-1 bg-[#222222] p-8 flex flex-col items-center justify-center text-white space-y-4">
           <div className="relative w-48 h-48 mb-4">
-            <img
+            <Image
               src="/sphere logo.png" // Using public/sphere logo.png as placeholder
               alt="Abstract geometric design"
-              className="w-full h-full object-contain rounded-lg"
+              width={192} // Equivalent to w-48 (192px)
+              height={192} // Equivalent to h-48 (192px)
+              className="object-contain rounded-lg"
             />
           </div>
           <h2 className="text-xl font-semibold text-gray-400 uppercase tracking-wider">SPHERE</h2>

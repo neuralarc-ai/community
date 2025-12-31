@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import Lightbox from '@/app/components/Lightbox';
+import dynamic from 'next/dynamic';
+const Lightbox = dynamic(() => import('@/app/components/Lightbox'), { ssr: false, loading: () => <div className="flex justify-center items-center h-full w-full bg-black/50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div> });
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import TwoColumnLayout from '@/app/components/TwoColumnLayout'
@@ -38,12 +39,14 @@ const renderImages = (
     };
 
     return (
-      <div className="relative w-full mb-6"> {/* Relative for positioning arrows */}
+      <div className="relative w-full mb-6 h-[600px]"> {/* Relative for positioning arrows */}
         <div className="w-full bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
-          <img
+          <Image
             src={imageUrls[currentImageIndex]} // Display current image
             alt={`Post image ${currentImageIndex + 1}`}
-            className="max-h-[600px] object-contain cursor-pointer"
+            fill
+            className="object-contain cursor-pointer"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onClick={() => handleImageClick(imageUrls[currentImageIndex], currentImageIndex)}
           />
         </div>

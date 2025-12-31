@@ -30,7 +30,7 @@ export const ConclaveInvitationEmail = ({
   hostName,
   conclaveDescription,
 }: ConclaveInvitationEmailProps) => {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sphere.he2.ai';
+  const siteUrl = 'https://sphere.he2.ai';
   const logoUrl = `${siteUrl}/${encodeURIComponent('HeliumLogo_dark (2).png')}`;
   const bgImageUrl = `${siteUrl}/${encodeURIComponent('Group 1000002848.svg')}`;
 

@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         conclaveTitle: workshop.title,
         conclaveDate: workshop.start_time,
         conclaveTime: workshop.start_time,
-        conclaveLink: `${process.env.NEXT_PUBLIC_FRONTEND_URL}/conclave/${workshop.id}`,
+        conclaveLink: `https://sphere.he2.ai/conclave/${workshop.id}`,
         hostName: hostName,
         conclaveDescription: workshop.description,
       })),
