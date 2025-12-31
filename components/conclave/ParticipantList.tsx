@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParticipants, useLocalParticipant, useRoomContext, useParticipantInfo } from '@livekit/components-react';
 import Avatar from '@/app/components/Avatar';
 import { createClient } from '@/app/lib/supabaseClient';
-import { Mic, MicOff, Video, VideoOff, MoreVertical, XCircle, Slash, Crown, ToggleLeft, ToggleRight, Hand } from 'lucide-react';
+import { Mic, MicOff, Video, VideoOff, MoreVertical, XCircle, Slash, Crown, ToggleLeft, ToggleRight, Hand, VideoIcon, Pin } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRoleManager } from '@/hooks/useRoleManager'; // Import the new hook
 import { Participant } from 'livekit-client';
+import { useSpotlight } from '@/app/hooks/useSpotlight';
 
 interface ParticipantListProps {
   workshopId: string;
@@ -31,6 +32,10 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
   const isLocalAdmin = localParticipantProfile?.role === 'admin';
   const [searchTerm, setSearchTerm] = useState('');
   const [isHandRaised, setIsHandRaised] = useState(false);
+  const [isUpdatingSpotlight, setIsUpdatingSpotlight] = useState(false);
+
+  // Use the spotlight hook to get current spotlight state and toggle function
+  const { currentSpotlightId, setSpotlight } = useSpotlight(workshopId);
 
   // Use the useRoleManager for local participant to get management functions
   const {
@@ -140,6 +145,20 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
     }
   };
 
+  const handleToggleSpotlight = async (participantId: string) => {
+    if (isUpdatingSpotlight) return;
+    
+    setIsUpdatingSpotlight(true);
+    try {
+      // If clicking the same user, unpin; otherwise, pin the new user
+      await setSpotlight(currentSpotlightId === participantId ? null : participantId);
+    } catch (error) {
+      console.error('Error updating spotlight:', error);
+    } finally {
+      setIsUpdatingSpotlight(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-zinc-950 text-white rounded-lg shadow-lg p-4">
       <div className="flex items-center justify-between border-b border-zinc-700 pb-3 mb-4">
@@ -161,6 +180,7 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
           const profile = participantProfiles.get(participant.identity);
           const isParticipantHost = profile?.role === 'host';
           const isParticipantAdmin = profile?.role === 'admin';
+          const isSpotlighted = currentSpotlightId === participant.identity;
           
           let canParticipantPublish = false;
           interface ParticipantMetadata { canSpeak?: boolean; handRaised?: boolean; }
@@ -174,22 +194,35 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
 
           return (
             <div key={participant.identity} className="flex items-center justify-between bg-zinc-900 p-2 rounded-md hover:bg-zinc-800 transition-colors">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
                 <Avatar
                   src={profile?.avatar_url}
                   alt={profile?.username || 'User'}
                   size={36}
                 />
-                <span className="font-medium text-white">
-                  {profile?.full_name || profile?.username || 'Anonymous'}
-                  {participant.isLocal && ' (me)'}
-                  {pMetadata.handRaised && <Hand className="ml-2 h-4 w-4 text-yellow-500 inline-block" />}
-                  {isParticipantHost && <Crown className="ml-1 h-4 w-4 inline-block text-yellow-400" />}
-                  {isParticipantAdmin && <span className="ml-2 px-2 py-0.5 bg-admin-yellow/20 text-admin-yellow rounded-full text-[10px] font-bold uppercase tracking-wider border border-admin-yellow/30">Admin</span>}
-                </span>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="font-medium text-white truncate">
+                    {profile?.full_name || profile?.username || 'Anonymous'}
+                    {participant.isLocal && ' (me)'}
+                  </span>
+                  {pMetadata.handRaised && <Hand className="h-4 w-4 text-yellow-500 flex-shrink-0" />}
+                  {isParticipantHost && <Crown className="h-4 w-4 text-yellow-400 flex-shrink-0" />}
+                  {isParticipantAdmin && (
+                    <span className="px-2 py-0.5 bg-admin-yellow/20 text-admin-yellow rounded-full text-[10px] font-bold uppercase tracking-wider border border-admin-yellow/30 flex-shrink-0">
+                      Admin
+                    </span>
+                  )}
+                  {/* Spotlight Badge */}
+                  {isSpotlighted && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 bg-red-600/20 text-red-400 rounded-full text-[10px] font-bold uppercase tracking-wider border border-red-500/30 flex-shrink-0">
+                      <VideoIcon className="h-3 w-3" />
+                      LIVE
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-shrink-0">
                 {/* Audio Status */}
                 {participant.isMicrophoneEnabled ? (
                   <Mic className="h-4 w-4 text-green-500" />
@@ -197,7 +230,37 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({ workshopId, is
                   <MicOff className="h-4 w-4 text-red-500" />
                 )}
 
-
+                {/* Admin/Host Controls - More Options Menu */}
+                {(isLocalHost || isLocalAdmin) && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-zinc-800 border-zinc-700 text-white">
+                      <DropdownMenuItem
+                        onClick={() => handleToggleSpotlight(participant.identity)}
+                        disabled={isUpdatingSpotlight}
+                        className="cursor-pointer hover:bg-zinc-700 focus:bg-zinc-700"
+                      >
+                        <Pin className="h-4 w-4 mr-2" />
+                        {isSpotlighted ? 'Remove from Stage' : 'Spotlight for Everyone'}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleRemoveParticipant(participant.identity)}
+                        className="cursor-pointer hover:bg-red-600/20 focus:bg-red-600/20 text-red-400"
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Remove Participant
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           );

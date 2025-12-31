@@ -19,6 +19,7 @@ import { Track } from 'livekit-client'
 import { Button } from '@/components/ui/button'
 import { Mic, MicOff, Video, VideoOff, Circle, Square, Mail } from 'lucide-react'
 import { ConclaveControls } from '@/components/conclave/stages/ConclaveControls'
+import SpotlightVideoLayout from '@/app/components/SpotlightVideoLayout'
 
 interface LiveRoomProps {
   workshopId: string
@@ -224,7 +225,10 @@ export default function LiveRoom({
         style={{ height: '100%' }}
       >
         {mode === 'video' ? (
-          <VideoConference />
+          <SpotlightVideoLayout 
+            workshopId={workshopId}
+            isHostOrAdmin={isHost || isLocalAdmin}
+          />
         ) : (
           <AudioConference />
         )}

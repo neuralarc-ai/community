@@ -8,23 +8,56 @@ import {
   ParticipantTile,
   ParticipantContext,
   useParticipantContext,
+  useLocalParticipant,
 } from '@livekit/components-react'
 import { Track } from 'livekit-client'
 import { useMemo, useEffect, useState } from 'react'
 import Avatar from '@/app/components/Avatar'
-import { MicOff } from 'lucide-react'
+import { MicOff, Pin, PinOff } from 'lucide-react'
 import { createClient } from '@/app/lib/supabaseClient'
+import { useSpotlight } from '@/app/hooks/useSpotlight'
+import { Button } from '@/components/ui/button'
 
-export default function VideoStage() {
+interface VideoStageProps {
+  workshopId?: string
+}
+
+export default function VideoStage({ workshopId }: VideoStageProps = {}) {
   const participants = useParticipants()
+  const { localParticipant } = useLocalParticipant()
   
-  // Find the most active speaker or the host to spotlight
+  // Parse local participant metadata to check if user is host/admin
+  const localParticipantMetadata = useMemo(() => {
+    try {
+      return JSON.parse(localParticipant?.metadata || '{}')
+    } catch {
+      return {}
+    }
+  }, [localParticipant?.metadata])
+
+  const isHostOrAdmin = localParticipantMetadata.role === 'host' || localParticipantMetadata.role === 'admin'
+  
+  // Use database spotlight if workshopId is provided
+  const { currentSpotlightId, setSpotlight } = workshopId 
+    ? useSpotlight(workshopId) 
+    : { currentSpotlightId: null, setSpotlight: async () => {} }
+  
+  const [isUpdatingSpotlight, setIsUpdatingSpotlight] = useState(false)
+
+  // CRITICAL FIX: When database spotlight is set, ONLY use that. No fallback to auto-detection.
   const spotlightParticipant = useMemo(() => {
-    // 1. Check for active speaker
+    // If database spotlight is set, ONLY use that participant (or null if not found)
+    if (currentSpotlightId) {
+      const dbSpotlight = participants.find(p => p.identity === currentSpotlightId)
+      return dbSpotlight || null // Return null if participant not found yet, don't fallback
+    }
+
+    // Only use auto-detection when NO database spotlight is set
+    // Check for active speaker
     const speaker = participants.find(p => p.isSpeaking)
     if (speaker) return speaker
 
-    // 2. Check for host
+    // Check for host
     const host = participants.find(p => {
       try {
         const meta = JSON.parse(p.metadata || '{}')
@@ -35,30 +68,127 @@ export default function VideoStage() {
     })
     if (host) return host
 
-    // 3. Fallback to first participant
-    return participants[0]
-  }, [participants])
+    // Fallback to first participant
+    return participants[0] || null
+  }, [participants, currentSpotlightId])
 
-  const sidebarParticipants = participants.filter(p => p.identity !== spotlightParticipant?.identity)
+  const handlePinClick = async (userId: string) => {
+    if (!workshopId || isUpdatingSpotlight) return
+    
+    setIsUpdatingSpotlight(true)
+    try {
+      await setSpotlight(currentSpotlightId === userId ? null : userId)
+    } catch (error) {
+      console.error('Error updating spotlight:', error)
+    } finally {
+      setIsUpdatingSpotlight(false)
+    }
+  }
+
+  const handleUnpinClick = async () => {
+    if (!workshopId || isUpdatingSpotlight) return
+    
+    setIsUpdatingSpotlight(true)
+    try {
+      await setSpotlight(null)
+    } catch (error) {
+      console.error('Error unpinning spotlight:', error)
+    } finally {
+      setIsUpdatingSpotlight(false)
+    }
+  }
+
+  // CRITICAL: If database spotlight is set, ALWAYS show spotlight view (even if participant hasn't joined yet)
+  // This ensures global sync - all users see the same view
+  if (currentSpotlightId) {
+    const sidebarParticipants = spotlightParticipant 
+      ? participants.filter(p => p.identity !== spotlightParticipant.identity)
+      : participants;
+
+    return (
+      <div className="flex h-full w-full gap-4 bg-zinc-950 rounded-3xl overflow-hidden p-4">
+        {/* Main Spotlight Area */}
+        <div className="flex-[3] relative bg-zinc-900 rounded-2xl overflow-hidden border border-white/5">
+          {/* Show placeholder if database spotlight is set but participant hasn't joined yet */}
+          {!spotlightParticipant ? (
+            <div className="flex items-center justify-center h-full text-zinc-500 italic">
+              Waiting for spotlighted participant to join...
+            </div>
+          ) : (
+            <SpotlightTile 
+              participant={spotlightParticipant}
+              isHostOrAdmin={isHostOrAdmin && !!workshopId}
+              onUnpin={handleUnpinClick}
+              isUpdating={isUpdatingSpotlight}
+            />
+          )}
+        </div>
+
+        {/* Sidebar Participants */}
+        <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
+          {sidebarParticipants.map(p => (
+            <div key={p.identity} className="aspect-video relative bg-zinc-900 rounded-xl overflow-hidden border border-white/5 flex-shrink-0 group">
+              <SidebarTile 
+                participant={p}
+                isHostOrAdmin={isHostOrAdmin && !!workshopId}
+                onPinClick={() => handlePinClick(p.identity)}
+                isUpdating={isUpdatingSpotlight}
+              />
+            </div>
+          ))}
+        </div>
+
+        <RoomAudioRenderer />
+      </div>
+    )
+  }
+
+  // Show grid view when no database spotlight is set (fallback to auto-detection or grid)
+  if (!spotlightParticipant) {
+    return (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full p-4 overflow-y-auto">
+          {participants.map(participant => (
+            <div key={participant.identity} className="aspect-video relative bg-zinc-900 rounded-xl overflow-hidden border border-white/5 flex-shrink-0 group">
+              <SidebarTile 
+                participant={participant}
+                isHostOrAdmin={isHostOrAdmin && !!workshopId}
+                onPinClick={() => handlePinClick(participant.identity)}
+                isUpdating={isUpdatingSpotlight}
+              />
+            </div>
+          ))}
+        </div>
+        <RoomAudioRenderer />
+      </>
+    )
+  }
+
+  // Auto-detection spotlight view (when no database spotlight but auto-detection found someone)
+  const sidebarParticipants = participants.filter(p => p.identity !== spotlightParticipant.identity)
 
   return (
     <div className="flex h-full w-full gap-4 bg-zinc-950 rounded-3xl overflow-hidden p-4">
       {/* Main Spotlight Area */}
       <div className="flex-[3] relative bg-zinc-900 rounded-2xl overflow-hidden border border-white/5">
-        {spotlightParticipant ? (
-          <SpotlightTile participant={spotlightParticipant} />
-        ) : (
-          <div className="flex items-center justify-center h-full text-zinc-500 italic">
-            Waiting for speakers...
-          </div>
-        )}
+        <SpotlightTile 
+          participant={spotlightParticipant}
+          isHostOrAdmin={isHostOrAdmin && !!workshopId}
+          onUnpin={handleUnpinClick}
+          isUpdating={isUpdatingSpotlight}
+        />
       </div>
 
       {/* Sidebar Participants */}
       <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
         {sidebarParticipants.map(p => (
-          <div key={p.identity} className="aspect-video relative bg-zinc-900 rounded-xl overflow-hidden border border-white/5 flex-shrink-0">
-            <SidebarTile participant={p} />
+          <div key={p.identity} className="aspect-video relative bg-zinc-900 rounded-xl overflow-hidden border border-white/5 flex-shrink-0 group">
+            <SidebarTile 
+              participant={p}
+              isHostOrAdmin={isHostOrAdmin && !!workshopId}
+              onPinClick={() => handlePinClick(p.identity)}
+              isUpdating={isUpdatingSpotlight}
+            />
           </div>
         ))}
       </div>
@@ -68,7 +198,17 @@ export default function VideoStage() {
   )
 }
 
-function SpotlightTile({ participant }: { participant: any }) {
+function SpotlightTile({ 
+  participant, 
+  isHostOrAdmin,
+  onUnpin,
+  isUpdating
+}: { 
+  participant: any
+  isHostOrAdmin?: boolean
+  onUnpin?: () => void
+  isUpdating?: boolean
+}) {
   const tracks = useTracks([Track.Source.Camera])
   const cameraTrack = tracks.find(t => t.participant.identity === participant.identity)
   const [profile, setProfile] = useState<any>(null);
@@ -119,11 +259,37 @@ function SpotlightTile({ participant }: { participant: any }) {
           <MicOff size={16} className="text-red-500" />
         )}
       </div>
+
+      {/* Unpin Button (Host/Admin only) */}
+      {isHostOrAdmin && onUnpin && (
+        <div className="absolute top-4 right-4 z-10">
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={onUnpin}
+            disabled={isUpdating}
+            className="gap-2"
+          >
+            <PinOff size={16} />
+            {isUpdating ? 'Unpinning...' : 'Unpin'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
 
-function SidebarTile({ participant }: { participant: any }) {
+function SidebarTile({ 
+  participant, 
+  isHostOrAdmin,
+  onPinClick,
+  isUpdating
+}: { 
+  participant: any
+  isHostOrAdmin?: boolean
+  onPinClick?: () => void
+  isUpdating?: boolean
+}) {
   const tracks = useTracks([Track.Source.Camera])
   const cameraTrack = tracks.find(t => t.participant.identity === participant.identity)
   const [profile, setProfile] = useState<any>(null);
@@ -166,7 +332,23 @@ function SidebarTile({ participant }: { participant: any }) {
           />
         </div>
       )}
-      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      {/* Pin Button Overlay (Host/Admin only) */}
+      {isHostOrAdmin && onPinClick && (
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Button
+            size="sm"
+            variant="default"
+            onClick={onPinClick}
+            disabled={isUpdating}
+            className="gap-2"
+          >
+            <Pin size={16} />
+            Pin to Stage
+          </Button>
+        </div>
+      )}
+      
       <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 rounded text-[10px] text-white font-medium border border-white/5">
         {profile?.full_name || profile?.username || 'Member'}
       </div>

@@ -56,7 +56,7 @@ function ConclaveRoomContent({
           {workshop.type === 'AUDIO' ? (
             <AudioConclaveView onLeave={onEndLive} userRole={userRole} />
           ) : (
-            <VideoStage />
+            <VideoStage workshopId={workshop.id} />
           )}
         </div>
 
