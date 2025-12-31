@@ -1,8 +1,10 @@
 import { useLocalParticipant, RoomAudioRenderer, useRemoteParticipants } from '@livekit/components-react';
 import { Track, TrackPublication } from 'livekit-client';
-import { Mic, MicOff, Hand, LogOut } from 'lucide-react';
+import { Mic, MicOff, Hand, LogOut, CheckCircle } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import ClickSpark from '@/components/ClickSpark';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface ConclaveControlsProps {
   onLeave: () => void;
@@ -36,6 +38,7 @@ export function ConclaveControls({ onLeave, userRole }: ConclaveControlsProps) {
 
 
   const [isHandRaisedLocal, setIsHandRaisedLocal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
     setIsHandRaisedLocal(metadata.handRaised || false);
@@ -83,9 +86,27 @@ export function ConclaveControls({ onLeave, userRole }: ConclaveControlsProps) {
         className="bg-red-500 text-white w-14 h-14 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200 flex-shrink-0"
         title="Leave Conclave"
       >
-        <LogOut className="w-8 h-8" />
+        <LogOut className="w-8 h-8 text-white" stroke="currentColor" />
       </button>
       <RoomAudioRenderer />
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md bg-[#27584F]/10 border border-[#27584F] text-white p-6 rounded-2xl shadow-xl backdrop-blur-xl">
+          <DialogHeader className="flex flex-col items-center justify-center text-center space-y-4">
+            <CheckCircle className="h-16 w-16 text-[#27584F]" />
+            <DialogTitle className="text-2xl font-bold text-white">Email was successfully sent!</DialogTitle>
+            <DialogDescription className="text-zinc-400 text-base">
+              Your conclave invitation emails have been successfully dispatched.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6">
+            <DialogClose asChild>
+              <Button type="button" className="w-full bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold py-3 rounded-xl transition-colors duration-200">
+                OK
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

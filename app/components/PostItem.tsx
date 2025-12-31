@@ -9,7 +9,8 @@ import React, { useState, useEffect } from 'react';
 import Lightbox from './Lightbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/app/components/ui/use-toast';
-import { ChevronLeft, ChevronRight } from 'lucide-react'; // ADD THIS LINE
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'; // ADD THIS LINE
 
 interface PostItemProps {
   post: Post;
@@ -75,6 +76,7 @@ export default function PostItem({
   const [currentImageSrc, setCurrentImageSrc] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // ADD THIS LINE
   const { toast } = useToast();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handleImageClick = (src: string, index: number) => {
     setCurrentImageSrc(src);
@@ -118,10 +120,7 @@ export default function PostItem({
       });
 
       if (response.ok) {
-        toast({
-          title: "Success!",
-          description: "Post announcement emails sent successfully.",
-        });
+        setShowSuccessModal(true); // Open the success modal
       } else {
         const errorData = await response.json();
         toast({
@@ -278,6 +277,26 @@ export default function PostItem({
         onPrevious={goToPreviousLightboxImage} // Pass previous handler
         onNext={goToNextLightboxImage} // Pass next handler
       />
+
+      {/* Success Modal for Post Notifications */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md bg-[#27584F]/10 border border-[#27584F] text-white p-6 rounded-2xl shadow-xl backdrop-blur-xl">
+          <DialogHeader className="flex flex-col items-center justify-center text-center space-y-4">
+            <CheckCircle className="h-16 w-16 text-[#27584F]" />
+            <DialogTitle className="text-2xl font-bold text-white">Email was successfully sent!</DialogTitle>
+            <DialogDescription className="text-zinc-400 text-base">
+              Your post announcement emails have been successfully dispatched.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6">
+            <DialogClose asChild>
+              <Button type="button" className="w-full bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold py-3 rounded-xl transition-colors duration-200">
+                OK
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </article>
   );
 }
