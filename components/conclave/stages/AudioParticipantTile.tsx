@@ -25,52 +25,61 @@ export const AudioParticipantTile = ({ participant, isAlone }: AudioParticipantT
   const isLocal = participant.identity === localParticipant.identity;
 
   const [metadata, setMetadata] = useState<any | null>(null);
+  const [displayAvatarSrc, setDisplayAvatarSrc] = useState('/images/default-avatar.jpg');
 
   useEffect(() => {
-    const updateMetadata = () => {
+    if (participant.metadata) {
+      try {
+        const parsedMetadata = JSON.parse(participant.metadata);
+        setMetadata(parsedMetadata);
+        if (typeof parsedMetadata.handRaised === 'boolean') {
+          setIsHandRaised(parsedMetadata.handRaised);
+        }
+
+        // Set avatarSrc only once when the component mounts or participant changes
+        if (parsedMetadata?.avatarUrl) {
+          if (parsedMetadata.avatarUrl.startsWith('http')) {
+            setDisplayAvatarSrc(parsedMetadata.avatarUrl);
+          } else {
+            setDisplayAvatarSrc(`/api/avatar/${parsedMetadata.avatarUrl}`);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse participant metadata:', e);
+        setMetadata(null);
+        setDisplayAvatarSrc('/images/default-avatar.jpg');
+      }
+    } else {
+      setMetadata(null);
+      setDisplayAvatarSrc('/images/default-avatar.jpg');
+    }
+
+    // Set up an interval to poll for changes in handRaised status
+    const interval = setInterval(() => {
       if (participant.metadata) {
         try {
           const parsedMetadata = JSON.parse(participant.metadata);
-          setMetadata(parsedMetadata);
           if (typeof parsedMetadata.handRaised === 'boolean') {
             setIsHandRaised(parsedMetadata.handRaised);
           }
         } catch (e) {
-          console.error('Failed to parse participant metadata:', e);
-          setMetadata(null);
+          console.error('Failed to parse participant metadata in interval:', e);
         }
-      } else {
-        setMetadata(null);
       }
-    };
-
-    updateMetadata(); // Initial check
-    const interval = setInterval(updateMetadata, 1000); // Poll for changes
+    }, 1000); // Poll for changes every second
 
     return () => clearInterval(interval);
-  }, [participant.metadata]);
-
-  let avatarSrc = '/images/default-avatar.jpg'; // Default fallback
-
-  if (metadata?.avatarUrl) {
-    if (metadata.avatarUrl.startsWith('http')) {
-      // CASE A: It's already a full Supabase URL -> Use directly
-      avatarSrc = metadata.avatarUrl;
-    } else {
-      // CASE B: It's just a filename -> Use internal API
-      avatarSrc = `/api/avatar/${metadata.avatarUrl}`;
-    }
-  } 
+  }, [participant.identity, participant.metadata]); 
 
   return (
     <div
       className={cn(
         "relative flex flex-col items-center justify-center rounded-full transition-all duration-300",
         "bg-gray-800 border-2 border-transparent",
-        isSpeaking && "border-[#e6b31c] shadow-lg shadow-[#e6b31c]/30",
-        isAlone
-          ? "w-48 h-48 sm:w-64 sm:h-64 animate-pulse-slight" // Larger for single participant, with pulsing effect
-          : "w-24 h-24 sm:w-32 sm:h-32"
+        isSpeaking && "border-[#e6b31c]",
+          isAlone
+            ? "w-48 h-48 sm:w-64 sm:h-64" // Larger for single participant
+            : "w-24 h-24 sm:w-32 sm:h-32"
       )}
     >
       <div className={cn(
@@ -79,7 +88,7 @@ export const AudioParticipantTile = ({ participant, isAlone }: AudioParticipantT
       )}>
         {/* Avatar */}
         <Image
-          src={avatarSrc}
+          src={displayAvatarSrc}
           alt={name || identity || 'Participant'}
           width={isAlone ? 200 : 100}
           height={isAlone ? 200 : 100}

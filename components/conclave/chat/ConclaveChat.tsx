@@ -105,55 +105,88 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
     const supabase = createClient();
 
     const fetchInitialMessages = async () => {
-      const { data, error } = await supabase
-        .from('conclave_chat_messages')
-        .select('*')
-        .eq('workshop_id', workshopId)
-        .order('created_at', { ascending: false })
-        .limit(50);
+      try {
+        const { data, error } = await supabase
+          .from('conclave_chat_messages')
+          .select('*')
+          .eq('workshop_id', workshopId)
+          .eq('is_hidden', false) // Only fetch non-hidden messages
+          .order('created_at', { ascending: false })
+          .limit(50);
 
-      if (error) {
-        console.error('Error fetching initial chat messages:', error);
-        toast({
-          variant: "destructive",
-          description: "Failed to load chat history.",
-        });
-      } else if (data) {
-        setMessages(data.reverse() as ChatMessage[]);
-        setTimeout(scrollToBottom, 0);
+        if (error) {
+          console.error('Error fetching initial chat messages:', error);
+          // Don't show toast for initial load failure - it's not critical
+          // Messages will still work via LiveKit
+          return;
+        }
+
+        if (data) {
+          setMessages(data.reverse() as ChatMessage[]);
+          setTimeout(scrollToBottom, 0);
+        }
+      } catch (err) {
+        console.error('Exception fetching initial messages:', err);
+        // Continue without showing error - LiveKit messages will still work
       }
     };
 
     fetchInitialMessages();
 
+    const channelName = `conclave_chat:${workshopId}`;
     const channel = supabase
-      .channel(`conclave_chat:${workshopId}`)
+      .channel(channelName)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'conclave_chat_messages',
         filter: `workshop_id=eq.${workshopId}`
       }, payload => {
-        console.log('Supabase Realtime: Received new message payload:', payload);
-        const newMessage = payload.new as ChatMessage;
-        setMessages(prevMessages => {
-          console.log('Supabase Realtime: Current messages state (prevMessages):', prevMessages);
-          // Prevent duplicates if we optimistically added it
-          const exists = prevMessages.some(msg => msg.id === newMessage.id || (msg.is_pending && msg.message === newMessage.message && msg.user_id === newMessage.user_id));
-          if (!exists) {
-            const updatedMessages = [...prevMessages, newMessage];
-            console.log('Supabase Realtime: Added new message, updated state:', updatedMessages);
-            return updatedMessages;
+        try {
+          console.log('Supabase Realtime: Received new message payload:', payload);
+          const newMessage = payload.new as ChatMessage;
+          
+          // Skip hidden messages
+          if (newMessage.is_hidden) {
+            return;
           }
-          // If it's an optimistic message, replace it with the actual one from Supabase
-          const updatedMessages = prevMessages.map(msg => msg.is_pending && msg.message === newMessage.message && msg.user_id === newMessage.user_id ? { ...newMessage, is_pending: false } : msg);
-          console.log('Supabase Realtime: Replaced optimistic message, updated state:', updatedMessages);
-          return updatedMessages;
-        });
+
+          setMessages(prevMessages => {
+            // Prevent duplicates if we optimistically added it
+            const exists = prevMessages.some(msg => 
+              msg.id === newMessage.id || 
+              (msg.is_pending && msg.message === newMessage.message && msg.user_id === newMessage.user_id)
+            );
+            
+            if (!exists) {
+              const updatedMessages = [...prevMessages, newMessage];
+              console.log('Supabase Realtime: Added new message');
+              return updatedMessages;
+            }
+            
+            // If it's an optimistic message, replace it with the actual one from Supabase
+            const updatedMessages = prevMessages.map(msg => 
+              msg.is_pending && msg.message === newMessage.message && msg.user_id === newMessage.user_id 
+                ? { ...newMessage, is_pending: false } 
+                : msg
+            );
+            console.log('Supabase Realtime: Replaced optimistic message');
+            return updatedMessages;
+          });
+        } catch (err) {
+          console.error('Error processing realtime message:', err);
+        }
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log(`Successfully subscribed to chat channel: ${channelName}`);
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error(`Error subscribing to chat channel: ${channelName}`);
+        }
+      });
 
     return () => {
+      console.log(`Cleaning up chat subscription: ${channelName}`);
       supabase.removeChannel(channel);
     };
   }, [workshopId]);
@@ -165,15 +198,25 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (messageInput.trim() === '') return;
+    if (!localParticipant?.identity) {
+      console.error('Local participant identity not available');
+      toast({
+        variant: "destructive",
+        description: "Unable to send message. Please refresh the page.",
+      });
+      return;
+    }
 
     const messageContent = messageInput.trim();
+    const userId = localParticipant.identity;
+    const userName = participantProfiles.get(userId)?.full_name || participantProfiles.get(userId)?.username || 'Anonymous';
 
     // Optimistic Update
     const tempMessage: ChatMessage = {
         id: 'temp-' + Date.now(),
         workshop_id: workshopId,
-        user_id: localParticipant?.identity || 'anonymous', // Use LiveKit identity as client-side user ID
-        user_name: participantProfiles.get(localParticipant?.identity || '')?.full_name || participantProfiles.get(localParticipant?.identity || '')?.username || 'Anonymous',
+        user_id: userId,
+        user_name: userName,
         message: messageContent,
         created_at: new Date().toISOString(),
         is_pending: true,
@@ -186,38 +229,70 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({ workshopId, isHost }
         // 1. Send via LiveKit for instant delivery
         await send(messageContent);
 
-        // 2. Save to Supabase for persistence
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          console.error('User not authenticated for chat persistence');
-          throw new Error('User not authenticated');
+        // 2. Save to Supabase for persistence (non-blocking - if it fails, message still sent via LiveKit)
+        try {
+          const supabase = createClient();
+          
+          // Try to get user, but don't fail if auth check fails
+          let authUserId = userId;
+          try {
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (!authError && user) {
+              authUserId = user.id;
+            } else {
+              // If auth fails, use participant identity (which should be the user ID)
+              console.warn('Auth check failed, using participant identity:', authError?.message);
+            }
+          } catch (authErr) {
+            // Auth check failed, but continue with participant identity
+            console.warn('Auth check exception, using participant identity:', authErr);
+          }
+
+          const { data, error } = await supabase.from('conclave_chat_messages').insert({
+              workshop_id: workshopId,
+              user_id: authUserId,
+              user_name: userName,
+              message: messageContent,
+          }).select();
+
+          if (error) {
+            // Log error but don't fail the entire operation
+            console.error('Error persisting message to Supabase:', error);
+            // Mark message as sent (remove pending flag) even if persistence failed
+            setMessages(prevMessages =>
+                prevMessages.map(msg =>
+                    msg.id === tempMessage.id
+                        ? { ...msg, is_pending: false }
+                        : msg
+                )
+            );
+          } else if (data && data[0]) {
+            // Replace the temporary message with the actual one from Supabase
+            setMessages(prevMessages =>
+                prevMessages.map(msg =>
+                    msg.id === tempMessage.id
+                        ? { ...data[0] as ChatMessage, is_pending: false }
+                        : msg
+                )
+            );
+          }
+        } catch (persistError) {
+          // Persistence failed, but message was sent via LiveKit
+          console.error('Error persisting message (non-critical):', persistError);
+          // Mark message as sent (remove pending flag)
+          setMessages(prevMessages =>
+              prevMessages.map(msg =>
+                  msg.id === tempMessage.id
+                      ? { ...msg, is_pending: false }
+                      : msg
+              )
+          );
         }
-
-        const { data, error } = await supabase.from('conclave_chat_messages').insert({
-            workshop_id: workshopId,
-            user_id: user.id,
-            user_name: participantProfiles.get(localParticipant?.identity || '')?.full_name || participantProfiles.get(localParticipant?.identity || '')?.username || 'Anonymous',
-            message: messageContent,
-        }).select();
-
-        if (error) {
-            throw error;
-        }
-
-        // Replace the temporary message with the actual one from Supabase
-        setMessages(prevMessages =>
-            prevMessages.map(msg =>
-                msg.id === tempMessage.id
-                    ? { ...data[0] as ChatMessage, is_pending: false }
-                    : msg
-            )
-        );
     } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Error sending message via LiveKit:', error);
         toast({
           variant: "destructive",
-          description: "Failed to send message.",
+          description: "Failed to send message. Please try again.",
         });
         // Remove the temporary message on failure
         setMessages(prevMessages => prevMessages.filter(msg => msg.id !== tempMessage.id));

@@ -64,8 +64,6 @@ export async function POST(req: NextRequest) {
       })
       .map(profile => profile.email as string); // Extract only emails for BCC
 
-    console.log('Emails to send (for BCC):', emailsToSend); // Debugging line
-
     if (emailsToSend.length === 0) {
       const response = NextResponse.json({ message: 'No eligible users to notify after filtering' }, { status: 200 });
       return setCorsHeaders(req, response);

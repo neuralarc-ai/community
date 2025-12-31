@@ -50,7 +50,7 @@ export function ParticipantTile({ participant }: ParticipantTileProps) {
   return (
     <div className="relative flex flex-col items-center gap-2 group">
       <div className="relative">
-        <div className={`relative z-10 p-1 rounded-full border-4 transition-all duration-300 ${participant.isSpeaking ? 'border-[#e6b31c] scale-105' : 'border-transparent'}`}>
+        <div className={`relative z-10 p-1 rounded-full border-4 transition-all duration-300 ${participant.isSpeaking ? 'border-[#e6b31c]' : 'border-transparent'}`}>
           <Avatar
             src={avatarSrc}
             alt={metadata?.fullName || metadata?.username || participant.name || participant.identity}
@@ -59,7 +59,7 @@ export function ParticipantTile({ participant }: ParticipantTileProps) {
           />
           {/* Hand Raised Indicator */}
           {handRaised && (
-            <div className="absolute -top-2 -right-2 bg-yellow-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-xl border-2 border-white/50 animate-bounce animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 z-20" data-state={handRaised ? 'open' : 'closed'}>
+            <div className="absolute -top-2 -right-2 bg-yellow-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg shadow-xl border-2 border-white/50 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 z-20" data-state={handRaised ? 'open' : 'closed'}>
               <Hand size={18} />
             </div>
           )}

@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, toZonedTime } from 'date-fns-tz'
 import { formatDistanceToNowStrict } from 'date-fns'
-import { Calendar, Clock, Users, Video, Bell, CalendarPlus, Square, PlayCircle, Archive, Share2, User as UserIcon, X } from 'lucide-react'
+import { Calendar, Clock, Users, Video, Bell, CalendarPlus, Square, PlayCircle, Archive, Share2, User as UserIcon, X, CheckCircle } from 'lucide-react'
 import { Card, CardContent } from '@/app/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { google, outlook, office365, yahoo, ics, CalendarEvent } from 'calendar-link'
 import { createClient } from '@/app/lib/supabaseClient'
 import VodPlayer from '@/app/components/VodPlayer'
@@ -50,6 +51,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
   const supabase = createClient()
   const router = useRouter()
   const { toast } = useToast()
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const conclaveLink = `${getBaseUrl()}/conclave/${workshop.id}`
 
@@ -347,10 +349,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
       });
 
       if (response.ok) {
-        toast({
-          title: "Notifications Sent!",
-          description: "Conclave invitations have been successfully dispatched to eligible users.",
-        });
+        setShowSuccessModal(true);
       } else {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -395,6 +394,12 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
             <Calendar size={16} />
             <span className="text-sm">{formatDateTimeLocal(workshop.start_time)}</span> {/* UI Fix: Date & Time Display */}
           </div>
+          <div className="flex items-center gap-2">
+            <div className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              workshop.type === 'AUDIO' ? 'bg-teal-500 text-white' : 'bg-teal-500 text-white'
+            }`}>
+              {workshop.type}
+            </div>
           <div className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
             isLive ? 'bg-red-500 text-white animate-pulse' : 
             isEnded ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' : 'bg-blue-500 text-white'
@@ -404,6 +409,7 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
                 Ended {workshop.ended_at ? formatDistanceToNowStrict(new Date(workshop.ended_at), { addSuffix: true }) : ''}
               </span>
             ) : workshop.status}
+            </div>
           </div>
         </div>
         <h3 className="text-lg sm:text-xl font-bold text-white group-hover:text-white/90 transition-colors font-sora">{workshop.title}</h3> {/* Apply Header Font */}
@@ -592,11 +598,11 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
               )}
               {isLive && (
                 <Button className="w-full sm:w-auto gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-bold font-sora" asChild>
-                  <a href={`/conclave/${workshop.id}`}>
-                    <Video className="w-8 h-8" />
-                    Join Now
-                  </a>
-                </Button>
+                    <a href={`/conclave/${workshop.id}`}>
+                      <Video className="w-8 h-8" />
+                      Join Now
+                    </a>
+                  </Button>
               )}
               {isEnded && (
                 <Button 
@@ -621,6 +627,26 @@ export default function WorkshopCard({ workshop: initialWorkshop, isHost, curren
           )}
         </div>
       </CardContent>
+
+      {/* Success Modal for Conclave Notifications */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md bg-[#27584F]/10 border border-[#27584F] text-white p-6 rounded-2xl shadow-xl backdrop-blur-xl">
+          <DialogHeader className="flex flex-col items-center justify-center text-center space-y-4">
+            <CheckCircle className="h-16 w-16 text-[#27584F]" />
+            <DialogTitle className="text-2xl font-bold text-white">Email was successfully sent!</DialogTitle>
+            <DialogDescription className="text-zinc-400 text-base">
+              Your conclave invitation emails have been successfully dispatched.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6">
+            <DialogClose asChild>
+              <Button type="button" className="w-full bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold py-3 rounded-xl transition-colors duration-200">
+                OK
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

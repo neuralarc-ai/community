@@ -221,6 +221,7 @@ export default function CreateWorkshopModal({ onWorkshopCreated }: CreateWorksho
                   value={scheduledTime}
                   onChange={(e) => setScheduledTime(e.target.value)}
                   className="bg-background border-[#27584F]/30 focus:ring-[#27584F]"
+                  placeholder="hh:mm"
                   required
                 />
               </div>
