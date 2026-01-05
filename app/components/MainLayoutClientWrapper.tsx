@@ -74,7 +74,7 @@ export default function MainLayoutClientWrapper({
           )}
         >
           <div className="mx-auto max-w-screen-xl pb-10">{children}</div>
-          <Footer />
+          {/* <Footer /> */}
         </main>
       </div>
     </div>
