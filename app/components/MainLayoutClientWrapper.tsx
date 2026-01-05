@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useEffect } from 'react';
-import LeftSidebar from './LeftSidebar';
-import Header from '@/app/components/Header';
-import { useMediaQuery } from '@/lib/utils';
-import { cn } from '@/lib/utils';
-import Footer from './Footer';
+import { useState, useCallback, useEffect } from "react";
+import LeftSidebar from "./LeftSidebar";
+import Header from "@/app/components/Header";
+import { useMediaQuery } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import Footer from "./Footer";
 
-const MOBILE_HEADER_HEIGHT = '56px'; // h-14
-const DESKTOP_HEADER_HEIGHT = '64px'; // h-16
+const MOBILE_HEADER_HEIGHT = "56px"; // h-14
+const DESKTOP_HEADER_HEIGHT = "64px"; // h-16
 
 interface MainLayoutClientWrapperProps {
   children: React.ReactNode;
 }
 
-export default function MainLayoutClientWrapper({ children }: MainLayoutClientWrapperProps) {
-  const isDesktop = useMediaQuery('(min-width: 1024px)');
+export default function MainLayoutClientWrapper({
+  children,
+}: MainLayoutClientWrapperProps) {
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isSidebarOpen, setIsSidebarOpen] = useState(isDesktop);
 
   useEffect(() => {
@@ -32,23 +34,29 @@ export default function MainLayoutClientWrapper({ children }: MainLayoutClientWr
     }
   };
 
-  const currentHeaderHeight = isDesktop ? DESKTOP_HEADER_HEIGHT : MOBILE_HEADER_HEIGHT;
+  const currentHeaderHeight = isDesktop
+    ? DESKTOP_HEADER_HEIGHT
+    : MOBILE_HEADER_HEIGHT;
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-white">
       {/* Header is always rendered */}
-      <Header onMenuClick={handleToggleSidebar} headerHeight={currentHeaderHeight} />
-      
-      <div className="flex flex-1 overflow-hidden"> {/* Ensure flex-1 for content area, overflow hidden to prevent horizontal scroll */}
+      <Header
+        onMenuClick={handleToggleSidebar}
+        headerHeight={currentHeaderHeight}
+      />
+
+      <div className="flex flex-1 overflow-hidden">
+        {" "}
+        {/* Ensure flex-1 for content area, overflow hidden to prevent horizontal scroll */}
         {/* LeftSidebar - Responsive visibility and positioning */}
-      <LeftSidebar
-        isOpen={isSidebarOpen}
+        <LeftSidebar
+          isOpen={isSidebarOpen}
           onToggle={handleToggleSidebar}
           isMobile={!isDesktop}
           onCloseMobile={handleCloseMobileSidebar}
           headerHeight={currentHeaderHeight} // Pass headerHeight to LeftSidebar
         />
-        
         {/* Mobile sidebar overlay - only visible on mobile when sidebar is open */}
         {!isDesktop && isSidebarOpen && (
           <div
@@ -56,9 +64,8 @@ export default function MainLayoutClientWrapper({ children }: MainLayoutClientWr
             onClick={handleCloseMobileSidebar}
           ></div>
         )}
-        
         {/* Main content area */}
-        <main 
+        <main
           className={cn(
             "flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8", // Responsive padding, pt will be set by style
             `pt-[${currentHeaderHeight}]`, // Dynamic top padding for fixed header
@@ -66,13 +73,10 @@ export default function MainLayoutClientWrapper({ children }: MainLayoutClientWr
             isDesktop && isSidebarOpen ? "lg:ml-64 md:ml-56" : "ml-0" // Adjust ml based on sidebar open state and desktop/tablet/mobile
           )}
         >
-          <div className="mx-auto max-w-screen-xl">
-        {children}
-          </div>
-        <Footer />
-      </main>
+          <div className="mx-auto max-w-screen-xl pb-10">{children}</div>
+          <Footer />
+        </main>
       </div>
     </div>
   );
 }
-
