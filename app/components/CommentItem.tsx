@@ -68,14 +68,14 @@ const CommentItem = memo(function CommentItem({
       {/* Thread Line - Refined for NebulaMax */}
       {hasChildren && (
         <div 
-          className="w-px absolute left-[19px] top-10 h-[calc(100%-2rem)] bg-white/10 group-hover/comment:bg-white/20 transition-colors duration-300" 
+          className="w-px absolute left-[19px] top-10 h-[calc(100%-2rem)] bg-foreground/10 group-hover/comment:bg-foreground/20 transition-colors duration-300" 
           aria-hidden="true"
         />
       )}
 
       {/* Avatar Column */}
       <div className="flex flex-col items-center z-10 flex-shrink-0">
-         <div className="w-10 h-10 rounded-full p-0.5 bg-[#0A0A0A] ring-1 ring-white/10">
+         <div className="w-10 h-10 rounded-full p-0.5 bg-[#0A0A0A] ring-1 ring-foreground/10">
             <Link href={`/profile/${comment.author_id}`}>
               <Avatar src={comment.author?.avatar_url || null} alt={`${comment.author?.username || 'Anonymous'}'s avatar`} size={36} className="rounded-full" />
             </Link>
@@ -86,7 +86,7 @@ const CommentItem = memo(function CommentItem({
       <div className="flex-grow min-w-0 pt-1">
         {/* Header */}
         <div className="flex items-center text-sm mb-1.5 gap-2">
-          <Link href={`/profile/${comment.author_id}`} className="font-semibold text-white hover:underline cursor-pointer">
+          <Link href={`/profile/${comment.author_id}`} className="font-semibold text-foreground hover:underline cursor-pointer">
             u/{comment.author?.username || 'Anonymous'}
           </Link>
           <span className="text-muted-foreground text-xs">•</span>
@@ -94,7 +94,7 @@ const CommentItem = memo(function CommentItem({
         </div>
 
         {/* Body */}
-        <div className="text-sm mb-3 text-white/90 whitespace-pre-wrap leading-relaxed">
+        <div className="text-sm mb-3 text-foreground/90 foregroundspace-pre-wrap leading-relaxed">
           {comment.body}
         </div>
 
@@ -111,7 +111,7 @@ const CommentItem = memo(function CommentItem({
            
            <button 
              onClick={handleReplyClick}
-             className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:bg-white/10 hover:text-white transition-all"
+             className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-all"
            >
               <MessageSquare className="w-3.5 h-3.5" />
               <span>Reply</span>

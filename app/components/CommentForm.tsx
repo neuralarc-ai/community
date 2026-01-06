@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import type { Comment } from '@/app/types'
+import { useState } from "react";
+import type { Comment } from "@/app/types";
 
 interface CommentFormProps {
-  postId: string
-  parentCommentId?: string
-  onCommentAdded?: (comment: Comment) => void
-  onCancel?: () => void
-  placeholder?: string
+  postId: string;
+  parentCommentId?: string;
+  onCommentAdded?: (comment: Comment) => void;
+  onCancel?: () => void;
+  placeholder?: string;
 }
 
 export default function CommentForm({
@@ -16,42 +16,42 @@ export default function CommentForm({
   parentCommentId,
   onCommentAdded,
   onCancel,
-  placeholder = "Write a comment..."
+  placeholder = "Write a comment...",
 }: CommentFormProps) {
-  const [body, setBody] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [body, setBody] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!body.trim() || isSubmitting) return
+    e.preventDefault();
+    if (!body.trim() || isSubmitting) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const response = await fetch('/api/comments', {
-        method: 'POST',
+      const response = await fetch("/api/comments", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           post_id: postId,
           body: body.trim(),
-          parent_comment_id: parentCommentId
-        })
-      })
+          parent_comment_id: parentCommentId,
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to create comment')
+        throw new Error("Failed to create comment");
       }
 
-      const newComment = await response.json()
-      setBody('')
-      onCommentAdded?.(newComment)
+      const newComment = await response.json();
+      setBody("");
+      onCommentAdded?.(newComment);
     } catch (error) {
       // Could add toast notification here
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
@@ -59,7 +59,7 @@ export default function CommentForm({
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder={placeholder}
-        className="w-full py-1 px-4 bg-input border border-border rounded-lg h-[40px] text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none overflow-hidden leading-tight"
+        className="w-full py-1 px-4 bg-background border border-border rounded-lg flex  text-foreground placeholder-muted-foreground focus:outline-none focus:ring focus:ring-yellow-400 focus:border-transparent resize-none overflow-hidden leading-tight"
         required
       />
 
@@ -77,11 +77,11 @@ export default function CommentForm({
         <button
           type="submit"
           disabled={!body.trim() || isSubmitting}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-yellow-600 text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? 'Posting...' : 'Post Comment'}
+          {isSubmitting ? "Posting..." : "Post Comment"}
         </button>
       </div>
     </form>
-  )
+  );
 }

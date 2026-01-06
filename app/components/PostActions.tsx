@@ -1,9 +1,18 @@
-import { MessageSquare, Share2, MoreHorizontal, Trash2, Bookmark, ChevronUp, ChevronDown, Bell } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
-import { useToast } from '@/app/components/ui/use-toast'; // Added import for useToast
-import Link from 'next/link';
+import {
+  MessageSquare,
+  Share2,
+  MoreHorizontal,
+  Trash2,
+  Bookmark,
+  ChevronUp,
+  ChevronDown,
+  Bell,
+} from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { useToast } from "@/app/components/ui/use-toast"; // Added import for useToast
+import Link from "next/link";
 
-import { useVote } from '@/app/hooks/useVote';
+import { useVote } from "@/app/hooks/useVote";
 
 interface PostActionsProps {
   commentCount: number;
@@ -37,8 +46,11 @@ export default function PostActions({
   onTogglePin,
   onNotifyUsers, // Destructure new prop
 }: PostActionsProps) {
-  const { currentVote, currentScore, handleVote, isLoading, error } = useVote({ initialVote, initialScore, postId });
-
+  const { currentVote, currentScore, handleVote, isLoading, error } = useVote({
+    initialVote,
+    initialScore,
+    postId,
+  });
 
   const [showMenu, setShowMenu] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
@@ -52,15 +64,15 @@ export default function PostActions({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this post?')) {
+    if (confirm("Are you sure you want to delete this post?")) {
       onDelete?.(postId);
     }
     setShowMenu(false);
@@ -74,76 +86,97 @@ export default function PostActions({
       setShowCopiedMessage(true);
       setTimeout(() => setShowCopiedMessage(false), 2000); // Hide after 2 seconds
     } catch (err) {
-      console.error('Failed to copy: ', err);
+      console.error("Failed to copy: ", err);
     }
   };
 
   return (
     <div className="flex items-center space-x-2 text-xs font-medium relative">
-      <div className="flex items-center space-x-1 bg-white/5 rounded-full px-2 py-1 transition-all duration-200 group">
+      <div className="flex items-center space-x-1 bg-foreground/5 rounded-full px-2 py-1 transition-all duration-200 group">
         <button
-          onClick={(e) => { e.stopPropagation(); handleVote('up'); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleVote("up");
+          }}
           className={`p-1 rounded-full transition-colors ${
             currentVote === 1
-              ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
-              : 'text-muted-foreground hover:bg-white/10 hover:text-white'
+              ? "text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30"
+              : "text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
           }`}
         >
           <ChevronUp size={16} />
         </button>
-        <span className="text-white font-semibold min-w-[20px] text-center">{currentScore}</span>
+        <span className="text-foreground font-semibold min-w-[20px] text-center">
+          {currentScore}
+        </span>
         <button
-          onClick={(e) => { e.stopPropagation(); handleVote('down'); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleVote("down");
+          }}
           className={`p-1 rounded-full transition-colors ${
             currentVote === -1
-              ? 'text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30'
-              : 'text-muted-foreground hover:bg-white/10 hover:text-white'
+              ? "text-yellow-400 bg-yellow-400/20 hover:bg-yellow-400/30"
+              : "text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
           }`}
         >
           <ChevronDown size={16} />
         </button>
       </div>
 
-      <Link href={`/posts/${postId}#comments`} passHref className="no-underline">
-           <div className="flex items-center space-x-1 hover:bg-white/5 text-muted-foreground hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 group">
-             <MessageSquare size={16} className="group-hover:text-white transition-colors" />
-             <span>{commentCount}</span>
-           </div>
-        </Link>
+      <Link
+        href={`/posts/${postId}#comments`}
+        passHref
+        className="no-underline"
+      >
+        <div className="flex items-center space-x-1 hover:bg-foreground/5 text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full transition-all duration-200 group">
+          <MessageSquare
+            size={16}
+            className="group-hover:text-foreground transition-colors"
+          />
+          <span>{commentCount}</span>
+        </div>
+      </Link>
 
-      <button 
-        className="flex items-center space-x-2 hover:bg-white/5 text-muted-foreground hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 group"
+      <button
+        className="flex items-center space-x-2 hover:bg-foreground/5 text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full transition-all duration-200 group"
         onClick={handleShareClick}
       >
-        <Share2 size={16} className="group-hover:text-white transition-colors" />
+        <Share2
+          size={16}
+          className="group-hover:text-foreground transition-colors"
+        />
         <span>Share</span>
       </button>
 
       {showCopiedMessage && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 bg-[#1A1A1A]/90 backdrop-blur-xl text-white text-sm font-semibold rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 animate-in fade-in slide-in-from-top-10 duration-500 flex items-center gap-3">
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 bg-[#1A1A1A]/90 backdrop-blur-xl text-foreground text-sm font-semibold rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-foreground/10 animate-in fade-in slide-in-from-top-10 duration-500 flex items-center gap-3">
           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)] animate-pulse" />
           <span>Link copied to clipboard!</span>
         </div>
       )}
 
-      <button 
+      <button
         onClick={(e) => {
           e.stopPropagation();
           onToggleSave?.(postId);
         }}
         className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all duration-200 group ${
-          isSaved 
-            ? 'text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20' 
-            : 'text-muted-foreground hover:bg-white/5 hover:text-white'
+          isSaved
+            ? "text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20"
+            : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
         }`}
       >
-        <Bookmark size={16} className={`transition-colors ${isSaved ? 'fill-current' : 'group-hover:text-white'}`} />
-        <span>{isSaved ? 'Saved' : 'Save'}</span>
+        <Bookmark
+          size={16}
+          className={`transition-colors ${isSaved ? "fill-current" : "group-hover:text-foreground"}`}
+        />
+        <span>{isSaved ? "Saved" : "Save"}</span>
       </button>
 
       <div className="relative" ref={menuRef}>
-        <button 
-          className="flex items-center space-x-2 hover:bg-white/5 text-muted-foreground hover:text-white px-2 py-1.5 rounded-full transition-all duration-200"
+        <button
+          className="flex items-center space-x-2 hover:bg-foreground/5 text-muted-foreground hover:text-foreground px-2 py-1.5 rounded-full transition-all duration-200"
           onClick={(e) => {
             e.stopPropagation();
             setShowMenu(!showMenu);
@@ -153,7 +186,7 @@ export default function PostActions({
         </button>
 
         {showMenu && (
-          <div className="absolute right-0 bottom-full mb-2 w-32 bg-[#1A1A1A] rounded-lg shadow-xl shadow-black/50 border border-white/10 py-1 z-10 backdrop-blur-md">
+          <div className="absolute right-0 bottom-full mb-2 w-32 bg-[#1A1A1A] rounded-lg shadow-xl shadow-black/50 border border-foreground/10 py-1 z-10 backdrop-blur-md">
             {(currentUserId === authorId || isAdmin) && onDelete ? (
               <button
                 onClick={handleDeleteClick}
@@ -169,7 +202,7 @@ export default function PostActions({
                 className="w-full text-left px-4 py-2 text-blue-400 hover:bg-blue-500/10 flex items-center gap-2 text-xs font-medium transition-colors"
               >
                 {isPinned ? <Bookmark size={14} /> : <Bookmark size={14} />}
-                <span>{isPinned ? 'Unpin Post' : 'Pin Post'}</span>
+                <span>{isPinned ? "Unpin Post" : "Pin Post"}</span>
               </button>
             ) : null}
             {isAdmin && onNotifyUsers ? (
@@ -185,9 +218,9 @@ export default function PostActions({
               </button>
             ) : null}
             {!currentUserId || (currentUserId !== authorId && !isAdmin) ? (
-                <div className="px-4 py-2 text-muted-foreground text-xs text-center">
-                    No actions
-                </div>
+              <div className="px-4 py-2 text-muted-foreground text-xs text-center">
+                No actions
+              </div>
             ) : null}
           </div>
         )}

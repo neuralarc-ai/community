@@ -1,24 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import {
-  Search,
-  Bell,
-  MessageSquare,
-  Menu,
-  LogOut,
-  User as UserIcon,
-  Sun,
-} from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
-import { createClient } from "@/app/lib/supabaseClient";
-import Avatar from "./Avatar";
 import { getCurrentUserProfile } from "@/app/lib/getProfile";
+import { createClient } from "@/app/lib/supabaseClient";
 import { Profile } from "@/app/types";
 import { Button } from "@/components/ui/button";
-import { cn, useMediaQuery } from "@/lib/utils";
+import { useMediaQuery } from "@/lib/utils";
+import {
+  Bell,
+  LogOut,
+  Menu,
+  Moon,
+  Search,
+  Sun
+} from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Avatar from "./Avatar";
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -29,6 +28,10 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [supabase, setSupabase] = useState<any>(null);
+  const [currentTheme, setCurrentTheme] = useState<string | null>(() => {
+    return localStorage.getItem("theme");
+  });
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [search, setSearch] = useState("");
@@ -52,6 +55,13 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
     if (!supabase) return;
     await supabase.auth.signOut();
     router.push("/login");
+  };
+
+  const handleToggleTheme = () => {
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    setCurrentTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.body.setAttribute("data-theme", newTheme);
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -79,7 +89,7 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
 
   return (
     <header
-      className="sticky top-0 z-50 w-full border-b border-white/5 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+      className="sticky top-0 z-50 w-full border-b border-foreground/5 bg-card "
       style={{ height: headerHeight }}
     >
       <div className="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
@@ -105,7 +115,7 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
                 className="object-contain"
               />
             </div>
-            <span className="text-lg sm:text-xl font-bold font-heading text-white tracking-tight hidden md:block">
+            <span className="text-lg sm:text-xl font-bold font-heading text-foreground tracking-tight hidden md:block">
               Sphere
             </span>
           </Link>
@@ -118,11 +128,11 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
         >
           <div className="relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-white transition-colors" />
+              <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
             </div>
             <input
               type="text"
-              className="block w-full pl-10 pr-3 py-2 bg-white/5 border border-white/5 rounded-lg text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-white/20 focus:border-white/10 transition-all"
+              className="block w-full pl-10 pr-3 py-2 bg-foreground/5 border border-foreground/5 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 focus:border-foreground/10 transition-all"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -133,26 +143,27 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
         {/* Right: Actions & Profile */}
         <div className="flex items-center gap-4 min-w-max">
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground hover:text-white hover:bg-white/5"
-            >
+            <Button variant="ghost" size="icon" className=" hover:bg-foreground/5">
               <Bell size={18} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-white hover:bg-white/5"
+              onClick={handleToggleTheme}
+              className=" hover:bg-foreground/5"
             >
-              <Sun size={18} />
+              {currentTheme === "light" ? (
+                <Moon size={18} />
+              ) : (
+                <Sun size={18} />
+              )}
             </Button>
           </div>
 
-          <div className="h-6 w-px bg-white/10 mx-1" />
+          <div className="h-6 w-px bg-foreground/10 mx-1" />
 
           {loadingProfile ? (
-            <div className="w-24 h-8 bg-white/5 rounded-md animate-pulse" />
+            <div className="w-24 h-8 bg-foreground/5 rounded-md animate-pulse" />
           ) : profile ? (
             <div className="flex items-center gap-3">
               <Link
@@ -164,14 +175,14 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
                     src={profile.avatar_url}
                     alt={profile.full_name || "User"}
                     size={32}
-                    className="ring-2 ring-transparent group-hover:ring-white/20 transition-all"
+                    className="ring-2 ring-transparent group-hover:ring-foreground/20 transition-all"
                   />
                 </div>
               </Link>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-white hover:bg-white/5"
+                className="text-muted-foreground hover:text-foreground hover:bg-foreground/5"
                 onClick={handleLogout}
               >
                 <LogOut size={18} />
@@ -180,7 +191,7 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
           ) : (
             <Button
               onClick={() => router.push("/login")}
-              className="bg-white text-black hover:bg-white/90"
+              className="bg-foreground text-black hover:bg-foreground/90"
             >
               Log In
             </Button>

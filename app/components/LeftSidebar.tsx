@@ -61,8 +61,7 @@ export default function LeftSidebar({
               href: "/dashboard",
               label: "Dashboard",
               icon: DashboardIcon,
-              gradient: "from-orange-500 to-orange-600",
-              color: "rgba(249, 115, 22, 0.8)",
+              color: "#F97316",
             },
           ]
         : []),
@@ -70,29 +69,25 @@ export default function LeftSidebar({
         href: "/posts",
         label: "Posts",
         icon: MessageSquare,
-        gradient: "from-yellow-500 to-yellow-600",
-        color: "rgba(231, 179, 27, 0.8)",
+        color: "#e7b31b",
       },
       {
         href: "/workshops",
         label: "Conclave",
         icon: Presentation,
-        gradient: "from-emerald-600 to-emerald-700",
-        color: "rgba(35, 125, 100, 0.8)",
+        color: "#0f766e",
       },
       {
         href: "/flux-dashboard",
         label: "Flux Leaderboard",
         icon: Award,
-        gradient: "from-pink-400 to-pink-500",
-        color: "rgba(255, 182, 193, 0.8)",
+        color: "#f472b6",
       },
       {
         href: "/profile/settings",
         label: "Settings",
         icon: Settings,
-        gradient: "from-purple-500 to-purple-600",
-        color: "rgba(192, 132, 252, 0.8)",
+        color: "#8b5cf6",
       },
     ],
     [userRole]
@@ -119,7 +114,7 @@ export default function LeftSidebar({
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "fixed left-0 top-0 z-40 flex flex-col bg-[#0F0F0F]/80 backdrop-blur-2xl border-r border-white/5",
+          "fixed left-0 top-0 z-40 flex flex-col bg-card backdrop-blur-2xl border-r border-foreground/5",
           "w-64 h-screen pt-[var(--header-height)]",
           className
         )}
@@ -160,10 +155,10 @@ export default function LeftSidebar({
                     href={item.href}
                     onClick={onCloseMobile}
                     className={cn(
-                      "flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-500 relative overflow-hidden group active:scale-95",
+                      "flex items-center gap-4 px-4 py-3  rounded-xl transition-all duration-500 relative overflow-hidden group active:scale-95",
                       isActive
                         ? "text-white font-medium"
-                        : "text-gray-400 hover:text-white"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {/* Icon with subtle scale animation */}

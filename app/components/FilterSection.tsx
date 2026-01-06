@@ -27,11 +27,11 @@ export default function FilterSection({
         <button
           onClick={() => onSelectTag(null)}
           className={`
-                whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200
+                foregroundspace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200
                 ${
                   selectedTag === null
                     ? activeColor
-                    : `bg-white/5 text-muted-foreground border border-white/5 hover:bg-white/10 hover:text-white ${hoverColor}`
+                    : `bg-foreground/5 text-muted-foreground border border-foreground/5 hover:bg-foreground/10 hover:text-foreground ${hoverColor}`
                 }
             `}
         >
@@ -43,11 +43,11 @@ export default function FilterSection({
             key={tag}
             onClick={() => onSelectTag(tag === selectedTag ? null : tag)}
             className={`
-                    whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200
+                    foregroundspace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200
                     ${
                       selectedTag === tag
                         ? activeColor
-                        : `bg-white/5 text-muted-foreground border border-white/5 hover:bg-white/10 hover:text-white ${hoverColor}`
+                        : `bg-foreground/5 text-muted-foreground border border-foreground/5 hover:bg-foreground/10 hover:text-foreground ${hoverColor}`
                     }
                 `}
           >

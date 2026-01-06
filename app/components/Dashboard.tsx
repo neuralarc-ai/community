@@ -299,15 +299,15 @@ export default function Dashboard() {
           accentColor="orange-500"
         >
           <div className="flex flex-col gap-2 pt-2">
-            <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter">
+            <span className="text-3xl sm:text-4xl font-heading font-bold text-foreground tracking-tighter">
               {stat.value?.toLocaleString()}
             </span>
             <div className="flex items-end gap-2 mb-4">
               <span
-                className={`text-base font-medium px-2 py-0.5 rounded-full border border-white/5  ${
+                className={`text-base font-medium px-2 py-0.5 rounded-full border border-foreground/5  ${
                   stat.change.includes("+")
-                    ? "text-white bg-white/10"
-                    : "text-muted-foreground bg-white/5"
+                    ? "text-foreground bg-foreground/10"
+                    : "text-muted-foreground bg-foreground/5"
                 }`}
               >
                 {stat.change}
@@ -358,15 +358,15 @@ export default function Dashboard() {
           accentColor="orange-500"
         >
           <div className="flex flex-col gap-2 pt-2">
-            <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter">
+            <span className="text-3xl sm:text-4xl font-heading font-bold text-foreground tracking-tighter">
               {stat.value?.toLocaleString()}
             </span>
             <div className="flex items-center gap-2 mb-4">
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 ${
+                className={`text-xs font-medium px-2 py-0.5 rounded-full border border-foreground/5 ${
                   stat.change.includes("+")
-                    ? "text-white bg-white/10"
-                    : "text-muted-foreground bg-white/5"
+                    ? "text-foreground bg-foreground/10"
+                    : "text-muted-foreground bg-foreground/5"
                 }`}
               >
                 {stat.change}
@@ -419,15 +419,15 @@ export default function Dashboard() {
           accentColor="orange-500"
         >
           <div className="flex flex-col gap-2 pt-2">
-            <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter">
+            <span className="text-3xl sm:text-4xl font-heading font-bold text-foreground tracking-tighter">
               {stat.value?.toLocaleString()}
             </span>
             <div className="flex items-center gap-2 mb-4">
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 ${
+                className={`text-xs font-medium px-2 py-0.5 rounded-full border border-foreground/5 ${
                   stat.change.includes("+")
-                    ? "text-white bg-white/10"
-                    : "text-muted-foreground bg-white/5"
+                    ? "text-foreground bg-foreground/10"
+                    : "text-muted-foreground bg-foreground/5"
                 }`}
               >
                 {stat.change}
@@ -478,7 +478,7 @@ export default function Dashboard() {
             <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-orange-200 transition-colors duration-300">
               {stat.title}
             </CardTitle>
-            <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
+            <div className="p-2 bg-foreground/5 rounded-lg border border-foreground/5 group-hover:bg-orange-500/10 group-hover:border-orange-500/20 group-hover:shadow-[0_0_10px_rgba(249,115,22,0.1)] transition-all duration-300">
               <stat.icon
                 size={18}
                 className="text-muted-foreground group-hover:text-orange-400 transition-colors"
@@ -487,20 +487,20 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-2 pt-2">
-              <span className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
+              <span className="text-3xl sm:text-4xl font-heading font-bold text-foreground tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
                 {stat.value?.toLocaleString()}
               </span>
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-xs font-medium px-2 py-0.5 rounded-full border border-white/5 transition-all duration-300 ${
+                  className={`text-xs font-medium px-2 py-0.5 rounded-full border border-foreground/5 transition-all duration-300 ${
                     stat.change.includes("+")
-                      ? "text-white bg-white/10 group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-200"
-                      : "text-muted-foreground bg-white/5 group-hover:bg-white/10"
+                      ? "text-foreground bg-foreground/10 group-hover:bg-orange-500/20 group-hover:border-orange-500/20 group-hover:text-orange-200"
+                      : "text-muted-foreground bg-foreground/5 group-hover:bg-foreground/10"
                   }`}
                 >
                   {stat.change}
                 </span>
-                <span className="text-xs text-muted-foreground group-hover:text-white/60 transition-colors">
+                <span className="text-xs text-muted-foreground group-hover:text-foreground/60 transition-colors">
                   from last month
                 </span>
               </div>
@@ -653,7 +653,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl sm:text-4xl font-heading font-bold text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-heading font-bold text-foreground tracking-tight">
             Admin Dashboard
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -662,13 +662,13 @@ export default function Dashboard() {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex p-1 bg-white/5 border border-white/10 rounded-xl backdrop-blur-md gap-1">
+        <div className="flex p-1 bg-foreground/5 border border-foreground/10 rounded-xl backdrop-blur-md gap-1">
           <button
             onClick={() => setActiveTab("stats")}
             className={`px-4 py-1 sm:px-6 sm:py-2 rounded-md w-full text-nowrap text-sm font-medium transition-all duration-300 ${
               activeTab === "stats"
                 ? "bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)]"
-                : "text-muted-foreground hover:text-white hover:bg-white/5"
+                : "text-muted-foreground  hover:bg-white/5"
             }`}
           >
             Overview
@@ -678,7 +678,7 @@ export default function Dashboard() {
             className={`px-4 py-1 sm:px-6 sm:py-2 rounded-md w-full text-nowrap text-sm font-medium transition-all duration-300 ${
               activeTab === "users"
                 ? "bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)]"
-                : "text-muted-foreground hover:text-white hover:bg-white/5"
+                : "text-muted-foreground hover:bg-white/5"
             }`}
           >
             User Management
@@ -696,13 +696,17 @@ export default function Dashboard() {
                 className="flex flex-col items-center gap-4 bg-card/30 px-6 py-4 rounded-lg hover:scale-[103%] duration-300 transition-all border border-orange-600/20 hover:border-orange-600 group shadow-[0_0_20px_rgba(249,115,22,0.1)] hover:shadow-[0_0_20px_rgba(249,115,22,0.25)]  glare-effect"
               >
                 <div className="w-full flex items-center justify-between">
-                  <span className="text-xl font-medium">{item.title}</span>
-                  <div className="flex items-center justify-center p-2 rounded-md bg-orange-500/25 group-hover:bg-orange-500/60  duration-700 transition-all ease-in-out">
+                  <span className="text-xl font-medium text-foreground">
+                    {item.title}
+                  </span>
+                  <div className="flex items-center justify-center p-2 rounded-md bg-orange-400 group-hover:bg-orange-500 duration-700 transition-all ease-in-out">
                     <item.icon />
                   </div>
                 </div>
                 <div className="w-full flex items-end justify-between">
-                  <span className="text-4xl font-bold">{item.value}</span>
+                  <span className="text-4xl font-bold text-muted-foreground">
+                    {item.value}
+                  </span>
                   <div className="flex items-center gap-2">
                     <div
                       className={`flex items-center gap-1 text-muted-foreground text-sm`}
@@ -725,7 +729,7 @@ export default function Dashboard() {
           <Card className="group bg-card/30 backdrop-blur-sm border border-orange-600/30 hover:border-orange-600 overflow-hidden transition-colors duration-300">
             <CardHeader className="px-4 pt-6 pb-5 sm:px-8 sm:pt-8 sm:pb-6 border-b border-white/5">
               <div className="flex items-center justify-between gap-3">
-                <CardTitle className="text-xl sm:text-2xl font-semibold text-white">
+                <CardTitle className="text-xl sm:text-2xl font-semibold text-foreground">
                   Recent Activity
                 </CardTitle>
                 <div className="p-2 bg-orange-500/10 rounded-lg border border-orange-500/20 flex-shrink-0 group-hover:scale-110 duration-300 ease-in-out">
@@ -734,7 +738,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="divide-y divide-white/5">
+              <div className="divide-y divide-foreground/5">
                 {recentPosts.length === 0 ? (
                   <div className="py-12 text-center text-muted-foreground text-sm">
                     No recent posts.
@@ -743,11 +747,11 @@ export default function Dashboard() {
                   recentPosts.map((post) => (
                     <div
                       key={post.id}
-                      className="flex items-start gap-3 sm:gap-4 p-4 sm:p-6 hover:bg-white/[0.04] transition-all duration-200 group cursor-pointer"
+                      className="flex items-start gap-3 sm:gap-4 p-4 sm:p-6 hover:bg-foreground/[0.04] transition-all duration-200 group cursor-pointer"
                     >
                       {/* Avatar/Icon */}
-                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-[#0F0F0F] rounded-xl flex items-center justify-center border border-white/5 group-hover:border-white/20 group-hover:bg-white/5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300">
-                        <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground group-hover:text-white transition-colors" />
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-background rounded-xl flex items-center justify-center border border-foreground/5 group-hover:border-foreground/20 group-hover:bg-foreground/5 group-hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300">
+                        <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground group-hover:text-foreground transition-colors" />
                       </div>
 
                       {/* Content */}
@@ -765,7 +769,7 @@ export default function Dashboard() {
                             </div>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2 group-hover:text-white/70 transition-colors">
+                        <p className="text-sm text-muted-foreground line-clamp-2 group-hover:text-foreground/70 transition-colors">
                           {post.body?.substring(0, 150) + "..." || "No content"}
                         </p>
                       </div>
@@ -779,12 +783,12 @@ export default function Dashboard() {
       ) : (
         /* User Management Section */
         <Card className="bg-card/30 backdrop-blur-sm border-orange-500/20 overflow-hidden hover:border-orange-500/30 transition-colors duration-300 hover:shadow-[0_0_30px_rgba(249,115,22,0.05)]">
-          <CardHeader className="px-8 pt-8 pb-6 border-b border-white/5 flex flex-row items-center justify-between">
+          <CardHeader className="px-8 pt-8 pb-6 border-b border-foreground/5 flex flex-row items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-orange-500/10 rounded-lg border border-orange-500/20">
                 <Users className="w-5 h-5 text-orange-400" />
               </div>
-              <CardTitle className="text-xl font-semibold text-white">
+              <CardTitle className="text-xl font-semibold text-foreground">
                 Community Members
               </CardTitle>
             </div>
@@ -806,7 +810,7 @@ export default function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-white/5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <tr className="bg-foreground/5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     <th className="px-4 py-3 sm:px-8 sm:py-4">Member</th>
                     <th className="px-4 py-3 sm:px-8 sm:py-4">Role</th>
                     <th className="px-4 py-3 sm:px-8 sm:py-4">Joined</th>
@@ -816,7 +820,7 @@ export default function Dashboard() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-foreground/5">
                   {users.length === 0 && !loadingUsers ? (
                     <tr>
                       <td
@@ -830,7 +834,7 @@ export default function Dashboard() {
                     users.map((user) => (
                       <tr
                         key={user.id}
-                        className="hover:bg-white/[0.04] transition-all duration-200 group"
+                        className="hover:bg-foreground/[0.04] transition-all duration-200 group"
                       >
                         <td className="px-4 py-3 sm:px-8 sm:py-4">
                           <div className="flex items-center gap-3">
@@ -838,10 +842,10 @@ export default function Dashboard() {
                               src={user.avatar_url}
                               alt={user.full_name}
                               size={32}
-                              className="ring-2 ring-white/5 group-hover:ring-orange-500/20"
+                              className="ring-2 ring-foreground/5 group-hover:ring-orange-500/20"
                             />
                             <div className="flex flex-col">
-                              <span className="text-sm font-medium text-white text-nowrap">
+                              <span className="text-sm font-medium text-foreground text-nowrap">
                                 {user.full_name}
                               </span>
                               <span className="text-xs text-muted-foreground font-mono">
@@ -855,7 +859,7 @@ export default function Dashboard() {
                             className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
                               user.role === "admin"
                                 ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
-                                : "bg-white/5 text-muted-foreground border-white/10"
+                                : "bg-foreground/5 text-muted-foreground border-foreground/10"
                             }`}
                           >
                             {user.role}
@@ -874,10 +878,10 @@ export default function Dashboard() {
                         </td>
                         <td className="px-8 py-4 text-right">
                           <div className="flex items-center justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                            <button className="p-2 bg-white/5 hover:bg-orange-500/10 text-muted-foreground hover:text-orange-400 rounded-lg border border-white/5 hover:border-orange-500/20 transition-all">
+                            <button className="p-2 bg-foreground/5 hover:bg-orange-500/10 text-muted-foreground hover:text-orange-400 rounded-lg border border-foreground/5 hover:border-orange-500/20 transition-all">
                               <ShieldAlert size={16} />
                             </button>
-                            <button className="p-2 bg-white/5 hover:bg-orange-500/10 text-muted-foreground hover:text-orange-400 rounded-lg border border-white/5 hover:border-orange-500/20 transition-all">
+                            <button className="p-2 bg-foreground/5 hover:bg-orange-500/10 text-muted-foreground hover:text-orange-400 rounded-lg border border-foreground/5 hover:border-orange-500/20 transition-all">
                               <Mail size={16} />
                             </button>
                           </div>

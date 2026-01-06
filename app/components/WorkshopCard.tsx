@@ -15,11 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  CalendarEvent,
-  google,
-  outlook
-} from "calendar-link";
+import { CalendarEvent, google, outlook } from "calendar-link";
 import { formatDistanceToNowStrict } from "date-fns";
 import { format, toZonedTime } from "date-fns-tz";
 import {
@@ -37,7 +33,7 @@ import {
   SquareCheckBig,
   User as UserIcon,
   Video,
-  X
+  X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -451,22 +447,22 @@ export default function WorkshopCard({
 
   return (
     <Card
-      className={`overflow-hidden border-[#27584F]/50 shadow-sm transition-all duration-300 bg-card/40 backdrop-blur-sm group ${
+      className={`overflow-hidden border-teal-700/50 shadow-sm transition-all duration-300 bg-card/40 backdrop-blur-sm group ${
         isEnded
           ? "opacity-80 grayscale-[0.3]"
-          : "hover:shadow-[0_0_20px_rgba(39,88,79,0.25)] hover:border-[#27584F]"
+          : "hover:shadow-[0_0_20px_rgba(39,88,79,0.25)] hover:border-teal-700"
       } font-manrope`}
     >
       {" "}
       {/* Apply Body Font */}
       <div
-        className={`p-6 border-b border-[#27584F]/10 transition-colors ${
+        className={`p-6 border-b border-teal-700/10 transition-colors ${
           isEnded
             ? "bg-zinc-900/10"
-            : "bg-[#27584F]/5 group-hover:bg-[#27584F]/10"
+            : "bg-teal-700/5 group-hover:bg-teal-700/10"
         }`}
       >
-        <h2 className="text-2xl font-medium text-white group-hover:text-white/90 transition-colors font-sora">
+        <h2 className="text-2xl font-medium text-foreground group-hover:text-foreground/90 transition-colors font-sora">
           {workshop.title}
         </h2>{" "}
         <div className="flex items-center justify-between mb-3">
@@ -486,10 +482,10 @@ export default function WorkshopCard({
             <div
               className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                 isLive
-                  ? "bg-red-500 text-white animate-pulse"
+                  ? "bg-red-500 text-white animate-pulse "
                   : isEnded
-                    ? "bg-zinc-800 text-zinc-400 border border-zinc-700"
-                    : "bg-blue-500 text-white"
+                    ? "bg-foreground/20 text-foreground border border-zinc-700"
+                    : "bg-blue-500 text-foreground"
               }`}
             >
               {isEnded ? (
@@ -513,12 +509,12 @@ export default function WorkshopCard({
         <div className="w-full flex flex-col">
           {isEnded ? (
             workshop.recording_url ? (
-              <div className="mb-3 rounded-lg overflow-hidden border border-[#27584F]/20 shadow-inner bg-black/5">
+              <div className="mb-3 rounded-lg overflow-hidden border border-teal-700/20 shadow-inner bg-black/5">
                 <VodPlayer
                   url={workshop.recording_url}
                   title={workshop.title}
                 />
-                <div className="p-3 bg-zinc-900/50 backdrop-blur-sm border-t border-[#27584F]/10 flex justify-between items-center">
+                <div className="p-3 bg-zinc-900/50 backdrop-blur-sm border-t border-teal-700/10 flex justify-between items-center">
                   <span className="text-xs text-zinc-400 flex items-center gap-1">
                     <Video size={12} /> Recording Available
                   </span>
@@ -533,11 +529,11 @@ export default function WorkshopCard({
                 </div>
               </div>
             ) : (
-              <div className="mb-6 py-4 w-full rounded-lg border border-dashed border-[#27584F]/30 bg-[#27584F]/5 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 rounded-full bg-[#27584F]/10 flex items-center justify-center mb-3 animate-pulse">
+              <div className="mb-6 py-4 w-full rounded-lg border border-dashed border-teal-700/30 bg-teal-700/5 flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 rounded-full bg-teal-700/10 flex items-center justify-center mb-3 animate-pulse">
                   <Clock className="w-8 h-8 text-[#48aa98]" />
                 </div>
-                <h4 className="font-semibold text-white font-sora">
+                <h4 className="font-semibold text-foreground font-sora">
                   Recording Processing
                 </h4>
                 <p className="text-xs text-muted-foreground max-w-[300px] mt-1 font-manrope">
@@ -547,7 +543,7 @@ export default function WorkshopCard({
               </div>
             )
           ) : (
-            <p className="text-white/80 text-start mb-3 leading-relaxed line-clamp-3 font-manrope">
+            <p className="text-foreground/80 text-start mb-3 leading-relaxed line-clamp-3 font-manrope">
               {workshop.description}
             </p>
           )}
@@ -560,11 +556,11 @@ export default function WorkshopCard({
               <span>{waitlistCount} people waiting</span>
             </div>
           )}
-          <div className="flex items-center gap-2 flex-col md:flex-row">
+          <div className="flex items-center gap-2 flex-col md:flex-row mb-3">
             <Button
               variant="outline"
               size="sm"
-              className="text-[11px] w-full h-8 bg-[#18181b] border-[#27584F]/30 text-zinc-300 hover:bg-zinc-800"
+              className="text-[11px] w-full h-8 bg-card border-teal-700/30 text-foreground hover:bg-foreground/10"
               onClick={handleShareLink}
             >
               <Share2 size={14} className="mr-1" />
@@ -575,7 +571,7 @@ export default function WorkshopCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-[11px] h-8 bg-[#18181b] border-[#27584F]/30 text-zinc-300 hover:bg-zinc-800 font-manrope"
+                  className="text-[11px] h-8 bg-card border-teal-700/30 text-foreground hover:bg-foreground/10 font-manrope"
                   onClick={() => window.open(google(event), "_blank")}
                 >
                   <CalendarPlus size={14} className="mr-1" />
@@ -584,7 +580,7 @@ export default function WorkshopCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-[11px] h-8 bg-[#18181b] border-[#27584F]/30 text-zinc-300 hover:bg-zinc-800 font-manrope"
+                  className="text-[11px] h-8 bg-card border-teal-700/30 text-foreground hover:bg-foreground/10 font-manrope"
                   onClick={() => window.open(outlook(event), "_blank")}
                 >
                   <MailOpen />
@@ -595,7 +591,7 @@ export default function WorkshopCard({
           </div>
 
           {joinedWaitlist && isScheduled && (
-            <div className="my-3 flex items-start p-3 bg-[#27584F]/10 border border-[#27584F]/30 rounded-md text-[#27584F] text-sm text-center font-medium font-manrope">
+            <div className="my-3 flex items-start p-3 bg-teal-700/10 border border-teal-700/30 rounded-md text-teal-700 text-sm text-center font-medium font-manrope">
               <SquareCheckBig />
               <span>
                 You&apos;re on the waitlist! We&apos;ll email you when we go
@@ -609,16 +605,16 @@ export default function WorkshopCard({
               <div className="flex items-center gap-2">
                 {isScheduled ? (
                   <Button
-                    className="w-full gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 text-base font-sora rounded-md"
+                    className="w-full gap-2 bg-teal-700 hover:bg-teal-700/90 text-foreground shadow-lg shadow-teal-700/20 text-base font-sora rounded-md"
                     onClick={handleStartConclave}
                     disabled={isStarting}
                   >
-                    <Play className="fill-white" />
+                    <Play className="fill-foreground" />
                     {isStarting ? "Starting..." : "Start Conclave"}
                   </Button>
                 ) : isLive ? (
                   <Button
-                    className="w-full gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-medium font-sora rounded-md"
+                    className="w-full gap-2 bg-teal-700 hover:bg-teal-700/90 text-foreground shadow-lg shadow-teal-700/20 py-4 text-base font-medium font-sora rounded-md"
                     asChild
                   >
                     <a href={`/conclave/${workshop.id}`}>
@@ -629,7 +625,7 @@ export default function WorkshopCard({
                 ) : isEnded ? (
                   <Button
                     disabled={!workshop.recording_url}
-                    className={`!w-full gap-2 py-4 rounded-md text-base font-sora ${workshop.recording_url ? "bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20" : "bg-zinc-800 text-zinc-500"} text-white shadow-sm`}
+                    className={`!w-full gap-2 py-4 rounded-md text-base font-sora ${workshop.recording_url ? "bg-teal-700 hover:bg-teal-700/90 shadow-lg shadow-teal-700/20" : "bg-zinc-800 text-zinc-500"} text-foreground shadow-sm`}
                     asChild={!!workshop.recording_url}
                   >
                     {workshop.recording_url ? (
@@ -648,7 +644,7 @@ export default function WorkshopCard({
                 {isScheduled ? (
                   <Button
                     variant="outline"
-                    className="w-full bg-[#18181b] border-[#27584F] hover:border-[#27584F] hover:bg-[#27584F]/30 text-[#40a391] hover:text-[#40a391] font-sora rounded-md"
+                    className="w-full bg-[#18181b] border-teal-700 hover:border-teal-700 hover:bg-teal-700/30 text-[#40a391] hover:text-[#40a391] font-sora rounded-md"
                     onClick={handleNotifyConclaveUsers}
                   >
                     <Bell className="w-8 h-8" />
@@ -708,7 +704,7 @@ export default function WorkshopCard({
             </Button>
           ) : isLive ? (
             <Button
-              className="!w-full sm:w-auto gap-2 bg-[#27584F] hover:bg-[#27584F]/90 text-white shadow-lg shadow-[#27584F]/20 py-4 text-base font-sora"
+              className="!w-full sm:w-auto gap-2 bg-teal-700 hover:bg-teal-700/90 text-white shadow-lg shadow-teal-700/20 py-4 text-base font-sora"
               asChild
             >
               <a href={`/conclave/${workshop.id}`}>
@@ -719,7 +715,7 @@ export default function WorkshopCard({
           ) : isEnded ? (
             <Button
               disabled={!workshop.recording_url}
-              className={`!w-full gap-2 py-4 text-base font-sora ${workshop.recording_url ? "bg-[#27584F] hover:bg-[#27584F]/90 shadow-lg shadow-[#27584F]/20" : "bg-zinc-800 text-zinc-500"} text-white shadow-sm`}
+              className={`!w-full gap-2 py-4 text-base font-sora ${workshop.recording_url ? "bg-teal-700 hover:bg-teal-700/90 shadow-lg shadow-teal-700/20" : "bg-foreground/30 text-foreground"}  shadow-sm`}
               asChild={!!workshop.recording_url}
             >
               {workshop.recording_url ? (
@@ -736,14 +732,13 @@ export default function WorkshopCard({
             </Button>
           ) : null}
         </div>
-
       </CardContent>
       {/* Success Modal for Conclave Notifications */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="sm:max-w-md bg-[#27584F]/10 border border-[#27584F] text-white p-6 rounded-2xl shadow-xl backdrop-blur-xl">
+        <DialogContent className="sm:max-w-md bg-teal-700/10 border border-teal-700 text-foreground p-6 rounded-2xl shadow-xl backdrop-blur-xl">
           <DialogHeader className="flex flex-col items-center justify-center text-center space-y-4">
-            <CheckCircle className="h-16 w-16 text-[#27584F]" />
-            <DialogTitle className="text-2xl font-bold text-white">
+            <CheckCircle className="h-16 w-16 text-teal-700" />
+            <DialogTitle className="text-2xl font-bold text-foreground">
               Email was successfully sent!
             </DialogTitle>
             <DialogDescription className="text-zinc-400 text-base">
@@ -754,7 +749,7 @@ export default function WorkshopCard({
             <DialogClose asChild>
               <Button
                 type="button"
-                className="w-full bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold py-3 rounded-xl transition-colors duration-200"
+                className="w-full bg-teal-700 hover:bg-teal-700/90 text-foreground font-bold py-3 rounded-xl transition-colors duration-200"
               >
                 OK
               </Button>

@@ -306,7 +306,7 @@ function PostsContent() {
           <input
             type="text"
             placeholder="Create Post"
-            className="bg-white/5 group-hover:bg-white/10 border border-white/5 rounded-md px-4 py-3 flex-grow text-sm text-white placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-yellow-500/20 transition-all cursor-text"
+            className="bg-foreground/5 group-hover:bg-foreground/10 border border-foreground/5 rounded-md px-4 py-3 flex-grow text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-yellow-500/20 transition-all cursor-text"
             onClick={() => setIsCreatePostDialogOpen(true)}
           />
         </div>
@@ -317,8 +317,8 @@ function PostsContent() {
         tags={allTags}
         selectedTag={selectedTag}
         onSelectTag={setSelectedTag}
-        activeColor="bg-yellow-500/10 text-white shadow-sm border border-yellow-500/20"
-        hoverColor="hover:bg-yellow-500/5 hover:text-white"
+        activeColor="bg-yellow-500/20 text-yellow-500 shadow-sm border border-yellow-500/30"
+        hoverColor="hover:bg-yellow-500/5 hover:text-foreground"
       />
 
       <CreatePostDialog

@@ -184,9 +184,9 @@ export default function CreatePostDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl w-full p-0 bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl max-h-[90vh] flex flex-col ">
+      <DialogContent className="max-w-3xl w-full p-0 bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-2xl border border-foreground/10 rounded-3xl shadow-2xl max-h-[90vh] flex flex-col ">
         <DialogHeader className="px-8 pt-8 pb-4 flex-shrink-0">
-          <DialogTitle className="text-3xl font-bold text-white tracking-tight">
+          <DialogTitle className="text-3xl font-bold text-yellow tracking-tight">
             Create New Post
           </DialogTitle>
         </DialogHeader>
@@ -214,7 +214,7 @@ export default function CreatePostDialog({
                     "relative border-2 border-dashed rounded-2xl transition-all duration-300",
                     dragActive
                       ? "border-yellow-500/70 bg-yellow-500/5 scale-[1.01]"
-                      : "border-white/20 bg-white/5",
+                      : "border-foreground/20 bg-foreground/5",
                     previews.length > 0 && "border-0 bg-transparent"
                   )}
                 >
@@ -223,8 +223,11 @@ export default function CreatePostDialog({
                       htmlFor="image-upload"
                       className="flex flex-col items-center justify-center py-12 cursor-pointer"
                     >
-                      <ImageIcon className="w-16 h-16 text-yellow-500 mb-4" />
-                      <p className="text-lg font-medium text-white">
+                      <ImageIcon
+                        className="w-16 h-16 text-yellow-500 mb-4"
+                        strokeWidth={1.5}
+                      />
+                      <p className="text-lg font-medium text-yellow">
                         Drop images here or click to upload
                       </p>
                       <p className="text-sm text-muted-foreground mt-2">
@@ -261,9 +264,9 @@ export default function CreatePostDialog({
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(preview.id)}
-                            className="absolute top-3 right-3 p-2 bg-black/70 rounded-full hover:bg-red-600 transition"
+                            className="absolute top-3 right-3 p-2 bg-background/70 rounded-full hover:bg-red-600 transition"
                           >
-                            <X className="w-5 h-5 text-white" />
+                            <X className="w-5 h-5 text-yellow" />
                           </button>
                         </div>
                       ))}
@@ -283,7 +286,7 @@ export default function CreatePostDialog({
 
                 {/* Title */}
                 <div className="space-y-3">
-                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-white/80">
+                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
                     <Type className="w-6 h-6 text-yellow-500" />
                     Title
                   </label>
@@ -292,13 +295,13 @@ export default function CreatePostDialog({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Give your post a catchy title..."
-                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white text-lg placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all"
+                    className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-yellow text-lg placeholder:text-yellow/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all"
                   />
                 </div>
 
                 {/* Body */}
                 <div className="space-y-3">
-                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-white/80">
+                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
                     <AlignLeft className="w-6 h-6 text-yellow-500" />
                     Content
                   </label>
@@ -307,16 +310,16 @@ export default function CreatePostDialog({
                     onChange={(e) => setBody(e.target.value)}
                     rows={6}
                     placeholder="Share your thoughts..."
-                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent resize-none transition-all leading-relaxed"
+                    className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-yellow placeholder:text-yellow/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent resize-none transition-all leading-relaxed"
                   />
                 </div>
 
                 {/* Tags */}
                 <div className="space-y-3">
-                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-white/80">
+                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
                     <Tag className="w-6 h-6 text-yellow-500" />
                     Tags{" "}
-                    <span className="lowercase font-normal text-white/50">
+                    <span className="lowercase font-normal text-yellow/50">
                       (optional)
                     </span>
                   </label>
@@ -325,22 +328,22 @@ export default function CreatePostDialog({
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="e.g. tech, design, feedback"
-                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all"
+                    className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-yellow placeholder:text-yellow/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all"
                   />
-                  <p className="text-xs text-white/50 ml-1">
+                  <p className="text-xs text-yellow/50 ml-1">
                     Separate with commas
                   </p>
                 </div>
 
                 {/* Actions - always visible at bottom */}
-                <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between pt-6 border-t border-foreground/10">
                   <div className="flex items-center gap-4">
                     <Button
                       type="button"
                       variant="outline"
                       size="lg"
                       onClick={() => fileInputRef.current?.click()}
-                      className="border-white/20 hover:bg-white/10"
+                      className="border-foreground/20 hover:bg-foreground/10"
                     >
                       <ImageIcon className="w-5 h-5 mr-2" />
                       Add Images ({selectedFiles.length}/3)
@@ -365,7 +368,7 @@ export default function CreatePostDialog({
                           !body.trim() &&
                           selectedFiles.length === 0)
                       }
-                      className="bg-yellow-500 hover:bg-yellow-400  text-black font-semibold px-8 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all"
+                      className="bg-yellow-500 hover:bg-yellow-400  text-background font-semibold px-8 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all"
                     >
                       {loading ? (
                         <>Posting...</>

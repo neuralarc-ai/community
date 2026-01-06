@@ -144,35 +144,35 @@ const FluxDashboard = () => {
     {
       label: "Posts Created",
       value: currentUserStats?.posts_count || 0,
-      valueColor: "text-white",
+      valueColor: "text-foreground",
       icon: ScrollText,
     },
     {
       label: "Comments Added",
       value: currentUserStats?.comments_count || 0,
-      valueColor: "text-white",
+      valueColor: "text-foreground",
       icon: MessageSquareText,
     },
     {
       label: "Your Rank",
       value: currentUserRank > 0 ? `#${currentUserRank}` : "N/A",
-      valueColor: "text-white",
+      valueColor: "text-foreground",
       icon: CircleStar,
     },
   ];
 
   if (loading) {
     return (
-      <div className="min-h-screen text-zinc-100 p-8 flex items-center justify-center">
+      <div className="min-h-screen text-foreground p-8 flex items-center justify-center">
         Loading Flux Dashboard...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen text-zinc-100 p-8">
+    <div className="min-h-screen text-foreground p-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-heading font-bold text-white tracking-tight">
+        <h1 className="text-3xl font-heading font-bold text-foreground tracking-tight">
           Flux Dashboard
         </h1>
         <p className="text-muted-foreground font-sans">
@@ -183,15 +183,15 @@ const FluxDashboard = () => {
         {statsData.map((stat, index) => (
           <div
             key={index}
-            className="flex items-center justify-between w-full bg-background rounded-xl p-6 border border-zinc-700 hover:border-[#FFB6C1] shadow-[0_0_20px_rgba(255,182,93,0.1)] hover:shadow-[0_0_20px_rgba(255,182,193,0.3)] hover:scale-[1.02] ease-in-out transition-all duration-300 glare-effect"
+            className="flex items-center justify-between w-full bg-background rounded-xl p-6 border border-foreground/10 hover:border-pink-400 shadow-[0_0_20px_rgba(255,182,93,0.1)] hover:shadow-[0_0_20px_rgba(255,182,193,0.3)] hover:scale-[1.02] ease-in-out transition-all duration-300 glare-effect"
           >
             <div className="w-full flex flex-col items-start">
-              <h3 className="text-zinc-400 text-sm mb-2">{stat.label}</h3>
+              <h3 className="text-muted-foreground text-sm mb-2">{stat.label}</h3>
               <p className={`text-3xl font-bold ${stat.valueColor}`}>
                 {stat.value}
               </p>
             </div>
-            <div className="flex items-center p-3 rounded-full bg-white/10">
+            <div className="flex items-center p-3 rounded-full bg-foreground/10">
               <stat.icon
                 className={`${stat.valueColor} `}
                 size={32}
@@ -205,13 +205,13 @@ const FluxDashboard = () => {
       {/* Section B: Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Leaderboard Table */}
-        <div className="lg:col-span-2 bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700">
+        <div className="lg:col-span-2 bg-card rounded-xl p-6 shadow-lg border border-foreground/10">
           <h2 className="text-2xl font-bold mb-6">Flux Leaderboard</h2>
           {/* Placeholder for Leaderboard Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full text-center">
               <thead>
-                <tr className="border-b border-zinc-700 text-zinc-400">
+                <tr className="border-b border-foreground/10 text-muted-foreground">
                   <th className="py-3 px-4 text-center">Rank</th>
                   <th className="py-3 px-4 text-left">User</th>
                   <th className="py-3 px-4 flex items-center justify-center">
@@ -226,9 +226,9 @@ const FluxDashboard = () => {
                 {leaderboard.map((profile, index) => (
                   <tr
                     key={profile.id}
-                    className={`border-b border-[#A6C8D5]/20 last:border-b-0 transition-all duration-300 group ${profile.id === user?.id ? "bg-card/60 border-[#A6C8D5]/30 shadow-[0_0_30px_rgba(166,200,213,0.1)]" : "hover:bg-card/60 hover:border-[#FFB6C1] hover:shadow-[0_0_30px_rgba(255,182,193,0.1)]"}`}
+                    className={`border-b border-[#A6C8D5]/20 last:border-b-0 transition-all duration-300 group ${profile.id === user?.id ? "bg-card/60 border-[#A6C8D5]/30 shadow-[0_0_30px_rgba(166,200,213,0.1)]" : "hover:bg-card/60 hover:border-pink-400 hover:shadow-[0_0_30px_rgba(255,182,193,0.1)]"}`}
                   >
-                    <td className="py-3 px-4 text-center text-white group-hover:text-white/80 transition-colors">
+                    <td className="py-3 px-4 text-center text-foreground group-hover:text-foreground/80 transition-colors">
                       {index + 1}
                     </td>
                     <td className="py-3 px-4 flex items-center text-left">
@@ -237,19 +237,19 @@ const FluxDashboard = () => {
                         alt={profile.full_name || "User"}
                         width={32}
                         height={32}
-                        className="rounded-full mr-3 ring-1 ring-white/10 group-hover:ring-[#FFB6C1]/50 transition-all"
+                        className="rounded-full mr-3 ring-1 ring-foreground/10 group-hover:ring-pink-400/50 transition-all"
                       />
-                      <span className="font-medium text-white group-hover:text-[#FFB6C1] transition-colors">
+                      <span className="font-medium text-foreground group-hover:text-pink-400 transition-colors">
                         {profile.full_name}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center text-white group-hover:text-[#FFB6C1] transition-colors">
+                    <td className="py-3 px-4 text-center text-foreground group-hover:text-pink-400 transition-colors">
                       {profile.total_flux}
                     </td>
-                    <td className="py-3 px-4 text-center text-white group-hover:text-[#FFB6C1] transition-colors">
+                    <td className="py-3 px-4 text-center text-foreground group-hover:text-pink-400 transition-colors">
                       {profile.posts_count}
                     </td>
-                    <td className="py-3 px-4 text-center text-white group-hover:text-[#FFB6C1] transition-colors">
+                    <td className="py-3 px-4 text-center text-foreground group-hover:text-pink-400 transition-colors">
                       {profile.comments_count}
                     </td>
                   </tr>
@@ -260,7 +260,7 @@ const FluxDashboard = () => {
         </div>
 
         {/* Right Column: Recent Activity Feed */}
-        <div className="lg:col-span-1 bg-zinc-900 rounded-xl p-6 shadow-lg border border-zinc-700">
+        <div className="lg:col-span-1 bg-card rounded-xl p-6 shadow-lg border border-foreground/10">
           <h2 className="text-2xl font-bold mb-6">What is Flux?</h2>
           <div className="space-y-6">
             <p>

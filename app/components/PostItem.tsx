@@ -67,7 +67,7 @@ const PostCardBase = ({ children, post, isProfilePage }: PostCardBaseProps) => (
           ? "border-[#A6C8D5]/20 hover:border-[#A6C8D5]/30 hover:shadow-[0_0_30px_rgba(166,200,213,0.1)]"
           : post.author?.role === "admin"
             ? "bg-admin-yellow/10 hover:shadow-[0_0_20px_rgba(234,179,8,0.15)] shadow-md shadow-admin-yellow/10 hover:scale-[1.01] transition-all duration-300"
-            : "border-white/5 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] hover:bg-white/[0.02]"
+            : "border-foreground/5 hover:shadow-[0_0_30px_rgba(231,179,27,0.05)] hover:bg-foreground/[0.02]"
       }
     `}
   >
@@ -194,14 +194,14 @@ export default function PostItem({
           <>
             <button
               onClick={goToPreviousImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-foreground p-2 rounded-full hover:bg-black/70 transition-colors z-10"
               aria-label="Previous image"
             >
               <ChevronLeft size={20} />
             </button>
             <button
               onClick={goToNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors z-10"
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-foreground p-2 rounded-full hover:bg-black/70 transition-colors z-10"
               aria-label="Next image"
             >
               <ChevronRight size={20} />
@@ -231,7 +231,7 @@ export default function PostItem({
           </Link>
           <Link
             href={`/profile/${post.author_id}`}
-            className="font-medium text-white"
+            className="font-medium text-foreground"
           >
             u/{post.author?.username || "Anonymous"}
           </Link>
@@ -241,12 +241,12 @@ export default function PostItem({
             Admin
           </span>
         )}
-        <span className="text-white/20">•</span>
+        <span className="text-foreground/20">•</span>
         <span>{formatTime(post.created_at)}</span>
         {post.tags && post.tags.length > 0 && (
           <>
-            <span className="text-white/20"> • </span>
-            <span className="bg-white/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-white/5 hover:border-admin-yellow/30 hover:text-admin-yellow hover:bg-admin-yellow/5 transition-all">
+            <span className="text-foreground/20"> • </span>
+            <span className="bg-foreground/5 text-muted-foreground px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-foreground/5 hover:border-admin-yellow/30 hover:text-admin-yellow hover:bg-admin-yellow/5 transition-all">
               {post.tags[0]}
             </span>
           </>
@@ -258,11 +258,11 @@ export default function PostItem({
         )}
       </div>
       <Link href={`/posts/${post.id}`} className="block group/title">
-        <h2 className="text-lg sm:text-xl font-heading font-semibold text-white mb-3 leading-snug group-hover/title:text-admin-yellow/80 transition-colors">
+        <h2 className="text-lg sm:text-xl font-heading font-semibold text-foreground mb-3 leading-snug group-hover/title:text-admin-yellow/80 transition-colors">
           {post.title}
         </h2>
         {post.body && (
-          <div className="text-sm text-muted-foreground line-clamp-3 mb-4 font-sans leading-relaxed group-hover/title:text-white/80 transition-colors">
+          <div className="text-sm text-muted-foreground line-clamp-3 mb-4 font-sans leading-relaxed  transition-colors">
             {post.body}
           </div>
         )}
@@ -274,7 +274,7 @@ export default function PostItem({
         renderImages(post.image_urls)}
 
       {/* Mobile Vote & Actions */}
-      <div className="flex items-center justify-between pt-2 border-t border-white/5 mt-2">
+      <div className="flex items-center justify-between pt-2 border-t border-foreground/5 mt-2">
         <div className="flex items-center text-muted-foreground font-medium text-xs">
           <PostActions
             commentCount={commentCount}
@@ -312,10 +312,10 @@ export default function PostItem({
       />
       {/* Success Modal for Post Notifications */}
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="sm:max-w-md bg-[#27584F]/10 border border-[#27584F] text-white p-6 rounded-2xl shadow-xl backdrop-blur-xl">
+        <DialogContent className="sm:max-w-md bg-[#27584F]/10 border border-[#27584F] text-foreground p-6 rounded-2xl shadow-xl backdrop-blur-xl">
           <DialogHeader className="flex flex-col items-center justify-center text-center space-y-4">
             <CheckCircle className="h-16 w-16 text-[#27584F]" />
-            <DialogTitle className="text-2xl font-bold text-white">
+            <DialogTitle className="text-2xl font-bold text-foreground">
               Email was successfully sent!
             </DialogTitle>
             <DialogDescription className="text-zinc-400 text-base">
@@ -326,7 +326,7 @@ export default function PostItem({
             <DialogClose asChild>
               <Button
                 type="button"
-                className="w-full bg-[#27584F] hover:bg-[#27584F]/90 text-white font-bold py-3 rounded-xl transition-colors duration-200"
+                className="w-full bg-[#27584F] hover:bg-[#27584F]/90 text-foreground font-bold py-3 rounded-xl transition-colors duration-200"
               >
                 OK
               </Button>

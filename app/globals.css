@@ -45,9 +45,12 @@
     --red-accent-hover: 0 80% 60%;
     --button-base: 4 73% 78%; /* HSL for EFB3AF */
     --button-hover: 4 73% 68%; /* Slightly darker for hover */
+
+    /* NEW CUSTOM CLASSES FOR THEME SUPPORT */
+    --dashboard: 249, 115, 22;
   }
 
-  .dark {
+  [data-theme="dark"] {
     --background: 0 0% 8%;
     --foreground: 0 0% 95%;
     --card: 0 0% 12%;
@@ -73,6 +76,56 @@
     --red-accent-hover: 0 80% 60%;
     --button-base: 4 73% 78%; /* HSL for EFB3AF */
     --button-hover: 4 73% 68%; /* Slightly darker for hover */
+  }
+
+  [data-theme="light"] {
+    /* Light Monochrome Theme */
+
+    --background: 0 0% 98%; /* Near-white background */
+    --foreground: 0 0% 10%; /* Almost black text */
+
+    --card: 0 0% 100%; /* Pure white cards */
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 0 0% 12%; /* Dark gray primary */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 92%; /* Light gray surfaces */
+    --secondary-foreground: 0 0% 18%;
+
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 0 0% 15%; /* Dark accent (inverse of dark mode) */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 80% 45%; /* Slightly darker red for light bg */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 85%; /* Subtle borders */
+    --input: 0 0% 92%;
+
+    --ring: 0 0% 20%;
+
+    --radius: 0.75rem;
+
+    /* Status (still monochrome) */
+    --warning: 0 0% 50%;
+    --success: 0 0% 50%;
+
+    /* Red Accent (unchanged brand color) */
+    --red-accent: 0 80% 50%;
+    --red-accent-hover: 0 80% 45%;
+
+    /* Buttons */
+    --button-base: 4 73% 78%; /* EFB3AF */
+    --button-hover: 4 73% 68%;
+
+    /* Custom */
+    --dashboard: 249, 115, 22;
   }
 }
 
