@@ -292,7 +292,7 @@ function PostsContent() {
   }
 
   return (
-    <div className="container max-w-[1000px] mx-auto py-8 px-6 space-y-12">
+    <div className="container max-w-3xl mx-auto py-8 px-6 space-y-12">
       {/* Create Post Input & Filter Bar */}
       <Card className="mb-6 shadow-sm  bg-card/50 backdrop-blur-sm px-4 py-2 sm:p-2 hover:border-yellow-500/50  transition-all group">
         <div className="flex items-center space-x-2 p-2">
@@ -328,7 +328,6 @@ function PostsContent() {
       />
 
       {/* Posts List */}
-      <PostList>
         {filteredPosts.length === 0 && !loading ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg">
@@ -355,7 +354,6 @@ function PostsContent() {
             </div>
           ))
         )}
-      </PostList>
     </div>
   );
 }

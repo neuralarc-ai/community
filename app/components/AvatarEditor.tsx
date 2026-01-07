@@ -428,18 +428,20 @@ export default function AvatarEditor({
         </div>
 
         {/* Right Side: Customization */}
-        <div className="md:w-3/5 flex flex-col overflow-hidden">
+        <div className="md:w-3/5 flex flex-col">
           {/* Tabs */}
-          <div className="flex items-center justify-between border-b border-foreground/5 p-2 bg-background/5 gap-2 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center overflow-auto">
+
+          <div className="flex items-center border-b border-foreground/5 p-2 bg-background/5 gap-2 overflow-x-auto scrollbar-hide">
             {Object.entries(CATEGORIES).map(([id, cat]) => (
               <button
-                key={id}
-                onClick={() => setActiveTab(id as CategoryKey)}
-                className={`flex-shrink-0 flex flex-col items-center py-2 px-4 rounded-xl transition-all ${
-                  activeTab === id
-                    ? "bg-red-600 text-foreground shadow-lg"
-                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
-                }`}
+              key={id}
+              onClick={() => setActiveTab(id as CategoryKey)}
+              className={`flex-shrink-0 flex flex-col items-center py-2 px-4 rounded-xl transition-all ${
+                activeTab === id
+                ? "bg-red-600 text-white shadow-lg"
+                : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
+              }`}
               >
                 <cat.icon className="h-4 w-4 mb-1" />
                 <span className="text-[10px] uppercase font-bold tracking-wider">
@@ -447,6 +449,7 @@ export default function AvatarEditor({
                 </span>
               </button>
             ))}
+            </div>
             <button
               onClick={onClose}
               className="px-4 ml-auto text-muted-foreground hover:text-foreground"

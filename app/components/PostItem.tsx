@@ -157,60 +157,92 @@ export default function PostItem({
     }
   };
 
-  const renderImages = (imageUrls: string[]) => {
-    if (imageUrls.length === 0) return null;
+const renderImages = (imageUrls: string[]) => {
+  if (imageUrls.length === 0) return null;
 
-    const showNavigation = imageUrls.length > 1;
+  const showNavigation = imageUrls.length > 1;
 
-    const goToPreviousImage = () => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === 0 ? imageUrls.length - 1 : prevIndex - 1
-      );
-    };
-
-    const goToNextImage = () => {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === imageUrls.length - 1 ? 0 : prevIndex + 1
-      );
-    };
-
-    return (
-      <div className="relative w-full mb-4">
-        {" "}
-        {/* Use relative for positioning arrows */}
-        <div className="w-full bg-neutral-900 rounded-lg flex items-center justify-center overflow-hidden">
-          <Image
-            width={900}
-            height={900}
-            src={imageUrls[currentImageIndex]}
-            alt={`Post image ${currentImageIndex + 1}`}
-            className="max-h-[500px] w-auto object-contain cursor-pointer" // Adjusted styling for main image
-            onClick={() =>
-              handleImageClick(imageUrls[currentImageIndex], currentImageIndex)
-            }
-          />
-        </div>
-        {showNavigation && (
-          <>
-            <button
-              onClick={goToPreviousImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-foreground p-2 rounded-full hover:bg-black/70 transition-colors z-10"
-              aria-label="Previous image"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={goToNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-foreground p-2 rounded-full hover:bg-black/70 transition-colors z-10"
-              aria-label="Next image"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </>
-        )}
-      </div>
+  const goToPrevious = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? imageUrls.length - 1 : prev - 1
     );
   };
+
+  const goToNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      prev === imageUrls.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  return (
+    <div className="relative w-full mb-6 group/image-carousel">
+      
+      <div className="relative aspect-video w-full bg-neutral-900 rounded-xl overflow-hidden border border-foreground/10">
+        
+        <Image
+          src={imageUrls[currentImageIndex]}
+          alt={`Post image ${currentImageIndex + 1} of ${imageUrls.length}`}
+          fill
+          className="object-contain transition-transform duration-500 ease-out my-2"
+          priority={currentImageIndex === 0}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 900px"
+          onClick={() =>
+            handleImageClick(imageUrls[currentImageIndex], currentImageIndex)
+          }
+        />
+
+        
+        {showNavigation && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-full text-xs text-white">
+            <span className="font-medium">
+              {currentImageIndex + 1} / {imageUrls.length}
+            </span>
+          </div>
+        )}
+      </div>
+
+      
+      {showNavigation && (
+        <>
+          <button
+            onClick={goToPrevious}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-all duration-200 "
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <button
+            onClick={goToNext}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-all duration-200 "
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      
+      {imageUrls.length > 2 && (
+        <div className="flex justify-center gap-2 mt-4">
+          {imageUrls.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentImageIndex
+                  ? "bg-white w-8"
+                  : "bg-white/40 hover:bg-white/70"
+              }`}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
   const postInnerContent = (
     <div className="flex-1 min-w-0 p-6">
