@@ -5,14 +5,7 @@ import { createClient } from "@/app/lib/supabaseClient";
 import { Profile } from "@/app/types";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/lib/utils";
-import {
-  Bell,
-  LogOut,
-  Menu,
-  Moon,
-  Search,
-  Sun
-} from "lucide-react";
+import { Bell, LogOut, Menu, Moon, Search, Sun } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -28,9 +21,7 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [supabase, setSupabase] = useState<any>(null);
-  const [currentTheme, setCurrentTheme] = useState<string | null>(() => {
-    return localStorage.getItem("theme");
-  });
+  const [currentTheme, setCurrentTheme] = useState<string | null>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -87,6 +78,15 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
     }
   };
 
+  const getCurrentTheme = () => {
+    const curr = localStorage.getItem("theme") || "light";
+    setCurrentTheme(curr);
+  };
+
+  useEffect(() => {
+    getCurrentTheme();
+  }, []);
+
   return (
     <header
       className="sticky top-0 z-50 w-full border-b border-foreground/5 bg-card "
@@ -108,7 +108,11 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
           <Link href="/dashboard" className="flex items-center gap-2 group">
             <div className="relative w-7 h-7 sm:w-8 sm:h-8 transition-all">
               <Image
-                src="/logo Sphere.png"
+                src={
+                  currentTheme === "dark"
+                    ? "/logo Sphere.png"
+                    : "/logo Sphere black.png"
+                }
                 alt="Sphere Logo"
                 fill
                 sizes="(max-width: 640px) 28px, 32px"
@@ -143,7 +147,11 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
         {/* Right: Actions & Profile */}
         <div className="flex items-center gap-4 min-w-max">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className=" hover:bg-foreground/5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className=" hover:bg-foreground/5"
+            >
               <Bell size={18} />
             </Button>
             <Button
