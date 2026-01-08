@@ -258,7 +258,7 @@ export default function PostDetailPage() {
               <div className="flex items-center gap-3 mb-6 text-foreground">
                 <Avatar
                   src={post.author?.avatar_url}
-                  alt={post.author?.username}
+                  alt={post.author?.username || "User avatar"}
                 />
                 <div>
                   <Link

@@ -329,15 +329,7 @@ export default function Dashboard() {
                     style={{ fontSize: "10px" }}
                   />
                   <YAxis hide domain={["dataMin - 10", "dataMax + 10"]} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#18181b",
-                      border: "1px solid #3f3f46",
-                      borderRadius: "8px",
-                    }}
-                    labelStyle={{ color: "#a1a1aa" }}
-                    itemStyle={{ color: "#f97316" }}
-                  />
+                  <Tooltip />
                   <Line
                     type="monotone"
                     dataKey="value"
@@ -649,7 +641,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="flex flex-col gap-2">

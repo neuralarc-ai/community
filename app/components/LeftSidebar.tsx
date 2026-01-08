@@ -158,7 +158,7 @@ export default function LeftSidebar({
                       "flex items-center gap-4 px-4 py-3  rounded-xl transition-all duration-500 relative overflow-hidden group active:scale-95",
                       isActive
                         ? "text-white font-medium"
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
                     )}
                   >
                     {/* Icon with subtle scale animation */}

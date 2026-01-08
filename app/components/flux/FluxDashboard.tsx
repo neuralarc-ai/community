@@ -170,7 +170,7 @@ const FluxDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen text-foreground p-8">
+    <div className="min-h-screen text-foreground p-2 md:p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-heading font-bold text-foreground tracking-tight">
           Flux Dashboard
@@ -179,19 +179,21 @@ const FluxDashboard = () => {
           Track your community impact and see your rank
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         {statsData.map((stat, index) => (
           <div
             key={index}
-            className="flex items-center justify-between w-full bg-background rounded-xl p-6 border border-foreground/10 hover:border-pink-400 shadow-[0_0_20px_rgba(255,182,93,0.1)] hover:shadow-[0_0_20px_rgba(255,182,193,0.3)] hover:scale-[1.02] ease-in-out transition-all duration-300 glare-effect"
+            className="flex items-center justify-between w-full bg-background rounded-xl p-3 md:p-6 border border-foreground/10 hover:border-pink-400 shadow-[0_0_20px_rgba(255,182,93,0.1)] hover:shadow-[0_0_20px_rgba(255,182,193,0.3)] hover:scale-[1.02] ease-in-out transition-all duration-300 glare-effect"
           >
             <div className="w-full flex flex-col items-start">
-              <h3 className="text-muted-foreground text-sm mb-2">{stat.label}</h3>
+              <h3 className="text-muted-foreground text-sm mb-2">
+                {stat.label}
+              </h3>
               <p className={`text-3xl font-bold ${stat.valueColor}`}>
                 {stat.value}
               </p>
             </div>
-            <div className="flex items-center p-3 rounded-full bg-foreground/10">
+            <div className="flex items-center p-2 md:p-3 rounded-full bg-foreground/10">
               <stat.icon
                 className={`${stat.valueColor} `}
                 size={32}
@@ -262,7 +264,7 @@ const FluxDashboard = () => {
         {/* Right Column: Recent Activity Feed */}
         <div className="lg:col-span-1 bg-card rounded-xl p-6 shadow-lg border border-foreground/10">
           <h2 className="text-2xl font-bold mb-6">What is Flux?</h2>
-          <div className="space-y-6">
+          <div className="space-y-2 md:space-y-6">
             <p>
               Flux (⚡) is the definitive metric of your contribution to The
               Sphere. It tracks how much value you provide to the community. The

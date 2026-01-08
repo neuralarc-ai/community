@@ -7,7 +7,7 @@ export default function Footer() {
   const [isTermsOfUseOpen, setIsTermsOfUseOpen] = useState(false);
   const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState(false);
   return (
-    <footer className="fixed bottom-0 left-0 w-full z-50">
+    <footer className=" w-full">
       <TermsOfUseDialog
         open={isTermsOfUseOpen}
         onClose={() => setIsTermsOfUseOpen(false)}
@@ -18,9 +18,9 @@ export default function Footer() {
       />
 
       {/* Footer Text Section */}
-      <div className="bg-black py-6 px-4 sm:px-6">
+      <div className="bg-card m-2 py-6 px-4 sm:px-6 shadow rounded-lg">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-white text-sm">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-2 md:gap-4 text-muted-foreground text-sm">
             {/* Left - Terms of Use and Privacy Policy */}
             <div className="flex items-center gap-4 sm:gap-6">
               <button
@@ -38,7 +38,7 @@ export default function Footer() {
             </div>
 
             {/* Center - Copyright */}
-            <div className="text-center">
+            <div className="text-center ">
               © 2025 Sphere Community Portal. All rights reserved.
             </div>
 

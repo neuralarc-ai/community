@@ -57,7 +57,7 @@ export default function CreatePostDialog({
   }, [previews]);
 
   const handleFileSelect = (
-    e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>
+    e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLElement>
   ) => {
     const files = "dataTransfer" in e ? e.dataTransfer.files : e.target.files;
     if (!files) return;
@@ -110,7 +110,7 @@ export default function CreatePostDialog({
     setDragActive(false);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -184,17 +184,24 @@ export default function CreatePostDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl w-full p-0 bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-2xl border border-foreground/10 rounded-3xl shadow-2xl max-h-[90vh] flex flex-col ">
-        <DialogHeader className="px-8 pt-8 pb-4 flex-shrink-0">
-          <DialogTitle className="text-3xl font-bold text-yellow tracking-tight">
+      <DialogContent
+        className={cn(
+          "p-0 bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-2xl",
+          "border border-foreground/10 rounded-3xl shadow-2xl",
+          "max-h-[95vh] flex flex-col",
+          "w-[95vw] max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-4xl" // Responsive width
+        )}
+      >
+        <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 sm:px-8 sm:pt-8">
+          <DialogTitle className="text-2xl sm:text-3xl font-bold text-yellow tracking-tight">
             Create New Post
           </DialogTitle>
         </DialogHeader>
 
-        {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto px-8 pb-6 custom-scrollbar">
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6 sm:px-8 custom-scrollbar">
           <Card className="bg-transparent backdrop-blur-xl rounded-2xl overflow-hidden shadow-inner">
-            <CardContent className="p-8">
+            <CardContent className="p-6 sm:p-8">
               <form
                 onSubmit={handleSubmit}
                 onDragOver={handleDragOver}
@@ -208,7 +215,7 @@ export default function CreatePostDialog({
                   </div>
                 )}
 
-                {/* Drag & Drop + Image Previews */}
+                {/* Image Upload / Previews */}
                 <div
                   className={cn(
                     "relative border-2 border-dashed rounded-2xl transition-all duration-300",
@@ -224,13 +231,13 @@ export default function CreatePostDialog({
                       className="flex flex-col items-center justify-center py-12 cursor-pointer"
                     >
                       <ImageIcon
-                        className="w-16 h-16 text-yellow-500 mb-4"
+                        className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500 mb-4"
                         strokeWidth={1.5}
                       />
-                      <p className="text-lg font-medium text-yellow">
+                      <p className="text-base sm:text-lg font-medium text-yellow text-center px-4">
                         Drop images here or click to upload
                       </p>
-                      <p className="text-sm text-muted-foreground mt-2">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                         Up to 3 images (PNG, JPG, GIF)
                       </p>
                     </label>
@@ -238,10 +245,10 @@ export default function CreatePostDialog({
                     <div
                       className={cn(
                         "grid gap-4 p-4",
-                        previews.length === 1 && "grid-cols-1",
-                        previews.length === 2 && "grid-cols-2",
-                        previews.length === 3 && "grid-cols-2",
-                        previews.length === 3 && "[&>:last-child]:col-span-2"
+                        "grid-cols-1 sm:grid-cols-2",
+                        previews.length === 3 && "lg:grid-cols-3",
+                        previews.length === 3 &&
+                          "[&>:last-child]:col-span-1 sm:[&>:last-child]:col-span-2 lg:[&>:last-child]:col-span-1"
                       )}
                     >
                       {previews.map((preview, idx) => (
@@ -251,7 +258,7 @@ export default function CreatePostDialog({
                             "relative rounded-xl overflow-hidden shadow-lg aspect-video",
                             previews.length === 3 &&
                               idx === 2 &&
-                              "col-span-2 aspect-[2/1]"
+                              "sm:col-span-2 lg:col-span-1 aspect-[2/1] sm:aspect-video"
                           )}
                         >
                           <Image
@@ -287,7 +294,7 @@ export default function CreatePostDialog({
                 {/* Title */}
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
-                    <Type className="w-6 h-6 text-yellow-500" />
+                    <Type className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
                     Title
                   </label>
                   <input
@@ -295,14 +302,14 @@ export default function CreatePostDialog({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Give your post a catchy title..."
-                    className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-yellow text-lg placeholder:text-yellow/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground text-base sm:text-lg placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
                   />
                 </div>
 
                 {/* Body */}
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
-                    <AlignLeft className="w-6 h-6 text-yellow-500" />
+                    <AlignLeft className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
                     Content
                   </label>
                   <textarea
@@ -310,14 +317,14 @@ export default function CreatePostDialog({
                     onChange={(e) => setBody(e.target.value)}
                     rows={6}
                     placeholder="Share your thoughts..."
-                    className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-yellow placeholder:text-yellow/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent resize-none transition-all leading-relaxed"
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none transition-all leading-relaxed text-base"
                   />
                 </div>
 
                 {/* Tags */}
                 <div className="space-y-3">
                   <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
-                    <Tag className="w-6 h-6 text-yellow-500" />
+                    <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
                     Tags{" "}
                     <span className="lowercase font-normal text-yellow/50">
                       (optional)
@@ -328,34 +335,33 @@ export default function CreatePostDialog({
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="e.g. tech, design, feedback"
-                    className="w-full px-5 py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-yellow placeholder:text-yellow/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all text-base"
                   />
                   <p className="text-xs text-yellow/50 ml-1">
                     Separate with commas
                   </p>
                 </div>
 
-                {/* Actions - always visible at bottom */}
-                <div className="flex items-center justify-between pt-6 border-t border-foreground/10">
-                  <div className="flex items-center gap-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-foreground/20 hover:bg-foreground/10"
-                    >
-                      <ImageIcon className="w-5 h-5 mr-2" />
-                      Add Images ({selectedFiles.length}/3)
-                    </Button>
-                  </div>
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-foreground/10">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full sm:w-auto border-foreground/20 hover:bg-foreground/10"
+                  >
+                    <ImageIcon className="w-5 h-5 mr-2" />
+                    Add Images ({selectedFiles.length}/3)
+                  </Button>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
                     <Button
                       type="button"
                       variant="ghost"
                       size="lg"
                       onClick={onClose}
+                      className="flex-1 sm:flex-initial"
                     >
                       Cancel
                     </Button>
@@ -368,7 +374,7 @@ export default function CreatePostDialog({
                           !body.trim() &&
                           selectedFiles.length === 0)
                       }
-                      className="bg-yellow-500 hover:bg-yellow-400  text-background font-semibold px-8 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all"
+                      className="flex-1 sm:flex-initial bg-yellow-500 hover:bg-yellow-400 text-background font-semibold px-8 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all"
                     >
                       {loading ? (
                         <>Posting...</>

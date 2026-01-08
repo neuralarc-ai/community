@@ -293,10 +293,10 @@ function PostsContent() {
   }
 
   return (
-    <div className="container max-w-3xl mx-auto py-8 px-6 space-y-12">
+    <div className="container max-w-4xl mx-auto md:py-8 md:px-6 space-y-4 md:space-y-6">
       {/* Create Post Input & Filter Bar */}
-      <Card className="mb-6 shadow-sm  bg-card/50 backdrop-blur-sm px-4 py-2 sm:p-2 hover:border-yellow-500/50  transition-all group">
-        <div className="flex items-center space-x-2 p-2">
+      <Card className="mb-6 shadow-sm  bg-card/50 backdrop-blur-sm  rounded-2xl hover:border-yellow-500/50 transition-all group">
+        <div className="flex items-center gap-2 p-2">
           <div className="flex-shrink-0">
             <Avatar
               src={currentUserProfile?.avatar_url}
@@ -329,32 +329,32 @@ function PostsContent() {
       />
 
       {/* Posts List */}
-        {filteredPosts.length === 0 && !loading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg">
-              {selectedTag
-                ? `No posts found with tag "${selectedTag}"`
-                : "No posts yet. Be the first to start a discussion!"}
-            </p>
+      {filteredPosts.length === 0 && !loading ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground text-lg">
+            {selectedTag
+              ? `No posts found with tag "${selectedTag}"`
+              : "No posts yet. Be the first to start a discussion!"}
+          </p>
+        </div>
+      ) : (
+        filteredPosts.map((post) => (
+          <div key={post.id} className="w-full">
+            <PostItem
+              post={post}
+              userVote={(post as any).user_vote || 0}
+              onVoteChange={handleVoteChange}
+              commentCount={post.comment_count || 0}
+              currentUserId={currentUserProfile?.id}
+              isAdmin={currentUserProfile?.role === "admin"}
+              onDelete={handleDeletePost}
+              isSaved={savedPostIds.has(post.id)}
+              onToggleSave={handleToggleSave}
+              onTogglePin={handleTogglePin}
+            />
           </div>
-        ) : (
-          filteredPosts.map((post) => (
-            <div key={post.id} className="w-full">
-              <PostItem
-                post={post}
-                userVote={(post as any).user_vote || 0}
-                onVoteChange={handleVoteChange}
-                commentCount={post.comment_count || 0}
-                currentUserId={currentUserProfile?.id}
-                isAdmin={currentUserProfile?.role === "admin"}
-                onDelete={handleDeletePost}
-                isSaved={savedPostIds.has(post.id)}
-                onToggleSave={handleToggleSave}
-                onTogglePin={handleTogglePin}
-              />
-            </div>
-          ))
-        )}
+        ))
+      )}
     </div>
   );
 }

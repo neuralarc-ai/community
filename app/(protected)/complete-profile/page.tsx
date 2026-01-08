@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/app/lib/supabaseClient'
 import { createProfile, getCurrentUserProfile } from '@/app/lib/getProfile'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { createClient } from '@/app/lib/supabaseClient'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { User, AtSign, CalendarDays, ArrowRight } from 'lucide-react' // Added icons
+import { ArrowRight, AtSign, CalendarDays, User } from 'lucide-react'; // Added icons
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export default function CompleteProfilePage() {
   const [formData, setFormData] = useState({

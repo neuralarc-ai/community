@@ -147,8 +147,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           userId={userId}
           userRole={userRole}
           onEndLive={handleEndLive}
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={toggleSidebar}
+          defaultSidebarOpen={isSidebarOpen}
           roomName={`conclave-${id}`}
         />
       </div>

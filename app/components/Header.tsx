@@ -4,8 +4,16 @@ import { getCurrentUserProfile } from "@/app/lib/getProfile";
 import { createClient } from "@/app/lib/supabaseClient";
 import { Profile } from "@/app/types";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useMediaQuery } from "@/lib/utils";
-import { Bell, LogOut, Menu, Moon, Search, Sun } from "lucide-react";
+import { Bell, LogOut, Menu, Moon, Search, Sun, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,23 +28,21 @@ interface HeaderProps {
 export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [supabase] = useState(() => createClient()); // Create once
-  const [theme, setTheme] = useState<"light" | "dark">("light"); // Default fallback
+  const [supabase] = useState(() => createClient());
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [search, setSearch] = useState("");
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  // Initialize theme on mount (localStorage + system preference)
+  // Theme setup
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-
     if (savedTheme) {
       setTheme(savedTheme);
       document.body.setAttribute("data-theme", savedTheme);
     } else {
-      // No saved theme → use system preference
       const prefersDark = window.matchMedia(
         "(prefers-color-scheme: dark)"
       ).matches;
@@ -46,19 +52,15 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
     }
   }, []);
 
-  // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
     const handleChange = () => {
       if (!localStorage.getItem("theme")) {
-        // Only react if user hasn't manually chosen a theme
         const newTheme = mediaQuery.matches ? "dark" : "light";
         setTheme(newTheme);
         document.body.setAttribute("data-theme", newTheme);
       }
     };
-
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
@@ -91,8 +93,7 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const query = search.trim();
-
-    let basePath = "/posts"; // default
+    let basePath = "/posts";
     if (pathname.startsWith("/posts")) basePath = "/posts";
     else if (pathname.startsWith("/workshops")) basePath = "/workshops";
     else if (pathname.startsWith("/meetings")) basePath = "/meetings";
@@ -133,7 +134,7 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
                 fill
                 sizes="(max-width: 640px) 28px, 32px"
                 className="object-contain"
-                priority // Important for header logo
+                priority
               />
             </div>
             <span className="text-lg sm:text-xl font-bold font-heading text-foreground tracking-tight hidden md:block">
@@ -162,56 +163,78 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
           </div>
         </form>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-4 min-w-max">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-foreground/5"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="hover:bg-foreground/5"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-            </Button>
-          </div>
-
-          <div className="h-6 w-px bg-foreground/10 mx-1" />
-
+        {/* Right: Actions + Theme Toggle + Avatar Dropdown */}
+        <div className="flex items-center gap-3">
           {loadingProfile ? (
-            <div className="w-24 h-8 bg-foreground/5 rounded-md animate-pulse" />
+            <div className="w-10 h-10 rounded-full bg-foreground/10 animate-pulse" />
           ) : profile ? (
-            <div className="flex items-center gap-3">
-              <Link href={`/profile/${profile.id}`} className="group">
-                <Avatar
-                  src={profile.avatar_url}
-                  alt={profile.full_name || "User"}
-                  size={32}
-                  className="ring-2 ring-transparent group-hover:ring-foreground/20 transition-all"
-                />
-              </Link>
+            <>
+              {/* Theme Toggle - Now outside dropdown */}
               <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                onClick={handleLogout}
-                className="text-muted-foreground hover:text-foreground hover:bg-foreground/5"
-                aria-label="Log out"
+                onClick={toggleTheme}
+                className="hover:bg-foreground/5 text-foreground border-foreground/20"
+                aria-label="Toggle theme"
               >
-                <LogOut size={18} />
+                {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
               </Button>
-            </div>
+
+              {/* User Avatar Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-10 w-10 rounded-full p-0 hover:bg-foreground/5"
+                  >
+                    <Avatar
+                      src={profile.avatar_url}
+                      alt={profile.full_name || "User"}
+                      size={40}
+                      className="ring-2 ring-transparent hover:ring-foreground/20 transition-all"
+                    />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {profile.full_name || "User"}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        @{profile.username || profile.id}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/profile/${profile.id}`}
+                      className="flex items-center"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center">
+                    <Bell className="mr-2 h-4 w-4" />
+                    <span>Notifications</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-destructive focus:text-destructive flex items-center"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           ) : (
             <Button
               onClick={() => router.push("/login")}
-              className="bg-foreground text-black hover:bg-foreground/90"
+              className="bg-foreground text-background hover:bg-foreground/90"
             >
               Log In
             </Button>

@@ -92,8 +92,8 @@ function WorkshopsContent() {
   }
 
   return (
-    <div className="container max-w-[1400px] py-8 mx-auto px-6 space-y-12">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="md:p-4 container max-w-[1400px]  mx-auto px-2 md:px-6 space-y-12">
+      <div className="flex  flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
             Conclave
@@ -119,7 +119,7 @@ function WorkshopsContent() {
       </div>
 
       {/* Workshops Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {workshops.map((workshop) => (
           <WorkshopCard
             key={workshop.id}

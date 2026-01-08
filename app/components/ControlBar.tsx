@@ -1,19 +1,21 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { useRoleManager } from '@/hooks/useRoleManager'
 import {
   useLocalParticipant,
   useRemoteParticipants,
   useRoomContext,
 } from '@livekit/components-react'
-import { RemoteParticipant } from 'livekit-client'
 import {
-  Mic, MicOff, Video, VideoOff, Hand, MonitorUp, UserPlus, MessageSquare, PhoneOff,
-  LogOut
+  Hand,
+  LogOut,
+  Mic, MicOff,
+  MonitorUp, UserPlus,
+  Video, VideoOff
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useRoleManager } from '@/hooks/useRoleManager';
+import { useRouter } from 'next/navigation'
+import { useMemo } from 'react'
 import { toast } from 'sonner'
 
 interface ControlBarProps {

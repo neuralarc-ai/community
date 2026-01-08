@@ -233,9 +233,6 @@ export const ParticipantList: React.FC<ParticipantListProps> = ({
                       src={profile?.avatar_url || ""}
                       alt={getDisplayName(participant)}
                       size={40}
-                      fallback={
-                        getDisplayName(participant)[0]?.toUpperCase() || "?"
-                      }
                     />
                     {isSpeaking && (
                       <div className="absolute inset-0 rounded-full ring-2 ring-green-500 animate-pulse" />

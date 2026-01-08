@@ -109,7 +109,9 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({
 
     const handleConnect = (p: any) => fetchProfile(p.identity);
     room?.on("participantConnected", handleConnect);
-    return () => room?.off("participantConnected", handleConnect);
+    return () => {
+      room?.off("participantConnected", handleConnect);
+    };
   }, [localParticipant?.identity, room]);
 
   // Load history + realtime
@@ -157,7 +159,9 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({
       )
       .subscribe();
 
-    return () => supabase.removeChannel(channel);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [workshopId]);
 
   const scrollToBottom = useCallback(() => {
@@ -278,12 +282,11 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({
                   src={profile?.avatar_url}
                   alt={msg.user_name}
                   size={32}
-                  fallback={msg.user_name[0]?.toUpperCase()}
                   className="mt-1 flex-shrink-0"
                 />
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2 flex-wrap">
+                  <div className="flex items-baseline gap-2">
                     <span
                       className={cn(
                         "font-semibold text-sm flex items-center gap-2",
@@ -293,7 +296,7 @@ export const ConclaveChat: React.FC<ConclaveChatProps> = ({
                       {msg.user_name}
                       {isMe && <Badge variant="secondary" >You</Badge>}
                     </span>
-                    <span className="text-xs text-neutral-500">
+                    <span className="text-xs text-neutral-500 whitespace-nowrap">
                       {formatTime(msg.created_at)}
                     </span>
                   </div>
