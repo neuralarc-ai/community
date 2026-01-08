@@ -32,7 +32,7 @@ export default function WorkshopLivePage({ params }: { params: Promise<{ id: str
       return true
     } catch (error) {
       console.error('Error ending workshop:', error)
-      alert('Failed to end workshop. Please try again.')
+      toast.error('Failed to end workshop. Please try again.')
       return false
     }
   }

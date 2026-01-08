@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabaseClient'
 import ConclaveRoom from '@/components/conclave/ConclaveRoom'
-import { cn } from '@/lib/utils'
+import { Toaster } from '@/components/ui/sonner'
 import { ChevronLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { use, useEffect, useState } from 'react'
 
 export default function ConclavePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -99,9 +99,9 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-zinc-950 text-white">
+      <div className="flex flex-col items-center justify-center h-screen bg-zinc-950 text-foreground">
         <div className="relative w-16 h-16 mb-6">
-          <div className="absolute inset-0 border-4 border-white/10 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-foreground/10 rounded-full"></div>
           <div className="absolute inset-0 border-4 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
         </div>
         <h1 className="text-xl font-bold tracking-tight">Entering Conclave</h1>
@@ -112,26 +112,26 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
 
   if (!workshop || !token || !serverUrl || !userId) {
     return (
-      <div className="flex items-center justify-center h-screen bg-zinc-950 text-white">
+      <div className="flex items-center justify-center h-screen bg-zinc-950 text-foreground">
         <p className="text-zinc-500">Failed to join session. Please try again.</p>
       </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-black overflow-hidden flex flex-col">
+    <main className="min-h-screen  overflow-hidden flex flex-col">
       <div className="p-4 flex-1">
         {/* Header Area */}
         <div className="mb-6 flex items-center justify-between px-2">
           <div className="flex items-center gap-4">
-            <button onClick={() => router.back()} className="text-white hover:text-zinc-400 transition-colors">
+            <button onClick={() => router.back()} className="text-foreground hover:text-muted-foreground transition-colors">
               <ChevronLeft size={24} />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-white">{workshop.title}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{workshop.title}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <span className="flex h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
-                <span className="text-xs text-zinc-400 uppercase tracking-widest font-bold">
+                <span className="text-xs text-muted-foreground uppercase tracking-widest font-bold">
                   Live {workshop.type} Conclave
                 </span>
               </div>
@@ -152,6 +152,7 @@ export default function ConclavePage({ params }: { params: Promise<{ id: string 
           roomName={`conclave-${id}`}
         />
       </div>
+      <Toaster position='top-center'/>
     </main>
   )
 }

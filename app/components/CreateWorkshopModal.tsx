@@ -16,6 +16,7 @@ import { Label } from "@/app/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/app/components/ui/radio-group";
 import { createClient } from "@/app/lib/supabaseClient";
 import GoLiveConfirmationModal from "./GoLiveConfirmationModal";
+import { toast } from "sonner";
 
 interface CreateWorkshopModalProps {
   onWorkshopCreated: () => void;
@@ -66,7 +67,7 @@ export default function CreateWorkshopModal({
       } else {
         // Schedule for later
         if (!scheduledDate || !scheduledTime) {
-          alert("Please select date and time for scheduled meeting");
+          toast.error("Please select date and time for scheduled meeting");
           setLoading(false);
           return;
         }
@@ -113,7 +114,7 @@ export default function CreateWorkshopModal({
       }
     } catch (error) {
       console.error("Error creating workshop:", error);
-      alert("Failed to create workshop. Please try again.");
+      toast.error("Failed to create workshop. Please try again.");
     } finally {
       setLoading(false);
     }

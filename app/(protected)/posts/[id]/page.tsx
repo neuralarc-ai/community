@@ -11,6 +11,7 @@ import { Post, Profile } from "@/app/types";
 import Avatar from "@/app/components/Avatar";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { getCurrentUserProfile } from "@/app/lib/getProfile";
+import { toast } from "sonner";
 
 export default function PostDetailPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -107,7 +108,7 @@ export default function PostDetailPage() {
       else throw new Error("Delete failed");
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("Failed to delete post");
+      toast.error("Failed to delete post");
     }
   };
 

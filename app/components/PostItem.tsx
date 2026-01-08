@@ -194,7 +194,7 @@ const renderImages = (imageUrls: string[]) => {
 
         
         {showNavigation && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-full text-xs text-white">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-full text-xs text-foreground">
             <span className="font-medium">
               {currentImageIndex + 1} / {imageUrls.length}
             </span>
@@ -232,8 +232,8 @@ const renderImages = (imageUrls: string[]) => {
               onClick={() => setCurrentImageIndex(index)}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 index === currentImageIndex
-                  ? "bg-white w-8"
-                  : "bg-white/40 hover:bg-white/70"
+                  ? "bg-foreground w-8"
+                  : "bg-foreground/40 hover:bg-foreground/70"
               }`}
               aria-label={`Go to image ${index + 1}`}
             />

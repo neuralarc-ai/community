@@ -15,6 +15,7 @@ import { getCurrentUserProfile } from "@/app/lib/getProfile";
 import { Profile } from "@/app/types";
 import FilterSection from "@/app/components/FilterSection";
 import CreatePostDialog from "@/app/components/CreatePostDialog";
+import { toast } from "sonner";
 
 function PostsContent() {
   const router = useRouter();
@@ -184,13 +185,13 @@ function PostsContent() {
         }
         return newSet;
       });
-      alert("Failed to update saved status");
+      toast.error("Failed to update saved status");
     }
   };
 
   const handleTogglePin = async (postId: string, isPinned: boolean) => {
     if (currentUserProfile?.role !== "admin") {
-      alert("You do not have permission to pin posts.");
+      toast.error("You do not have permission to pin posts.");
       return;
     }
 
@@ -239,7 +240,7 @@ function PostsContent() {
       // will handle the UI immediately.
     } catch (error) {
       console.error("Error toggling pin:", error);
-      alert("Failed to update pin status.");
+      toast.error("Failed to update pin status.");
     }
   };
 
@@ -267,11 +268,11 @@ function PostsContent() {
         );
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to delete post");
+        toast.error(error.error || "Failed to delete post");
       }
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("Failed to delete post");
+      toast.error("Failed to delete post");
     }
   };
 
