@@ -146,7 +146,7 @@ export default function WorkshopCard({
             {formatDateTimeLocal(workshop.start_time)}
           </div>
           <div className="flex items-center gap-2">
-            <div className="px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-widest text-teal-500 border border-teal-500">
+            <div className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-widest text-teal-500 border bg-teal-500/10 border-teal-500">
               {workshop.type}
             </div>
             <div
@@ -157,7 +157,7 @@ export default function WorkshopCard({
                     ? "bg-red-500 text-white animate-pulse"
                     : isEnded
                       ? "bg-foreground/20 text-foreground border border-zinc-700"
-                      : "bg-blue-500 text-foreground"
+                      : "bg-blue-500 text-white"
                 }
               `}
             >
@@ -271,7 +271,7 @@ export default function WorkshopCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 text-[11px]"
+                  className="h-9 text-[11px] border-teal-700/30 hover:bg-foreground/10"
                   onClick={() => window.open(google(event), "_blank")}
                 >
                   <CalendarPlus size={14} className="mr-1" /> Google
@@ -279,7 +279,7 @@ export default function WorkshopCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 text-[11px]"
+                  className="h-9 text-[11px] border-teal-700/30 hover:bg-foreground/10"
                   onClick={() => window.open(outlook(event), "_blank")}
                 >
                   <MailOpen size={14} /> Outlook
@@ -293,12 +293,12 @@ export default function WorkshopCard({
             <div className="space-y-3">
               <div className="grid grid-cols-1 gap-3">
                 {isScheduled && (
-                  <Button className="w-full bg-teal-700 hover:bg-teal-700/90 shadow-lg shadow-teal-700/20">
+                  <Button className="w-full bg-teal-700 hover:bg-teal-800 shadow-lg shadow-teal-700/20">
                     <Play className="mr-2" /> Start Conclave
                   </Button>
                 )}
                 {isLive && (
-                  <Button asChild className="w-full bg-teal-700">
+                  <Button asChild className="w-full bg-teal-700 hover:bg-teal-800">
                     <a href={`/conclave/${workshop.id}`}>
                       <Video className="mr-2 w-6 h-6" /> Join as Host
                     </a>
@@ -320,7 +320,7 @@ export default function WorkshopCard({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline">
+                <Button variant="secondary">
                   <Archive size={14} className="mr-1" />{" "}
                   {workshop.is_archived ? "Unarchive" : "Archive"}
                 </Button>
@@ -331,7 +331,7 @@ export default function WorkshopCard({
             </div>
           ) : (
             <Button
-              className="w-full h-12 text-base font-sora"
+              className="w-full text-base font-sora bg-teal-700 hover:bg-teal-800"
               variant={isLive ? "default" : "secondary"}
               asChild={isLive || (isEnded && !!workshop.recording_url)}
               disabled={isScheduled || (isEnded && !workshop.recording_url)}

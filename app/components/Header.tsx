@@ -13,11 +13,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useMediaQuery } from "@/lib/utils";
-import { Bell, LogOut, Menu, Moon, Search, Sun, User } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
+  Moon,
+  Search,
+  Sun,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Avatar from "./Avatar";
 
 interface HeaderProps {
@@ -34,6 +43,10 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [search, setSearch] = useState("");
+  const [tagSuggestions, setTagSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   // Theme setup
@@ -78,6 +91,50 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
       });
   }, []);
 
+  // Tag suggestions effect
+  useEffect(() => {
+    const fetchTagSuggestions = async () => {
+      if (search.length > 0) {
+        try {
+          const response = await fetch(
+            `/api/tags?q=${encodeURIComponent(search)}&limit=5`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setTagSuggestions(data.tags || []);
+            setShowSuggestions(true);
+          }
+        } catch (error) {
+          console.error("Failed to fetch tag suggestions:", error);
+          setTagSuggestions([]);
+        }
+      } else {
+        setTagSuggestions([]);
+        setShowSuggestions(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchTagSuggestions, 150);
+    return () => clearTimeout(debounceTimer);
+  }, [search]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node) &&
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
@@ -90,9 +147,24 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
     router.push("/login");
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const handleTagSelect = (tag: string) => {
+    setSearch(tag);
+    setShowSuggestions(false);
+    // Auto-submit the search
+    handleSearchWithTag(tag);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = search.trim();
+    handleSearchWithTag(search);
+  };
+
+  const handleSearchWithTag = (searchQuery: string) => {
+    const query = searchQuery.trim();
     let basePath = "/posts";
     if (pathname.startsWith("/posts")) basePath = "/posts";
     else if (pathname.startsWith("/workshops")) basePath = "/workshops";
@@ -146,21 +218,48 @@ export default function Header({ onMenuClick, headerHeight }: HeaderProps) {
         {/* Center: Search */}
         <form
           onSubmit={handleSearch}
-          className="flex-1 mx-2 sm:mx-4 md:mx-4 lg:mx-8 lg:max-w-4xl"
+          className="flex-1 mx-2 sm:mx-4 md:mx-4 lg:mx-8 lg:max-w-4xl relative"
         >
           <div className="relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
             </div>
             <input
+              ref={searchRef}
               type="search"
-              className="block w-full pl-10 pr-3 py-2 bg-foreground/5 border border-foreground/5 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 focus:border-foreground/10 transition-all"
-              placeholder="Search..."
+              className="block w-full pl-10 pr-10 py-2 bg-foreground/5 border border-foreground/5 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 focus:border-foreground/10 transition-all"
+              placeholder="Search tags..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search"
+              onChange={handleInputChange}
+              onFocus={() => search.length > 0 && setShowSuggestions(true)}
+              aria-label="Search tags"
             />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            </div>
           </div>
+
+          {/* Tag Suggestions Dropdown */}
+          {showSuggestions && tagSuggestions.length > 0 && (
+            <div
+              ref={suggestionsRef}
+              className="absolute top-full left-0 right-0 mt-1 bg-card border border-foreground/10 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+            >
+              {tagSuggestions.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => handleTagSelect(tag)}
+                  className="w-full px-4 py-2 text-left text-foreground text-sm hover:bg-foreground/5 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">#</span>
+                    <span>{tag}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </form>
 
         {/* Right: Actions + Theme Toggle + Avatar Dropdown */}

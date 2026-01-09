@@ -1,39 +1,26 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import PostList from "@/app/components/PostList";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import PostItem from "@/app/components/PostItem";
-import CommentTree from "@/app/components/CommentTree";
-import { Post, Comment } from "@/app/types";
-import { Plus, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
-import Link from "next/link";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Card, CardContent } from "@/app/components/ui/card";
+import { Post } from "@/app/types";
+import { useSearchParams } from "next/navigation";
+import { Card } from "@/app/components/ui/card";
 import Avatar from "@/app/components/Avatar";
 import { createClient } from "@/app/lib/supabaseClient";
 import { getCurrentUserProfile } from "@/app/lib/getProfile";
 import { Profile } from "@/app/types";
-import FilterSection from "@/app/components/FilterSection";
 import CreatePostDialog from "@/app/components/CreatePostDialog";
 import { toast } from "sonner";
 
 function PostsContent() {
-  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentUserProfile, setCurrentUserProfile] = useState<Profile | null>(
     null
   );
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [savedPostIds, setSavedPostIds] = useState<Set<string>>(new Set());
   const [isCreatePostDialogOpen, setIsCreatePostDialogOpen] = useState(false);
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    fetchPosts();
-    fetchUserProfile();
-    fetchSavedPosts();
-  }, [searchParams]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -65,16 +52,16 @@ function PostsContent() {
     };
   }, []);
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       const profile = await getCurrentUserProfile();
       setCurrentUserProfile(profile);
     } catch (error) {
       console.error("Error fetching profile:", error);
     }
-  };
+  }, []);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
       const searchQuery = searchParams.get("search");
@@ -116,9 +103,9 @@ function PostsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchParams]);
 
-  const fetchSavedPosts = async () => {
+  const fetchSavedPosts = useCallback(async () => {
     try {
       // Use the new endpoint we created to get saved posts
       // Or we can create a lightweight endpoint just for IDs if performance is a concern
@@ -131,7 +118,7 @@ function PostsContent() {
     } catch (error) {
       console.error("Failed to fetch saved posts:", error);
     }
-  };
+  }, []);
 
   const handleToggleSave = async (postId: string) => {
     // Optimistic update
@@ -189,6 +176,12 @@ function PostsContent() {
     }
   };
 
+  useEffect(() => {
+    fetchPosts();
+    fetchUserProfile();
+    fetchSavedPosts();
+  }, [searchParams, fetchPosts, fetchUserProfile, fetchSavedPosts]);
+
   const handleTogglePin = async (postId: string, isPinned: boolean) => {
     if (currentUserProfile?.role !== "admin") {
       toast.error("You do not have permission to pin posts.");
@@ -207,7 +200,7 @@ function PostsContent() {
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           // If parsing fails, try to get the raw response text
           try {
             const rawResponse = await response.text();
@@ -251,7 +244,9 @@ function PostsContent() {
   ) => {
     setPosts((currentPosts) =>
       currentPosts.map((post) =>
-        post.id === postId ? { ...post, vote_score: newScore } : post
+        post.id === postId
+          ? { ...post, vote_score: newScore, user_vote: newUserVote }
+          : post
       )
     );
   };
@@ -276,13 +271,7 @@ function PostsContent() {
     }
   };
 
-  const allTags = Array.from(
-    new Set(posts.flatMap((post) => post.tags || []))
-  ).sort();
-
-  const filteredPosts = selectedTag
-    ? posts.filter((post) => post.tags?.includes(selectedTag))
-    : posts;
+  const filteredPosts = posts;
 
   if (loading) {
     return (
@@ -313,15 +302,6 @@ function PostsContent() {
         </div>
       </Card>
 
-      {/* Filter Section */}
-      <FilterSection
-        tags={allTags}
-        selectedTag={selectedTag}
-        onSelectTag={setSelectedTag}
-        activeColor="bg-yellow-500/20 text-yellow-500 shadow-sm border border-yellow-500/30"
-        hoverColor="hover:bg-yellow-500/5 hover:text-foreground"
-      />
-
       <CreatePostDialog
         isOpen={isCreatePostDialogOpen}
         onClose={() => setIsCreatePostDialogOpen(false)}
@@ -332,9 +312,7 @@ function PostsContent() {
       {filteredPosts.length === 0 && !loading ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground text-lg">
-            {selectedTag
-              ? `No posts found with tag "${selectedTag}"`
-              : "No posts yet. Be the first to start a discussion!"}
+            No posts yet. Be the first to start a discussion!
           </p>
         </div>
       ) : (
@@ -342,7 +320,7 @@ function PostsContent() {
           <div key={post.id} className="w-full">
             <PostItem
               post={post}
-              userVote={(post as any).user_vote || 0}
+              userVote={post.user_vote || 0}
               onVoteChange={handleVoteChange}
               commentCount={post.comment_count || 0}
               currentUserId={currentUserProfile?.id}
