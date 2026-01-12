@@ -10,6 +10,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const searchQuery = searchParams.get('search')
   const showArchived = searchParams.get('showArchived') === 'true'
+  const typeFilter = searchParams.get('type') // 'AUDIO' or 'VIDEO'
+  const statusFilter = searchParams.get('status') // 'LIVE', 'ENDED', or 'SCHEDULED'
 
   try {
     const supabase = await createServerClient()
@@ -27,6 +29,14 @@ export async function GET(request: NextRequest) {
 
     if (searchQuery) {
       query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+    }
+
+    if (typeFilter && ['AUDIO', 'VIDEO'].includes(typeFilter)) {
+      query = query.eq('type', typeFilter)
+    }
+
+    if (statusFilter && ['LIVE', 'ENDED', 'SCHEDULED'].includes(statusFilter)) {
+      query = query.eq('status', statusFilter)
     }
 
     const { data: workshops, error: fetchError } = await query

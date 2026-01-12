@@ -1,26 +1,14 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { Plus } from "lucide-react";
+import { useState, useEffect, Suspense, useCallback } from "react";
+import { Video, Mic, Clock, PlayCircle, Calendar, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CreateWorkshopModal from "@/app/components/CreateWorkshopModal";
 import WorkshopCard from "@/app/components/WorkshopCard";
 import { createClient } from "@/app/lib/supabaseClient";
 import { useSearchParams } from "next/navigation";
 import { getCurrentUserProfile } from "@/app/lib/getProfile";
-import { Profile } from "@/app/types";
-
-interface Workshop {
-  id: string;
-  title: string;
-  description: string;
-  start_time: string;
-  status: "SCHEDULED" | "LIVE" | "ENDED";
-  recording_url?: string;
-  host_id: string;
-  ended_at?: string;
-  is_archived?: boolean;
-}
+import { Profile, Workshop } from "@/app/types";
 
 function WorkshopsContent() {
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
@@ -28,25 +16,16 @@ function WorkshopsContent() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<Profile["role"] | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<"AUDIO" | "VIDEO" | "ALL">(
+    "ALL"
+  );
+  const [statusFilter, setStatusFilter] = useState<
+    "LIVE" | "ENDED" | "SCHEDULED" | "ALL"
+  >("ALL");
   const supabase = createClient();
   const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const getSessionAndProfile = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-      if (user) {
-        const profile = await getCurrentUserProfile();
-        setUserRole(profile?.role || null);
-      }
-    };
-    getSessionAndProfile();
-    fetchWorkshops();
-  }, [searchParams, showArchived]);
-
-  const fetchWorkshops = async () => {
+  const fetchWorkshops = useCallback(async () => {
     try {
       const searchQuery = searchParams.get("search");
       let url = "/api/workshops";
@@ -56,6 +35,12 @@ function WorkshopsContent() {
       }
       if (showArchived) {
         params.append("showArchived", "true");
+      }
+      if (typeFilter !== "ALL") {
+        params.append("type", typeFilter);
+      }
+      if (statusFilter !== "ALL") {
+        params.append("status", statusFilter);
       }
       if (params.toString()) {
         url = `${url}?${params.toString()}`;
@@ -77,10 +62,35 @@ function WorkshopsContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchParams, showArchived, typeFilter, statusFilter]);
+
+  useEffect(() => {
+    const getSessionAndProfile = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+      if (user) {
+        const profile = await getCurrentUserProfile();
+        setUserRole(profile?.role || null);
+      }
+    };
+    getSessionAndProfile();
+    fetchWorkshops();
+  }, [fetchWorkshops, supabase.auth]);
 
   const handleToggleShowArchived = () => {
     setShowArchived((prev) => !prev);
+  };
+
+  const handleTypeFilterChange = (type: "AUDIO" | "VIDEO" | "ALL") => {
+    setTypeFilter(type);
+  };
+
+  const handleStatusFilterChange = (
+    status: "LIVE" | "ENDED" | "SCHEDULED" | "ALL"
+  ) => {
+    setStatusFilter(status);
   };
 
   if (loading) {
@@ -92,8 +102,8 @@ function WorkshopsContent() {
   }
 
   return (
-    <div className="md:p-4 container max-w-[1400px]  mx-auto px-2 md:px-6 space-y-12">
-      <div className="flex  flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="md:p-4 container max-w-[1400px] mx-auto px-2 md:px-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
             Conclave
@@ -107,7 +117,7 @@ function WorkshopsContent() {
             <Button
               variant="outline"
               onClick={handleToggleShowArchived}
-              className=" border-teal-600 text-teal-600 hover:bg-teal-600/20"
+              className="border-teal-600 text-teal-600 hover:bg-teal-600/20"
             >
               {showArchived ? "Hide Archived" : "Show Archived"}
             </Button>
@@ -118,12 +128,159 @@ function WorkshopsContent() {
         </div>
       </div>
 
+    
+      <div className="space-y-3">
+        {/* Active filters summary (chips) */}
+        {(typeFilter !== "ALL" || statusFilter !== "ALL") && (
+          <div className="text-sm text-muted-foreground flex items-center gap-2 flex-wrap">
+            <span>Active filters:</span>
+            <div className="flex flex-wrap gap-2">
+              {typeFilter !== "ALL" && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-700 text-xs border border-teal-700/50">
+                  {typeFilter === "VIDEO" ? (
+                    <Video size={13} />
+                  ) : (
+                    <Mic size={13} />
+                  )}
+                  {typeFilter.toLowerCase()}
+                </div>
+              )}
+              {statusFilter !== "ALL" && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/10 text-teal-700 text-xs border border-teal-700/50">
+                  {statusFilter === "LIVE" ? (
+                    <PlayCircle size={13} />
+                  ) : statusFilter === "SCHEDULED" ? (
+                    <Calendar size={13} />
+                  ) : (
+                    <Clock size={13} />
+                  )}
+                  {statusFilter}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Unified filter bar */}
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 overflow-x-auto pb-1 scrollbar-thin">
+          {/* Type group */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs font-medium text-muted-foreground/80">
+              Type:
+            </span>
+            <div className="flex bg-muted/40 rounded-md p-0.5 border border-border/50">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleTypeFilterChange("ALL")}
+                className={`h-7 min-w-[52px] px-2.5 text-xs rounded-sm transition-all ${
+                  typeFilter === "ALL"
+                    ? "bg-background shadow-sm border"
+                    : "hover:bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                All
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleTypeFilterChange("VIDEO")}
+                className={`h-7 min-w-[68px] px-2.5 text-xs rounded-sm flex items-center gap-1 transition-all ${
+                  typeFilter === "VIDEO"
+                    ? "bg-background shadow-sm border text-teal-700"
+                    : "hover:bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                <Video size={13} />
+                Video
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleTypeFilterChange("AUDIO")}
+                className={`h-7 min-w-[68px] px-2.5 text-xs rounded-sm flex items-center gap-1 transition-all ${
+                  typeFilter === "AUDIO"
+                    ? "bg-background shadow-sm border text-teal-700"
+                    : "hover:bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                <Mic size={13} />
+                Audio
+              </Button>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="hidden sm:block h-5 w-px bg-border/60 mx-1" />
+
+          {/* Status group */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs font-medium text-muted-foreground/80">
+              Status:
+            </span>
+            <div className="flex bg-muted/40 rounded-md p-0.5 border border-border/50">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleStatusFilterChange("ALL")}
+                className={`h-7 min-w-[52px] px-2.5 text-xs rounded-sm transition-all ${
+                  statusFilter === "ALL"
+                    ? "bg-background shadow-sm border"
+                    : "hover:bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                All
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleStatusFilterChange("SCHEDULED")}
+                className={`h-7 min-w-[78px] px-2.5 text-xs rounded-sm flex items-center gap-1 transition-all ${
+                  statusFilter === "SCHEDULED"
+                    ? "bg-background shadow-sm border text-teal-700"
+                    : "hover:bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                <Calendar size={13} />
+                Scheduled
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleStatusFilterChange("LIVE")}
+                className={`h-7 min-w-[60px] px-2.5 text-xs rounded-sm flex items-center gap-1 transition-all ${
+                  statusFilter === "LIVE"
+                    ? "bg-red-500/10 shadow-sm border border-red-700/50 text-red-700"
+                    : "hover:bg-red-950/20 text-red-400/90"
+                }`}
+              >
+                <PlayCircle size={13} />
+                Live
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleStatusFilterChange("ENDED")}
+                className={`h-7 min-w-[68px] px-2.5 text-xs rounded-sm flex items-center gap-1 transition-all ${
+                  statusFilter === "ENDED"
+                    ? "bg-background shadow-sm border text-teal-700"
+                    : "hover:bg-muted/60 text-muted-foreground"
+                }`}
+              >
+                <Clock size={13} />
+                Ended
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Workshops Grid */}
-      <div className="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {workshops.map((workshop) => (
           <WorkshopCard
             key={workshop.id}
-            workshop={workshop as any}
+            workshop={workshop}
             isHost={workshop.host_id === userId}
           />
         ))}

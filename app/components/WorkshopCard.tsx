@@ -20,7 +20,6 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { format, toZonedTime } from "date-fns-tz";
 import {
   Archive,
-  Bell,
   Calendar,
   CalendarPlus,
   CheckCircle,
@@ -30,8 +29,6 @@ import {
   PlayCircle,
   Share2,
   Square,
-  SquareCheckBig,
-  User as UserIcon,
   Video,
   X,
   ChevronDown,
@@ -68,6 +65,13 @@ export default function WorkshopCard({
   isHost,
 }: WorkshopCardProps) {
   const [workshop, setWorkshop] = useState<Workshop>(initialWorkshop);
+  const [email, setEmail] = useState("");
+  const [isJoiningWaitlist, setIsJoiningWaitlist] = useState(false);
+  const [joinedWaitlist, setJoinedWaitlist] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [waitlistCount, setWaitlistCount] = useState(0); // Initialize to 0
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false); // New: for description toggle
 
@@ -77,30 +81,94 @@ export default function WorkshopCard({
 
   const conclaveLink = `${getBaseUrl()}/conclave/${workshop.id}`;
 
-  // Polling and waitlist logic unchanged
+  // Polling for workshop status updates
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
         const { data, error } = await supabase
           .from("workshops")
-          .select("status")
+          .select("status") // Only select status
           .eq("id", workshop.id)
           .single();
 
-        if (error && error.code === "PGRST116") {
-          clearInterval(interval);
+        if (error) {
+          // Check if it's a "not found" error (workshop deleted or inaccessible)
+          if (
+            error.code === "PGRST116" ||
+            error.message?.includes("No rows found")
+          ) {
+            // Workshop is no longer accessible, stop polling
+            console.warn(
+              "Workshop no longer accessible, stopping status polling"
+            );
+            clearInterval(interval);
+            return;
+          }
+          // Log other real errors but don't spam the console
+          console.warn(
+            "Workshop status polling error:",
+            error.message || "Unknown error"
+          );
           return;
         }
 
-        if (data && data.status !== workshop.status) {
-          setWorkshop((prev) => ({ ...prev, status: data.status }));
+        if (data) {
+          if (data.status !== workshop.status) {
+            setWorkshop((prev) => ({ ...prev, status: data.status }));
+          }
         }
       } catch (err) {
-        console.warn("Polling error:", err);
+        // Handle any unexpected errors in the polling logic
+        console.warn("Unexpected error in workshop polling:", err);
       }
-    }, 5000);
+    }, 5000); // Poll every 5 seconds
+
     return () => clearInterval(interval);
   }, [workshop.id, workshop.status, supabase]);
+
+  // Fetch waitlist count on load and when workshop.id changes
+  useEffect(() => {
+    const fetchWaitlistCount = async () => {
+      const { count, error } = await supabase
+        .from("workshop_waitlist")
+        .select("*", { count: "exact" })
+        .eq("workshop_id", workshop.id);
+
+      if (error) {
+        console.error("Error fetching waitlist count:", error);
+        setWaitlistCount(0);
+      } else {
+        setWaitlistCount(count || 0);
+      }
+    };
+    fetchWaitlistCount();
+  }, [workshop.id, supabase]);
+
+  // Check if current user is already on the waitlist on load
+  useEffect(() => {
+    const checkWaitlistStatus = async () => {
+      // Only check if email is available (for anonymous waitlist)
+      if (email) {
+        const { data, error } = await supabase
+          .from("workshop_waitlist")
+          .select("*")
+          .eq("workshop_id", workshop.id)
+          .eq("user_email", email)
+          .single();
+
+        if (data) {
+          setJoinedWaitlist(true);
+        } else if (error && error.code !== "PGRST116") {
+          // PGRST116 means no rows found
+          console.error("Error checking waitlist status:", error);
+        }
+      }
+    };
+    // Call immediately if email is present. The effect will re-run if 'email' changes.
+    if (email) {
+      checkWaitlistStatus();
+    }
+  }, [workshop.id, supabase, email]);
 
   const event: CalendarEvent = {
     title: workshop.title,
@@ -108,6 +176,264 @@ export default function WorkshopCard({
     start: workshop.start_time,
     duration: [1, "hour"],
     url: conclaveLink,
+  };
+
+  const handleStartConclave = async () => {
+    setIsStarting(true);
+    try {
+      const response = await fetch(`/api/workshops/${workshop.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "LIVE" }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to start conclave");
+      }
+
+      setWorkshop((prev) => ({ ...prev, status: "LIVE" }));
+      router.push(`/conclave/${workshop.id}`);
+    } catch (error) {
+      console.error("Error starting conclave:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start conclave. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const handleEndWorkshop = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to end this conclave? This will stop the live session for everyone."
+      )
+    ) {
+      return;
+    }
+
+    setIsEnding(true);
+    try {
+      const response = await fetch(`/api/workshops/${workshop.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "ENDED" }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to end workshop");
+      }
+
+      setWorkshop((prev) => ({ ...prev, status: "ENDED" }));
+      router.refresh();
+    } catch (error) {
+      console.error("Error ending workshop:", error);
+      toast({
+        title: "Error",
+        description: "Failed to end conclave. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEnding(false);
+    }
+  };
+
+  const handleArchiveToggle = async () => {
+    if (
+      !confirm(
+        `Are you sure you want to ${workshop.is_archived ? "unarchive" : "archive"} this conclave?`
+      )
+    ) {
+      return;
+    }
+
+    setIsArchiving(true);
+    try {
+      const response = await fetch(`/api/workshops/${workshop.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_archived: !workshop.is_archived }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to ${workshop.is_archived ? "unarchive" : "archive"} workshop`
+        );
+      }
+
+      setWorkshop((prev) => ({ ...prev, is_archived: !prev.is_archived }));
+      router.refresh();
+    } catch (error) {
+      console.error("Error archiving/unarchiving workshop:", error);
+      toast({
+        title: "Error",
+        description: `Failed to ${workshop.is_archived ? "unarchive" : "archive"} conclave. Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsArchiving(false);
+    }
+  };
+
+  const handleJoinWaitlist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      toast({
+        title: "Error",
+        description: "Email address cannot be empty.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (trimmedEmail.includes(",")) {
+      toast({
+        title: "Error",
+        description: "Please enter only one email address at a time.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsJoiningWaitlist(true);
+    try {
+      const response = await fetch(`/api/workshops/${workshop.id}/waitlist`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
+
+      const data = await response.json();
+
+      if (
+        response.ok ||
+        (response.status === 200 &&
+          data.message === "You are already on the waitlist.")
+      ) {
+        setJoinedWaitlist(true);
+        if (response.status === 201) {
+          setWaitlistCount((prev) => prev + 1);
+        }
+        setEmail("");
+        toast({
+          title: "Success",
+          description:
+            "✅ You're on the waitlist! We'll email you when we go live.",
+        });
+      } else {
+        throw new Error(data.error || "Failed to join waitlist");
+      }
+    } catch (error) {
+      console.error("Error joining waitlist:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to join waitlist. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsJoiningWaitlist(false);
+    }
+  };
+
+  const handleShareLink = () => {
+    navigator.clipboard.writeText(conclaveLink);
+    toast({
+      title: "Link Copied!",
+      description: "The conclave link has been copied to your clipboard.",
+    });
+  };
+
+  const handleDeleteConclave = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this conclave? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/workshops/${workshop.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete conclave");
+      }
+
+      toast({
+        title: "Success",
+        description: "Conclave deleted successfully.",
+      });
+      router.push("/workshops"); // Redirect to workshops page after deletion
+      router.refresh();
+    } catch (error) {
+      console.error("Error deleting conclave:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete conclave. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleNotifyConclaveUsers = async () => {
+    try {
+      const response = await fetch("/api/notify/conclave", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ workshopId: workshop.id }),
+      });
+
+      if (response.ok) {
+        setShowSuccessModal(true);
+      } else {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          const errorData = await response.json();
+          toast({
+            title: "Error!",
+            description:
+              errorData.message || "Failed to send conclave invitations.",
+            variant: "destructive",
+          });
+        } else {
+          const errorText = await response.text();
+          toast({
+            title: "Error!",
+            description: `Server error: ${response.status} ${response.statusText} - ${errorText}`,
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to notify conclave users:", error);
+      toast({
+        title: "Error!",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
   };
 
   const isScheduled = workshop.status === "SCHEDULED";
@@ -235,14 +561,14 @@ export default function WorkshopCard({
               </div>
             ) : (
               <div className="py-4 rounded-lg border border-dashed border-teal-700/30 bg-teal-700/5 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full bg-teal-700/10 flex items-center justify-center mb-4 animate-pulse">
-                  <Clock className="w-10 h-10 text-[#48aa98]" />
+                <div className="p-2 rounded-full bg-teal-700/10 flex items-center justify-center mb-4 animate-pulse">
+                  <Clock className=" text-[#48aa98]" size={28} />
                 </div>
                 <h4 className="font-semibold text-foreground font-sora">
                   Recording Processing
                 </h4>
                 <p className="text-xs text-muted-foreground mt-2 max-w-xs px-2">
-                  The session has ended. We're currently processing the
+                  The session has ended. We&apos;re currently processing the
                   recording for you.
                 </p>
               </div>
@@ -251,18 +577,12 @@ export default function WorkshopCard({
 
         {/* Bottom Actions */}
         <div className="mt-6 space-y-3">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              className="h-9 text-[11px] border-teal-700/30 hover:bg-foreground/10"
-              onClick={() => {
-                navigator.clipboard.writeText(conclaveLink);
-                toast({
-                  title: "Copied!",
-                  description: "Link copied to clipboard.",
-                });
-              }}
+              className="h-9 w-full text-[11px] border-teal-700/30 hover:bg-foreground/10"
+              onClick={handleShareLink}
             >
               <Share2 size={14} className="mr-1" /> Share
             </Button>
@@ -271,7 +591,7 @@ export default function WorkshopCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 text-[11px] border-teal-700/30 hover:bg-foreground/10"
+                  className="h-9 w-full text-[11px] border-teal-700/30 hover:bg-foreground/10"
                   onClick={() => window.open(google(event), "_blank")}
                 >
                   <CalendarPlus size={14} className="mr-1" /> Google
@@ -279,7 +599,7 @@ export default function WorkshopCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-9 text-[11px] border-teal-700/30 hover:bg-foreground/10"
+                  className="h-9 w-full text-[11px] border-teal-700/30 hover:bg-foreground/10"
                   onClick={() => window.open(outlook(event), "_blank")}
                 >
                   <MailOpen size={14} /> Outlook
@@ -293,15 +613,24 @@ export default function WorkshopCard({
             <div className="space-y-3">
               <div className="grid grid-cols-1 gap-3">
                 {isScheduled && (
-                  <Button className="w-full bg-teal-700 hover:bg-teal-800 shadow-lg shadow-teal-700/20">
-                    <Play className="mr-2" /> Start Conclave
+                  <Button
+                    className="w-full bg-teal-700 hover:bg-teal-800 shadow-lg shadow-teal-700/20"
+                    onClick={handleStartConclave}
+                    disabled={isStarting}
+                  >
+                    <Play className="mr-2" />{" "}
+                    {isStarting ? "Starting..." : "Start Conclave"}
                   </Button>
                 )}
                 {isLive && (
-                  <Button asChild className="w-full bg-teal-700 hover:bg-teal-800">
-                    <a href={`/conclave/${workshop.id}`}>
-                      <Video className="mr-2 w-6 h-6" /> Join as Host
-                    </a>
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={handleEndWorkshop}
+                    disabled={isEnding}
+                  >
+                    <Square className="mr-2 w-6 h-6" />{" "}
+                    {isEnding ? "Ending..." : "End Conclave"}
                   </Button>
                 )}
                 {isEnded && (
@@ -320,11 +649,19 @@ export default function WorkshopCard({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="secondary">
+                <Button
+                  variant="secondary"
+                  onClick={handleArchiveToggle}
+                  disabled={isArchiving}
+                >
                   <Archive size={14} className="mr-1" />{" "}
-                  {workshop.is_archived ? "Unarchive" : "Archive"}
+                  {isArchiving
+                    ? "Processing..."
+                    : workshop.is_archived
+                      ? "Unarchive"
+                      : "Archive"}
                 </Button>
-                <Button variant="destructive">
+                <Button variant="destructive" onClick={handleDeleteConclave}>
                   <X size={14} className="mr-1" /> Delete
                 </Button>
               </div>
