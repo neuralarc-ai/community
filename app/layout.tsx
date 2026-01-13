@@ -29,11 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
+        data-theme="dark"
         className="antialiased bg-background text-foreground font-sans overflow-x-hidden"
       >
-        <LayoutWrapper>
-        {children}
-        </LayoutWrapper>
+        <LayoutWrapper>{children}</LayoutWrapper>
         <Toaster />
       </body>
     </html>

@@ -135,7 +135,7 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
   };
 
   const CommentItem = ({ comment, showTag = false }: { comment: any, showTag?: boolean }) => (
-    <div className="bg-card/40 backdrop-blur-sm border border-white/5 rounded-xl p-4 mb-4 hover:border-white/10 transition-all">
+    <div className="bg-card/40 backdrop-blur-sm border border-foreground/5 rounded-xl p-4 mb-4 hover:border-foreground/10 transition-all">
       <div className="text-xs flex items-center gap-2 mb-3">
         {showTag && (
           <span className="bg-red-500/10 text-red-400 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border border-red-500/20 mr-1 font-heading">
@@ -145,14 +145,14 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
         <div className="flex items-center gap-2 font-sans">
           <MessageCircle size={14} className="text-muted-foreground" />
           <span className="font-medium text-muted-foreground">Commented on:</span>
-          <Link href={`/posts/${comment.post.id}`} className="text-[#A6C8D5] hover:text-[#A6C8D5]/80 hover:underline transition-colors font-bold truncate max-w-[250px] md:max-w-[400px]">
+          <Link href={`/posts/${comment.post.id}`} className="text-sky-600 hover:text-sky-600/80 hover:underline transition-colors font-bold truncate max-w-[250px] md:max-w-[400px]">
              {comment.post.title}
           </Link>
-          <span className="text-white/20"> • </span>
+          <span className="text-foreground/20"> • </span>
           <span className="text-muted-foreground font-mono">{new Date(comment.created_at).toLocaleDateString()}</span>
         </div>
       </div>
-      <p className="text-sm text-white/90 leading-relaxed font-sans pl-2 border-l border-white/5">{comment.body}</p>
+      <p className="text-sm text-foreground/90 leading-relaxed font-sans pl-2 border-l border-foreground/5">{comment.body}</p>
     </div>
   );
 
@@ -162,16 +162,16 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
   // Sidebar specific for Profile
   const ProfileSidebar = (
     <div className="space-y-4">
-        <Card className="overflow-hidden border border-[#A6C8D5]/20 shadow-xl bg-card/60 backdrop-blur-md hover:border-[#A6C8D5]/30 hover:shadow-[0_0_30px_rgba(166,200,213,0.1)] transition-all duration-300">
+        <Card className="overflow-hidden border border-sky-600/20 shadow-xl bg-card/60 backdrop-blur-md hover:border-sky-600/30 hover:shadow-[0_0_30px_rgba(166,200,213,0.1)] transition-all duration-300">
             {/* Card Header Background - Removed height to allow flex growth if needed, but keeping for visual */}
-            <div className="h-24 bg-[#A6C8D5]/20 relative border-b border-[#A6C8D5]/10">
+            <div className="h-24 bg-sky-600/20 relative border-b border-sky-600/10">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(166,200,213,0.1)_1px,transparent_1px)] [background-size:24px_24px] opacity-50"></div>
             </div>
             
             <CardContent className="pt-0 px-6 pb-6 flex flex-col items-center text-center">
                 {/* Avatar - Centered with negative margin to pull it up */}
                 <div className="mt-12 mb-4 relative group">
-                    <div className="rounded-full p-1.5 bg-[#141414] ring-1 ring-[#A6C8D5]/30 shadow-[0_0_20px_rgba(166,200,213,0.2)]">
+                    <div className="rounded-full p-1.5 bg-[#141414] ring-1 ring-sky-600/30 shadow-[0_0_20px_rgba(166,200,213,0.2)]">
                         {loading ? (
                             <Skeleton className="rounded-full w-24 h-24" />
                         ) : (
@@ -187,7 +187,7 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                     {userId === currentUserId && !loading && (
                         <button 
                             onClick={() => setShowAvatarEditor(true)}
-                            className="absolute bottom-0 right-0 p-2 bg-[#A6C8D5] rounded-full text-white shadow-lg hover:bg-[#A6C8D5]/80 transition-transform hover:scale-105"
+                            className="absolute bottom-0 right-0 p-2 bg-sky-600 rounded-full text-foreground shadow-lg hover:bg-sky-600/80 transition-transform hover:scale-105"
                             title="Edit Avatar"
                         >
                             <Edit2 size={14} />
@@ -201,7 +201,7 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                         {loading ? (
                             <Skeleton className="h-7 w-48 mx-auto mb-2" />
                         ) : (
-                            <h2 className="font-heading font-bold text-2xl text-white tracking-tight">{profile?.full_name}</h2>
+                            <h2 className="font-heading font-bold text-2xl text-foreground tracking-tight">{profile?.full_name}</h2>
                         )}
                         {loading ? (
                             <Skeleton className="h-4 w-32 mx-auto" />
@@ -211,31 +211,31 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                         {loading ? (
                             <Skeleton className="h-12 w-full mx-auto mt-2" />
                         ) : profile?.bio && (
-                            <p className="text-sm text-muted-foreground mt-2 px-4 whitespace-pre-wrap">{profile.bio}</p>
+                            <p className="text-sm text-muted-foreground mt-2 px-4 foregroundspace-pre-wrap">{profile.bio}</p>
                         )}
                     </div>
                     
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-6 py-5 border-y border-white/5 w-full">
+                    <div className="grid grid-cols-2 gap-6 py-5 border-y border-foreground/5 w-full">
                         <div className="flex flex-col items-center">
                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Flux</p>
                             <div className="flex items-center gap-2">
-                                <Award className="w-4 h-4 text-white" />
+                                <Award className="w-4 h-4 text-foreground" />
                                 {loading ? (
                                     <Skeleton className="h-5 w-12" />
                                 ) : (
-                                    <span className="font-heading font-bold text-lg text-white">{profile?.total_flux !== undefined ? profile.total_flux.toLocaleString() : '0'}</span>
+                                    <span className="font-heading font-bold text-lg text-foreground">{profile?.total_flux !== undefined ? profile.total_flux.toLocaleString() : '0'}</span>
                                 )}
                             </div>
                         </div>
                         <div className="flex flex-col items-center">
                             <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mb-1.5 font-heading">Joined</p>
                             <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-white" />
+                                <Calendar className="w-4 h-4 text-foreground" />
                                 {loading ? (
                                     <Skeleton className="h-5 w-24" />
                                 ) : (
-                                    <span className="font-heading font-bold text-lg text-white">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '-'}</span>
+                                    <span className="font-heading font-bold text-lg text-foreground">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '-'}</span>
                                 )}
                             </div>
                         </div>
@@ -246,7 +246,7 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                         <Skeleton className="w-full h-10" />
                     ) : (
                         <Link href="/flux-dashboard" className="w-full">
-                            <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
+                            <Button className="w-full rounded-lg font-medium border border-sky-600/20 bg-sky-600/10 hover:bg-sky-600/20 text-sky-600 transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
                                 <Award className="w-4 h-4 mr-2" />
                                 Flux Leaderboard
                             </Button>
@@ -258,7 +258,7 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                             <Skeleton className="w-full h-10" />
                         ) : (
                             <Link href="/profile/settings" className="w-full">
-                                <Button className="w-full rounded-lg font-medium border border-[#A6C8D5]/20 bg-[#A6C8D5]/10 hover:bg-[#A6C8D5]/20 text-[#A6C8D5] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
+                                <Button className="w-full rounded-lg font-medium border border-sky-600/20 bg-sky-600/10 hover:bg-sky-600/20 text-sky-600 transition-all shadow-sm hover:shadow-[0_0_15px_rgba(166,200,213,0.1)]" variant="outline">
                                     <Settings className="w-4 h-4 mr-2" />
                                     Profile Settings
                                 </Button>
@@ -276,10 +276,10 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
       {/* Profile Header */}
       <div className="space-y-6">
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => router.push('/posts')} className="text-muted-foreground hover:text-white">
+          <Button variant="ghost" size="icon" onClick={() => router.push('/posts')} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-4xl font-extrabold text-white tracking-tighter">
+          <h1 className="text-4xl font-extrabold text-foreground tracking-tighter">
             {loading ? <Skeleton className="h-10 w-64" /> : (userId === currentUserId ? "My Profile" : profile?.full_name)}
           </h1>
         </div>
@@ -287,13 +287,13 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
         {loading ? (
             <Skeleton className="h-12 w-full rounded-xl" />
         ) : (
-            <div className="bg-card/40 backdrop-blur-md rounded-xl border border-[#A6C8D5]/20 p-1.5">
+            <div className="bg-card/40 backdrop-blur-md rounded-xl border border-sky-600/20 p-1.5">
                 <div className="flex items-center space-x-1">
                     {[
                         { id: 'overview', label: 'Overview', icon: FileText },
                         { id: 'posts', label: 'Posts', icon: MessageCircle },
                         { id: 'comments', label: 'Comments', icon: MessageCircle },
-                        { id: 'saved', label: 'Saved', icon: Bookmark },
+                        ...(userId === currentUserId ? [{ id: 'saved', label: 'Saved', icon: Bookmark }] : []),
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -301,11 +301,11 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                             className={`
                                 flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex-1 justify-center
                                 ${activeTab === tab.id 
-                                    ? 'bg-[#A6C8D5]/10 text-white shadow-sm border border-[#A6C8D5]/20' 
-                                    : 'text-muted-foreground hover:bg-[#A6C8D5]/5 hover:text-white'}
+                                    ? 'bg-sky-600/10 text-sky-600 shadow-sm border border-sky-600/20' 
+                                    : 'text-muted-foreground hover:bg-sky-600/5 hover:text-foreground'}
                             `}
                         >
-                            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-white' : 'text-muted-foreground'}`} />
+                            <tab.icon className={`w-4 h-4 ${activeTab === tab.id ? 'text-sky-600' : 'text-muted-foreground'}`} />
                             {tab.label}
                         </button>
                     ))}
@@ -334,14 +334,14 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                ))}
              </PostList>
            ) : (
-             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors group">
-               <MessageCircle className="w-12 h-12 text-muted-foreground mb-4 opacity-50 group-hover:text-white group-hover:opacity-75 transition-all duration-300" />
-               <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">No posts yet</h3>
+             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-foreground/10 hover:border-foreground/20 transition-colors group">
+               <MessageCircle className="w-12 h-12 text-muted-foreground mb-4 opacity-50 group-hover:text-foreground group-hover:opacity-75 transition-all duration-300" />
+               <h3 className="text-xl font-heading font-semibold text-foreground mb-2 tracking-tight">No posts yet</h3>
                <p className="text-muted-foreground max-w-sm text-base leading-relaxed mb-6">
                  Share your thoughts with the community.
                </p>
                <Link href="/posts/new">
-                 <Button className="rounded-lg font-semibold px-8 py-3 text-white bg-[#A6C8D5] hover:bg-[#A6C8D5]/90 border border-[#A6C8D5]/20 hover:border-[#A6C8D5]/30 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(166,200,213,0.3)]">
+                 <Button className="rounded-lg font-semibold px-8 py-3 text-foreground bg-sky-600 hover:bg-sky-600/90 border border-sky-600/20 hover:border-sky-600/30 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(166,200,213,0.3)]">
                     <Plus className="w-4 h-4 mr-2"/> Create Post
                  </Button>
                </Link>
@@ -359,9 +359,9 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                ))}
              </div>
            ) : (
-             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors">
+             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-foreground/10 hover:border-foreground/20 transition-colors">
                <MessageCircle className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
-               <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">No comments yet</h3>
+               <h3 className="text-xl font-heading font-semibold text-foreground mb-2 tracking-tight">No comments yet</h3>
                <p className="text-muted-foreground max-w-sm text-base leading-relaxed">
                  Join the discussion on posts that interest you.
                </p>
@@ -389,9 +389,9 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                ))}
              </PostList>
            ) : (
-             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors">
+             <div className="min-h-[400px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-foreground/10 hover:border-foreground/20 transition-colors">
                <Bookmark className="w-8 h-8 text-muted-foreground mb-4 opacity-50" />
-               <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">No saved posts</h3>
+               <h3 className="text-xl font-heading font-semibold text-foreground mb-2 tracking-tight">No saved posts</h3>
                <p className="text-muted-foreground max-w-sm text-base leading-relaxed">
                  Posts you save will appear here for easy access.
                </p>
@@ -404,7 +404,7 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
               {/* Stat Cards Skeletons */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="bg-card/40 backdrop-blur-md border border-[#A6C8D5]/20 shadow-xl">
+                  <Card key={i} className="bg-card/40 backdrop-blur-md border border-sky-600/20 shadow-xl">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-8 w-8 rounded-lg" />
@@ -427,18 +427,18 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                   { id: 'total-saved', title: 'Total Saved Posts', value: totalSavedPosts, icon: Bookmark, color: 'yellow' },
                   { id: 'total-shares', title: 'Total Shares', value: totalShares, icon: Share2, color: 'purple' }, // Placeholder
                 ].map((stat) => (
-                  <Card key={stat.id} className="bg-card/40 backdrop-blur-md border border-[#A6C8D5]/20 hover:border-[#A6C8D5]/40 hover:bg-[#A6C8D5]/5 hover:shadow-xl transition-all duration-300 group cursor-pointer">
+                  <Card key={stat.id} className="bg-card/40 backdrop-blur-md border border-sky-600/20 hover:border-sky-600/40 hover:bg-sky-600/5 hover:shadow-xl transition-all duration-300 group cursor-pointer">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-[#A6C8D5] transition-colors duration-300">
+                      <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-sky-600 transition-colors duration-300">
                         {stat.title}
                       </CardTitle>
-                      <div className="p-2 bg-white/5 rounded-lg border border-white/5 group-hover:bg-[#A6C8D5]/10 group-hover:border-[#A6C8D5]/20 group-hover:shadow-md transition-all duration-300">
-                        <stat.icon size={18} className="text-muted-foreground group-hover:text-[#A6C8D5] transition-colors" />
+                      <div className="p-2 bg-foreground/5 rounded-lg border border-foreground/5 group-hover:bg-sky-600/10 group-hover:border-sky-600/20 group-hover:shadow-md transition-all duration-300">
+                        <stat.icon size={18} className="text-muted-foreground group-hover:text-sky-600 transition-colors" />
                       </div>
                     </CardHeader>
                     <CardContent>
                       <div className="flex flex-col gap-2 pt-2">
-                        <span className="text-4xl font-heading font-bold text-white tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
+                        <span className="text-4xl font-heading font-bold text-foreground tracking-tighter group-hover:scale-105 transition-transform duration-300 origin-left">
                             {stat.value}
                         </span>
                       </div>
@@ -475,11 +475,11 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
                 </div>
               )}
               {myPosts.length === 0 && myComments.length === 0 && (
-                <div className="min-h-[200px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-colors group">
-                  <div className="w-20 h-20 bg-white/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-white/5">
-                      <Plus className="w-8 h-8 text-muted-foreground group-hover:text-white transition-colors" />
+                <div className="min-h-[200px] flex flex-col items-center justify-center p-12 text-center bg-card/20 rounded-xl border border-dashed border-foreground/10 hover:border-foreground/20 transition-colors group">
+                  <div className="w-20 h-20 bg-foreground/5 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-foreground/5">
+                      <Plus className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </div>
-                  <h3 className="text-xl font-heading font-semibold text-white mb-2 tracking-tight">
+                  <h3 className="text-xl font-heading font-semibold text-foreground mb-2 tracking-tight">
                       Welcome to your profile, u/{profile.username}!
                   </h3>
                   <p className="text-muted-foreground max-w-sm mb-8 text-base leading-relaxed">

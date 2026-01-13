@@ -1,56 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/app/lib/supabaseServerClient'
-import { Post } from '@/app/types'
-import { awardFlux } from '@/lib/flux'
-import rateLimit from '@/app/lib/rateLimit'
-import { z } from 'zod'
-import logger from '@/app/lib/logger'
-import { setCorsHeaders } from '@/app/lib/setCorsHeaders'
+import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@/app/lib/supabaseServerClient";
+import { Post } from "@/app/types";
+import { awardFlux } from "@/lib/flux";
+import rateLimit from "@/app/lib/rateLimit";
+import { z } from "zod";
+import logger from "@/app/lib/logger";
+import { setCorsHeaders } from "@/app/lib/setCorsHeaders";
 
 const createPostSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(255),
-  body: z.string().min(1, 'Body is required'),
+  title: z.string().min(1, "Title is required").max(255),
+  body: z.string().min(1, "Body is required"),
   tags: z.array(z.string()).optional().default([]),
   image_urls: z.array(z.string()).optional().default([]),
 });
 
 export async function GET(request: NextRequest) {
   // Apply rate limiting for GET requests
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ??
-             request.headers.get('x-real-ip') ??
-             '127.0.0.1';
-  const limiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 });
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0] ??
+    request.headers.get("x-real-ip") ??
+    "127.0.0.1";
+  const limiter = rateLimit({
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 500,
+  });
   const rateLimitResult = limiter.check(60, ip); // 60 requests per minute
 
   if (!rateLimitResult.success) {
     const response = NextResponse.json(
-      { error: 'Too Many Requests' },
+      { error: "Too Many Requests" },
       {
         status: 429,
         headers: {
-          'X-RateLimit-Limit': rateLimitResult.limit.toString(),
-          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-          'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+          "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+          "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+          "X-RateLimit-Reset": rateLimitResult.reset.toString(),
         },
       }
     );
     return setCorsHeaders(request, response);
   }
 
-  const { searchParams } = new URL(request.url)
-  const searchQuery = searchParams.get('search')
-  const limit = searchParams.get('limit')
+  const { searchParams } = new URL(request.url);
+  const searchQuery = searchParams.get("search");
+  const limit = searchParams.get("limit");
 
   try {
-    const supabase = await createServerClient()
+    const supabase = await createServerClient();
 
     // Get the authenticated user
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    // Fetch posts - temporarily exclude is_pinned until migration is run
-    let query = supabase
-      .from('posts')
-      .select(`
+    // Build the base query
+    let query = supabase.from("posts").select(`
         id,
         author_id,
         title,
@@ -62,118 +66,132 @@ export async function GET(request: NextRequest) {
         is_pinned,
         image_urls,
         post_comment_counts(comment_count)
-      `)
+      `);
 
+   
     if (searchQuery) {
-      query = query.or(`title.ilike.%${searchQuery}%,body.ilike.%${searchQuery}%`)
+      query = query.contains("tags", [searchQuery]);
     }
 
     // Order by is_pinned first, then created_at (newest first)
     let { data: posts, error: postsError } = await query
-      .order('is_pinned', { ascending: false })
-      .order('created_at', { ascending: false })
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: false });
 
-    posts = posts ?? []
+    posts = posts ?? [];
 
     if (limit) {
-      posts = posts.slice(0, parseInt(limit))
+      posts = posts.slice(0, parseInt(limit));
     }
 
     if (postsError) {
-      logger.error('Error fetching posts', postsError)
-      return setCorsHeaders(request, NextResponse.json(
-        { error: 'Failed to fetch posts' },
-        { status: 500 }
-      ));
+      logger.error("Error fetching posts", postsError);
+      return setCorsHeaders(
+        request,
+        NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 })
+      );
     }
 
     // Get total count of posts (without pagination/filters for the dashboard)
     const { count: totalPostsCount, error: countError } = await supabase
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
+      .from("posts")
+      .select("id", { count: "exact", head: true });
 
     if (countError) {
-      logger.error('Error fetching total posts count', countError)
+      logger.error("Error fetching total posts count", countError);
     }
 
     // Fetch profiles for all post authors
-    const authorIds = [...new Set(posts.map(post => post.author_id))]
+    const authorIds = [...new Set(posts.map((post) => post.author_id))];
     const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, username, full_name, avatar_url, role')
-      .in('id', authorIds)
+      .from("profiles")
+      .select("id, username, full_name, avatar_url, role")
+      .in("id", authorIds);
 
-    const profileMap = new Map(profiles?.map(profile => [profile.id, profile]) || [])
+    const profileMap = new Map(
+      profiles?.map((profile) => [profile.id, profile]) || []
+    );
 
     // Fetch user votes for posts if user is authenticated
-    let userVotesMap = new Map<string, -1 | 0 | 1>()
+    let userVotesMap = new Map<string, -1 | 0 | 1>();
     if (user) {
-      const postIds = posts.map(post => post.id)
+      const postIds = posts.map((post) => post.id);
       const { data: userVotes } = await supabase
-        .from('votes')
-        .select('target_id, value')
-        .eq('user_id', user.id)
-        .eq('target_type', 'post')
-        .in('target_id', postIds)
+        .from("votes")
+        .select("target_id, value")
+        .eq("user_id", user.id)
+        .eq("target_type", "post")
+        .in("target_id", postIds);
 
-      userVotesMap = new Map(userVotes?.map(vote => [vote.target_id, vote.value as -1 | 1]) || [])
+      userVotesMap = new Map(
+        userVotes?.map((vote) => [vote.target_id, vote.value as -1 | 1]) || []
+      );
     }
 
     // Calculate vote scores and comment counts for each post
     const postsWithScores = posts.map((post: any) => {
-      const profile = profileMap.get(post.author_id)
+      const profile = profileMap.get(post.author_id);
       return {
         ...post,
         author: {
-          username: profile?.username || 'Anonymous',
-          full_name: profile?.full_name || 'Anonymous',
-          avatar_url: profile?.avatar_url || '',
-          role: profile?.role || 'user',
+          username: profile?.username || "Anonymous",
+          full_name: profile?.full_name || "Anonymous",
+          avatar_url: profile?.avatar_url || "",
+          role: profile?.role || "user",
         },
-        comment_count: post.post_comment_counts ? post.post_comment_counts.comment_count : 0,
+        comment_count: post.post_comment_counts
+          ? post.post_comment_counts.comment_count
+          : 0,
         user_vote: userVotesMap.get(post.id) || 0,
         vote_score: post.vote_score,
-        is_pinned: post.is_pinned
-      }
-    })
+        is_pinned: post.is_pinned,
+      };
+    });
 
-    return setCorsHeaders(request, NextResponse.json({ posts: postsWithScores, totalPostsCount }));
+    return setCorsHeaders(
+      request,
+      NextResponse.json({ posts: postsWithScores, totalPostsCount })
+    );
   } catch (error) {
-    logger.error('Server error:', error)
-    return setCorsHeaders(request, NextResponse.json(
-      { error: 'Failed to fetch posts' },
-      { status: 500 }
-    ));
+    logger.error("Server error:", error);
+    return setCorsHeaders(
+      request,
+      NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 })
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     // Apply rate limiting
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ??
-               request.headers.get('x-real-ip') ??
-               '127.0.0.1';
-    const limiter = rateLimit({ interval: 60 * 1000, uniqueTokenPerInterval: 500 });
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ??
+      request.headers.get("x-real-ip") ??
+      "127.0.0.1";
+    const limiter = rateLimit({
+      interval: 60 * 1000,
+      uniqueTokenPerInterval: 500,
+    });
     const limit = 10; // 10 requests per 60 seconds
     const rateLimitResult = limiter.check(limit, ip);
 
     if (!rateLimitResult.success) {
       const response = NextResponse.json(
-        { error: 'Too Many Requests' },
+        { error: "Too Many Requests" },
         {
           status: 429,
           headers: {
-            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+            "X-RateLimit-Limit": rateLimitResult.limit.toString(),
+            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+            "X-RateLimit-Reset": rateLimitResult.reset.toString(),
           },
         }
       );
       return setCorsHeaders(request, response);
     }
 
-    const supabase = await createServerClient()
-    const body = await request.json()
+    const supabase = await createServerClient();
+    const body = await request.json();
 
     // Validate incoming data with Zod
     const validationResult = createPostSchema.safeParse(body);
@@ -187,28 +205,31 @@ export async function POST(request: NextRequest) {
     const { title, body: postBody, tags, image_urls } = validationResult.data;
 
     // Get the authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       let response = NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: "Unauthorized" },
         { status: 401 }
       );
       return setCorsHeaders(request, response);
     }
 
-
     // Create the post
     const { data: newPost, error } = await supabase
-      .from('posts')
+      .from("posts")
       .insert({
         author_id: user.id,
         title,
         body: postBody,
         tags,
-        image_urls
+        image_urls,
       })
-      .select(`
+      .select(
+        `
         id,
         author_id,
         title,
@@ -218,13 +239,14 @@ export async function POST(request: NextRequest) {
         updated_at,
         vote_score,
         image_urls
-      `)
-      .single()
+      `
+      )
+      .single();
 
     if (error) {
-      logger.error('Error creating post', error)
+      logger.error("Error creating post", error);
       let response = NextResponse.json(
-        { error: 'Failed to create post' },
+        { error: "Failed to create post" },
         { status: 500 }
       );
       return setCorsHeaders(request, response);
@@ -232,29 +254,29 @@ export async function POST(request: NextRequest) {
 
     // Fetch the author profile
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('username, full_name, avatar_url')
-      .eq('id', user.id)
-      .single()
+      .from("profiles")
+      .select("username, full_name, avatar_url")
+      .eq("id", user.id)
+      .single();
 
     // Award flux points for creating a post
-    const fluxAwardResult = await awardFlux(user.id, 'POST')
+    const fluxAwardResult = await awardFlux(user.id, "POST");
     const postWithAuthor = {
       ...newPost,
       author: {
-        username: profile?.username || 'Anonymous',
-        full_name: profile?.full_name || 'Anonymous',
-        avatar_url: profile?.avatar_url || ''
+        username: profile?.username || "Anonymous",
+        full_name: profile?.full_name || "Anonymous",
+        avatar_url: profile?.avatar_url || "",
       },
-      vote_score: 0
-    }
+      vote_score: 0,
+    };
 
     let response = NextResponse.json(postWithAuthor, { status: 201 });
     return setCorsHeaders(request, response);
   } catch (error) {
-    logger.error('Server error:', error)
+    logger.error("Server error:", error);
     let response = NextResponse.json(
-      { error: 'Failed to create post' },
+      { error: "Failed to create post" },
       { status: 500 }
     );
     return setCorsHeaders(request, response);

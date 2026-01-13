@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, Info } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { toast } from '@/app/components/ui/use-toast'
 
 export default function WorkshopLivePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -32,7 +33,11 @@ export default function WorkshopLivePage({ params }: { params: Promise<{ id: str
       return true
     } catch (error) {
       console.error('Error ending workshop:', error)
-      alert('Failed to end workshop. Please try again.')
+      toast({
+        title: "Error",
+        description: 'Failed to end workshop. Please try again.',
+        variant: "destructive"
+      })
       return false
     }
   }

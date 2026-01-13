@@ -31,11 +31,11 @@
 
     --border: 0 0% 10%; /* Darker gray border */
     --input: 0 0% 12%;
-    
+
     --ring: 0 0% 20%; /* Dark gray for focus ring */
-    
+
     --radius: 0.75rem;
-    
+
     /* Custom Status Colors - Now monochrome */
     --warning: 0 0% 70%;
     --success: 0 0% 70%;
@@ -45,9 +45,12 @@
     --red-accent-hover: 0 80% 60%;
     --button-base: 4 73% 78%; /* HSL for EFB3AF */
     --button-hover: 4 73% 68%; /* Slightly darker for hover */
+
+    /* NEW CUSTOM CLASSES FOR THEME SUPPORT */
+    --dashboard: 249, 115, 22;
   }
 
-  .dark {
+  [data-theme="dark"] {
     --background: 0 0% 8%;
     --foreground: 0 0% 95%;
     --card: 0 0% 12%;
@@ -74,6 +77,56 @@
     --button-base: 4 73% 78%; /* HSL for EFB3AF */
     --button-hover: 4 73% 68%; /* Slightly darker for hover */
   }
+
+  [data-theme="light"] {
+    /* Light Monochrome Theme */
+
+    --background: 0 0% 98%; /* Near-white background */
+    --foreground: 0 0% 10%; /* Almost black text */
+
+    --card: 0 0% 100%; /* Pure white cards */
+    --card-foreground: 0 0% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 0 0% 12%; /* Dark gray primary */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 92%; /* Light gray surfaces */
+    --secondary-foreground: 0 0% 18%;
+
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 0 0% 15%; /* Dark accent (inverse of dark mode) */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 80% 45%; /* Slightly darker red for light bg */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 85%; /* Subtle borders */
+    --input: 0 0% 92%;
+
+    --ring: 0 0% 20%;
+
+    --radius: 0.75rem;
+
+    /* Status (still monochrome) */
+    --warning: 0 0% 50%;
+    --success: 0 0% 50%;
+
+    /* Red Accent (unchanged brand color) */
+    --red-accent: 0 80% 50%;
+    --red-accent-hover: 0 80% 45%;
+
+    /* Buttons */
+    --button-base: 4 73% 78%; /* EFB3AF */
+    --button-hover: 4 73% 68%;
+
+    /* Custom */
+    --dashboard: 249, 115, 22;
+  }
 }
 
 @layer base {
@@ -82,9 +135,16 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading tracking-tight;
   }
 }
@@ -93,15 +153,15 @@
   .glass-panel {
     @apply bg-card/80 backdrop-blur-md border border-white/10 shadow-lg;
   }
-  
+
   .glow-border {
     @apply border border-white/15;
   }
-  
+
   .hover-glow {
     @apply transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:border-white/30 hover:bg-white/[0.03];
   }
-  
+
   .hover-lift {
     @apply transition-transform duration-300 hover:-translate-y-1;
   }
@@ -114,27 +174,29 @@
   }
 
   .glare-effect::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
-    left: 0;
-    width: 150%; /* Make it wider to ensure it covers the diagonal movement */
-    height: 150%; /* Make it taller */
-    background: radial-gradient(
-      circle at center,
-      rgba(255, 255, 255, 0.2) 0%,
-      rgba(255, 255, 255, 0.0) 70%
+    left: -150%;
+    width: 200%;
+    height: 100%;
+
+    /* diagonal shine strip */
+    background: linear-gradient(
+      120deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.35) 50%,
+      transparent 60%
     );
-    opacity: 0;
+
     pointer-events: none;
-    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
-    transform: translate(-100%, -100%) rotate(45deg); /* Start off-screen top-left */
-    z-index: 1; /* Ensure it's above card content */
+    transition: transform 0.8s;
+    transform: translateX(0);
+    z-index: 1;
   }
 
   .glare-effect:hover::before {
-    opacity: 1;
-    transform: translate(0%, 0%) rotate(45deg); /* End at 0,0 */
+    transform: translateX(100%);
   }
 
   /* Fade In Up Animation */
@@ -165,12 +227,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #FFFFFF; /* White scrollbar thumb */
+  background: #ffffff; /* White scrollbar thumb */
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #E0E0E0; /* Lighter white on hover */
+  background: #e0e0e0; /* Lighter white on hover */
 }
 
 .animated-background {
@@ -179,13 +241,17 @@
 }
 
 .animated-background::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at center, hsla(var(--red-accent), 0.1) 0%, transparent 70%);
+  background: radial-gradient(
+    circle at center,
+    hsla(var(--red-accent), 0.1) 0%,
+    transparent 70%
+  );
   animation: move-glow 15s infinite alternate ease-in-out;
   z-index: -1;
 }

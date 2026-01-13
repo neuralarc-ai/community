@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { Mic, MicOff, Video, VideoOff, Circle, Square, Mail } from 'lucide-react'
 import { ConclaveControls } from '@/components/conclave/stages/ConclaveControls'
 import SpotlightVideoLayout from '@/app/components/SpotlightVideoLayout'
+import { toast } from 'sonner'
 
 interface LiveRoomProps {
   workshopId: string
@@ -130,10 +131,10 @@ export default function LiveRoom({
         body: JSON.stringify({ workshopId }),
       })
       const data = await response.json()
-      alert(data.message || 'Notifications sent!')
+      toast.success(data.message || 'Notifications sent!')
     } catch (error) {
       console.error('Error notifying waitlist:', error)
-      alert('Failed to send notifications.')
+      toast.error('Failed to send notifications.')
     } finally {
       setIsNotifying(false)
     }

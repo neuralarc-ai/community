@@ -12,6 +12,7 @@ const AvatarEditor = dynamic(() => import('@/app/components/AvatarEditor'), {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getCurrentUserProfile } from '@/app/lib/getProfile'
+import { toast } from 'sonner'
 
 export default function CreateAvatarPage() {
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | undefined>(undefined)
@@ -62,7 +63,7 @@ export default function CreateAvatarPage() {
       router.refresh()
     } catch (error: any) {
       console.error('Error saving avatar:', error.message)
-      alert('Failed to save avatar. Please try again.')
+      toast.error('Failed to save avatar. Please try again.')
     } finally {
       setLoading(false)
     }

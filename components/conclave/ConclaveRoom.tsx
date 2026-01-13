@@ -1,90 +1,27 @@
-'use client'
+"use client";
 
-import { LiveKitRoom, useLocalParticipant, useRoomContext } from '@livekit/components-react'
-import { useMemo } from 'react'
-import AudioConclaveView from './stages/AudioConclaveView'
-import VideoStage from './stages/VideoStage'
-import { ConclaveChat } from './chat/ConclaveChat'
-import { ParticipantList } from './ParticipantList'
-import SidebarTabs from '../../app/components/conclave/SidebarTabs'
-import ControlBar from '@/app/components/ControlBar'
-import '@livekit/components-styles'
-import { Mic, MicOff, Video, VideoOff, PhoneOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import ControlBar from "@/app/components/ControlBar";
+import { LiveKitRoom } from "@livekit/components-react";
+import "@livekit/components-styles";
+import SidebarTabs from "../../app/components/conclave/SidebarTabs";
+import AudioConclaveView from "./stages/AudioConclaveView";
+import VideoStage from "./stages/VideoStage";
+import { useState, useEffect } from "react";
 
 interface ConclaveRoomProps {
-  token: string
-  serverUrl: string
+  token: string;
+  serverUrl: string;
   workshop: {
-    id: string
-    title: string
-    type: 'AUDIO' | 'VIDEO'
-    host_id: string
-  }
-  userId: string
-  userRole: string | null
-  onEndLive: () => Promise<boolean | void>
-  isSidebarOpen?: boolean
-  roomName: string
-}
-
-// Inner component that uses LiveKit hooks - must be inside LiveKitRoom
-function ConclaveRoomContent({
-  workshop,
-  isHost,
-  userRole,
-  onEndLive,
-  isSidebarOpen,
-  onToggleSidebar,
-  roomName
-}: {
-  workshop: ConclaveRoomProps['workshop']
-  isHost: boolean
-  userRole: string | null
-  onEndLive: () => Promise<boolean | void>
-  isSidebarOpen?: boolean
-  onToggleSidebar: () => void
-  roomName: string
-}) {
-  const room = useRoomContext()
-  const { localParticipant } = useLocalParticipant()
-
-  return (
-    <>
-      <div className="flex flex-1 relative">
-        <div className="flex-1">
-          {workshop.type === 'AUDIO' ? (
-            <AudioConclaveView onLeave={onEndLive} userRole={userRole} />
-          ) : (
-            <VideoStage workshopId={workshop.id} />
-          )}
-        </div>
-
-        {/* Sidebar - conditionally rendered based on isSidebarOpen */}
-        {isSidebarOpen && (
-          <div className="w-80 ml-4">
-            <SidebarTabs
-              onClose={onToggleSidebar}
-              workshopId={workshop.id}
-              isHost={isHost}
-            />
-          </div>
-        )}
-      </div>
-
-        {/* Control Bar - Only render for VIDEO type, as AudioConclaveView has its own controls */}
-        {workshop.type === 'VIDEO' && (
-          <ControlBar
-            workshopId={workshop.id}
-            roomName={roomName}
-            type={workshop.type}
-            onEndLive={onEndLive}
-            toggleSidebar={onToggleSidebar}
-            isSidebarOpen={isSidebarOpen || false}
-          />
-        )}
-    </>
-  )
+    id: string;
+    title: string;
+    type: "AUDIO" | "VIDEO";
+    host_id: string;
+  };
+  userId: string;
+  userRole: string | null;
+  onEndLive: () => Promise<boolean | void>;
+  defaultSidebarOpen?: boolean;
+  roomName: string;
 }
 
 export default function ConclaveRoom({
@@ -94,34 +31,94 @@ export default function ConclaveRoom({
   userId,
   userRole,
   onEndLive,
-  isSidebarOpen,
-  onToggleSidebar,
-  roomName
-}: ConclaveRoomProps & {
-  onToggleSidebar: () => void
-}) {
-  const isHost = workshop.host_id === userId
+  defaultSidebarOpen = false,
+  roomName,
+}: ConclaveRoomProps) {
+  const isHost = workshop.host_id === userId;
+
+  // Manage sidebar state locally with responsive default
+  const [isSidebarOpen, setIsSidebarOpen] = useState(defaultSidebarOpen);
+
+  // Auto-hide sidebar on mobile by default
+  useEffect(() => {
+    const handleResize = () => {
+      if (
+        window.innerWidth < 768 &&
+        isSidebarOpen &&
+        defaultSidebarOpen === false
+      ) {
+        setIsSidebarOpen(false);
+      }
+    };
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isSidebarOpen, defaultSidebarOpen]);
+
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   return (
-    <div className="relative w-full h-full flex flex-col gap-4">
+    <div className="relative w-full h-[80vh] flex flex-col text-white overflow-hidden">
+      
       <LiveKitRoom
         token={token}
         serverUrl={serverUrl}
-        data-lk-theme="default"
         connect={true}
-        className="flex-1 flex flex-col"
+        className="flex-1 flex flex-col relative bg-background"
+        data-lk-theme="default"
       >
-        <ConclaveRoomContent
-          workshop={workshop}
-          isHost={isHost}
-          userRole={userRole}
-          onEndLive={onEndLive}
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={onToggleSidebar}
-          roomName={roomName}
-        />
+        
+        <div className="flex flex-1 gap-4 relative overflow-hidden bg-background">
+          
+          <main className="flex-1 relative min-w-0">
+            {workshop.type === "AUDIO" ? (
+              <AudioConclaveView onLeave={onEndLive} userRole={userRole} />
+            ) : (
+              <VideoStage workshopId={workshop.id} />
+            )}
+          </main>
+
+          
+          <aside
+            className={`
+              fixed inset-y-0 right-0 z-40 w-80 
+              transform transition-transform duration-300 ease-in-out
+              md:relative md:translate-x-0 md:inset-auto md:z-auto
+              ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}
+            `}
+            aria-label="Conference sidebar"
+          >
+            <SidebarTabs
+              onClose={toggleSidebar}
+              workshopId={workshop.id}
+              isHost={isHost}
+            />
+          </aside>
+
+          
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-70 z-30 md:hidden"
+              onClick={toggleSidebar}
+              aria-hidden="true"
+            />
+          )}
+        </div>
+
+        
+        {workshop.type === "VIDEO" && (
+            <div className="pointer-events-auto max-w-screen-2xl mx-auto px-4 pb-4">
+              <ControlBar
+                workshopId={workshop.id}
+                roomName={roomName}
+                type={workshop.type}
+                onEndLive={onEndLive}
+                toggleSidebar={toggleSidebar}
+                isSidebarOpen={isSidebarOpen}
+              />
+            </div>
+        )}
       </LiveKitRoom>
     </div>
-  )
+  );
 }
-

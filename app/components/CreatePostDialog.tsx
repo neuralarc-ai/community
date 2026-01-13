@@ -1,17 +1,27 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft, Send, Tag, Type, AlignLeft, ChevronLeft, Image as ImageIcon, X } from 'lucide-react'
-import { Card, CardContent } from '@/app/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { useToast } from '@/app/components/ui/use-toast'
-import { uploadPostImages } from '@/app/lib/uploadPostImages';
-import { createClient } from '@/app/lib/supabaseClient';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/app/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import {
+  X,
+  Image as ImageIcon,
+  Send,
+  Type,
+  AlignLeft,
+  Tag,
+} from "lucide-react";
+import { Card, CardContent } from "@/app/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/app/components/ui/use-toast";
+import { uploadPostImages } from "@/app/lib/uploadPostImages";
+import { createClient } from "@/app/lib/supabaseClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/app/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 interface CreatePostDialogProps {
   isOpen: boolean;
@@ -19,309 +29,369 @@ interface CreatePostDialogProps {
   onPostCreated?: () => void;
 }
 
-export default function CreatePostDialog({ isOpen, onClose, onPostCreated }: CreatePostDialogProps) {
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const [tags, setTags] = useState('')
-  const [selectedFiles, setSelectedFiles] = useState<Array<{ id: string; file: File }>>([]);
-  const [previews, setPreviews] = useState<Array<{ id: string; url: string }>>([]);
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [dragActive, setDragActive] = useState(false) // New state for drag-and-drop
-  const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const { toast } = useToast()
+export default function CreatePostDialog({
+  isOpen,
+  onClose,
+  onPostCreated,
+}: CreatePostDialogProps) {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [tags, setTags] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<
+    Array<{ id: string; file: File }>
+  >([]);
+  const [previews, setPreviews] = useState<Array<{ id: string; url: string }>>(
+    []
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Cleanup object URLs when component unmounts or previews change
     return () => {
-      previews.forEach(preview => URL.revokeObjectURL(preview.url));
+      previews.forEach((p) => URL.revokeObjectURL(p.url));
     };
   }, [previews]);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement> | React.DragEvent<HTMLFormElement>) => {
-    const files = (e.type === 'drop') ? (e as React.DragEvent<HTMLDivElement>).dataTransfer.files : (e as React.ChangeEvent<HTMLInputElement>).target.files;
+  const handleFileSelect = (
+    e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLElement>
+  ) => {
+    const files = "dataTransfer" in e ? e.dataTransfer.files : e.target.files;
+    if (!files) return;
 
-    if (files) {
-      const newFiles = Array.from(files).filter(file => file.type.startsWith('image/')); // Filter for image files
-      
-      // Enforce max 3 images
-      if (selectedFiles.length + newFiles.length > 3) {
-        toast({
-          title: "Too many images",
-          description: "You can only upload a maximum of 3 images per post.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const filesWithIds = newFiles.map(file => ({ id: crypto.randomUUID(), file }));
-      setSelectedFiles((prevFiles) => [...prevFiles, ...filesWithIds]);
-      const newPreviews = filesWithIds.map(item => ({ id: item.id, url: URL.createObjectURL(item.file) }));
-      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
+    const newImages = Array.from(files).filter((f) =>
+      f.type.startsWith("image/")
+    );
+    if (selectedFiles.length + newImages.length > 3) {
+      toast({
+        title: "Limit reached",
+        description: "Maximum 3 images allowed per post.",
+        variant: "destructive",
+      });
+      return;
     }
-  }
 
-  const handleRemoveImage = (idToRemove: string) => {
-    setSelectedFiles((prevFiles) => prevFiles.filter((item) => item.id !== idToRemove));
-    setPreviews((prevPreviews) => {
-      const previewToRemove = prevPreviews.find(item => item.id === idToRemove);
-      if (previewToRemove) {
-        URL.revokeObjectURL(previewToRemove.url); // Clean up memory
-      }
-      return prevPreviews.filter((item) => item.id !== idToRemove);
+    const newEntries = newImages.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+    }));
+
+    setSelectedFiles((prev) => [...prev, ...newEntries]);
+    setPreviews((prev) => [
+      ...prev,
+      ...newEntries.map((entry) => ({
+        id: entry.id,
+        url: URL.createObjectURL(entry.file),
+      })),
+    ]);
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setSelectedFiles((prev) => prev.filter((i) => i.id !== id));
+    setPreviews((prev) => {
+      const toRemove = prev.find((p) => p.id === id);
+      if (toRemove) URL.revokeObjectURL(toRemove.url);
+      return prev.filter((p) => p.id !== id);
     });
-  }
+  };
 
-  const handleDragOver = (e: React.DragEvent<HTMLFormElement>) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent<HTMLFormElement>) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLFormElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    handleFileSelect(e); // Reuse existing file select logic
+    handleFileSelect(e);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-
-    // Validation: Ensure content OR images exist
+    e.preventDefault();
     if (!title.trim() && !body.trim() && selectedFiles.length === 0) {
-      setError('Please provide content or at least one image for your post.')
-      setLoading(false)
-      return
+      setError("Add a title, text, or at least one image.");
+      return;
     }
+
+    setLoading(true);
+    setError("");
 
     try {
       const supabase = createClient();
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.user) throw new Error("Not authenticated");
 
-      if (sessionError || !session?.user) {
-        throw new Error('User not authenticated.');
-      }
-      const user = session.user;
       let imageUrls: string[] = [];
       if (selectedFiles.length > 0) {
-        toast({
-          title: "Uploading images...",
-          description: "Please wait while your images are being uploaded.",
-        });
-        imageUrls = await uploadPostImages(user.id, selectedFiles.map(item => item.file));
-        toast({
-            title: "Images uploaded!",
-            description: `${imageUrls.length} image(s) uploaded successfully.`,
-        });
+        toast({ title: "Uploading images..." });
+        imageUrls = await uploadPostImages(
+          session.user.id,
+          selectedFiles.map((i) => i.file)
+        );
+        toast({ title: "Images uploaded!" });
       }
 
-      const response = await fetch('/api/posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           body,
-          tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+          tags: tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean),
           image_urls: imageUrls,
         }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create post')
-      }
-
-      toast({
-        title: "Post created!",
-        description: "Your post has been successfully published.",
       });
 
-      // Cleanup
-      setTitle('');
-      setBody('');
-      setTags('');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to create post");
+      }
+
+      toast({ title: "Post created successfully!" });
+      setTitle("");
+      setBody("");
+      setTags("");
       setSelectedFiles([]);
       setPreviews([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Clear file input
-      }
-      
-      onPostCreated?.(); // Notify parent that post was created
-      onClose(); // Close the dialog
+      if (fileInputRef.current) fileInputRef.current.value = "";
+
+      onPostCreated?.();
+      onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
-      toast({
-        title: "Error creating post",
-        description: err instanceof Error ? err.message : 'An unexpected error occurred.',
-        variant: "destructive",
-      });
+      const msg = err instanceof Error ? err.message : "Something went wrong";
+      setError(msg);
+      toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-[700px] p-0 bg-background/90 backdrop-blur-lg border border-white/10 rounded-2xl">
-        <DialogHeader className="p-4 sm:p-6 border-b border-white/10 flex flex-row items-center justify-between">
-          <DialogTitle className="text-xl sm:text-2xl font-bold text-white tracking-tight">Create New Post</DialogTitle>
+      <DialogContent
+        className={cn(
+          "p-0 bg-gradient-to-b from-background/95 to-background/80 backdrop-blur-2xl",
+          "border border-foreground/10 rounded-3xl shadow-2xl",
+          "max-h-[95vh] flex flex-col",
+          "w-[95vw] max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-4xl" // Responsive width
+        )}
+      >
+        <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 sm:px-8 sm:pt-8">
+          <DialogTitle className="text-2xl sm:text-3xl font-bold text-yellow tracking-tight">
+            Create New Post
+          </DialogTitle>
         </DialogHeader>
-        <div className="p-6">
-            <div className="max-w-2xl mx-auto space-y-10">
-                <Card className="bg-card/40 backdrop-blur-md border border-white/5 overflow-hidden shadow-2xl hover:border-yellow-500/30 transition-all duration-300">
-                    <CardContent className="p-4 sm:p-10 relative">
-                        <form 
-                            onSubmit={handleSubmit} 
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                            className={`space-y-8 font-manrope ${dragActive ? 'border-2 border-dashed border-yellow-500/50 rounded-xl' : ''}`}
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6 sm:px-8 custom-scrollbar">
+          <Card className="bg-transparent backdrop-blur-xl rounded-2xl overflow-hidden shadow-inner">
+            <CardContent className="p-6 sm:p-8">
+              <form
+                onSubmit={handleSubmit}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className="space-y-8"
+              >
+                {error && (
+                  <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                {/* Image Upload / Previews */}
+                <div
+                  className={cn(
+                    "relative border-2 border-dashed rounded-2xl transition-all duration-300",
+                    dragActive
+                      ? "border-yellow-500/70 bg-yellow-500/5 scale-[1.01]"
+                      : "border-foreground/20 bg-foreground/5",
+                    previews.length > 0 && "border-0 bg-transparent"
+                  )}
+                >
+                  {previews.length === 0 ? (
+                    <label
+                      htmlFor="image-upload"
+                      className="flex flex-col items-center justify-center py-12 cursor-pointer"
+                    >
+                      <ImageIcon
+                        className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-500 mb-4"
+                        strokeWidth={1.5}
+                      />
+                      <p className="text-base sm:text-lg font-medium text-yellow text-center px-4">
+                        Drop images here or click to upload
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                        Up to 3 images (PNG, JPG, GIF)
+                      </p>
+                    </label>
+                  ) : (
+                    <div
+                      className={cn(
+                        "grid gap-4 p-4",
+                        "grid-cols-1 sm:grid-cols-2",
+                        previews.length === 3 && "lg:grid-cols-3",
+                        previews.length === 3 &&
+                          "[&>:last-child]:col-span-1 sm:[&>:last-child]:col-span-2 lg:[&>:last-child]:col-span-1"
+                      )}
+                    >
+                      {previews.map((preview, idx) => (
+                        <div
+                          key={preview.id}
+                          className={cn(
+                            "relative rounded-xl overflow-hidden shadow-lg aspect-video",
+                            previews.length === 3 &&
+                              idx === 2 &&
+                              "sm:col-span-2 lg:col-span-1 aspect-[2/1] sm:aspect-video"
+                          )}
                         >
-                            {error && (
-                                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                                    {error}
-                                </div>
-                            )}
+                          <Image
+                            src={preview.url}
+                            alt="Preview"
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(preview.id)}
+                            className="absolute top-3 right-3 p-2 bg-background/70 rounded-full hover:bg-red-600 transition"
+                          >
+                            <X className="w-5 h-5 text-yellow" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                            <div className="space-y-10">
-                                {/* Image Preview Area */}
-                                {previews.length > 0 && (
-                                  <div className="grid gap-4 mb-4" style={{
-                                    gridTemplateColumns: previews.length === 1 ? '1fr' : previews.length === 2 ? '1fr 1fr' : '3fr 2fr'
-                                  }}>
-                                    {previews.map((item) => (
-                                      <div key={item.id} className="relative rounded-lg overflow-hidden border border-white/10 shadow-lg">
-                                        <Image src={item.url} alt={`Preview ${item.id}`} fill className="object-cover" unoptimized={true} />
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveImage(item.id)}
-                                          className="absolute top-2 right-2 p-1 bg-black/60 rounded-full text-white hover:bg-red-500 transition-colors"
-                                        >
-                                          <X className="w-8 h-8" />
-                                        </button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
+                  <input
+                    id="image-upload"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                </div>
 
-                                {/* Title Field */}
-                                <div className="space-y-4">
-                                    <label htmlFor="title" className="flex items-center gap-2 text-sm font-bold text-white/90 ml-1 uppercase tracking-wider font-heading">
-                                        <Type className="w-8 h-8 text-yellow-500" />
-                                        Title <span className="text-transparent"></span>
-                                    </label>
-                                    <div className="relative group">
-                                        <input
-                                            type="text"
-                                            id="title"
-                                            value={title}
-                                            onChange={(e) => setTitle(e.target.value)}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-lg placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
-                                            placeholder="Enter your post title..."
-                                        />
-                                    </div>
-                                </div>
+                {/* Title */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
+                    <Type className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Give your post a catchy title..."
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground text-base sm:text-lg placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+                  />
+                </div>
 
-                                {/* Body Field */}
-                                <div className="space-y-4">
-                                    <label htmlFor="body" className="flex items-center gap-2 text-sm font-bold text-white/90 ml-1 uppercase tracking-wider font-heading">
-                                        <AlignLeft className="w-8 h-8 text-yellow-500" />
-                                        Body <span className="text-yellow-500/50"></span>
-                                    </label>
-                                    <div className="relative group">
-                                        <textarea
-                                            id="body"
-                                            value={body}
-                                            onChange={(e) => setBody(e.target.value)}
-                                            rows={6}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-base placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all resize-none leading-relaxed group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
-                                        placeholder="Start a new post..."
-                                    />
-                                    </div>
-                                </div>
+                {/* Body */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
+                    <AlignLeft className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+                    Content
+                  </label>
+                  <textarea
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    rows={6}
+                    placeholder="Share your thoughts..."
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 resize-none transition-all leading-relaxed text-base"
+                  />
+                </div>
 
-                                {/* Tags Field */}
-                                <div className="space-y-4">
-                                    <label htmlFor="tags" className="flex items-center gap-2 text-sm font-bold text-white/90 ml-1 uppercase tracking-wider font-heading">
-                                        <Tag className="w-8 h-8 text-yellow-500" />
-                                        Tags <span className="text-muted-foreground/50 font-normal text-xs lowercase italic">(optional)</span>
-                                    </label>
-                                    <div className="relative group">
-                                        <input
-                                            type="text"
-                                            id="tags"
-                                            value={tags}
-                                            onChange={(e) => setTags(e.target.value)}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white text-base placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all group-hover:bg-white/10 group-hover:border-white/20 shadow-inner font-manrope"
-                                            placeholder="e.g., general, question, feedback"
-                                        />
-                                    </div>
-                                    <p className="text-xs text-muted-foreground/60 ml-2 italic">
-                                        Separate multiple tags with commas
-                                    </p>
-                                </div>
-                            </div>
+                {/* Tags */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-yellow/80">
+                    <Tag className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
+                    Tags{" "}
+                    <span className="lowercase font-normal text-yellow/50">
+                      (optional)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    placeholder="e.g. tech, design, feedback"
+                    className="w-full px-4 py-3 sm:px-5 sm:py-4 bg-foreground/5 border border-foreground/10 rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all text-base"
+                  />
+                  <p className="text-xs text-yellow/50 ml-1">
+                    Separate with commas
+                  </p>
+                </div>
 
-                            {/* Actions */}
-                            <div className="pt-6 flex flex-col sm:flex-row items-center justify-end gap-4 sm:gap-6 border-t border-white/10 mt-6">
-                                <input
-                                  type="file"
-                                  ref={fileInputRef}
-                                  multiple
-                                  accept="image/*"
-                                  className="hidden"
-                                  onChange={handleFileSelect}
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="text-muted-foreground hover:text-white hover:bg-white/5 px-4 py-3 rounded-xl transition-all"
-                                    style={{ backgroundColor: selectedFiles.length > 0 ? '#e6b31c' : '' }}
-                                >
-                                    <ImageIcon className={cn("w-8 h-8", selectedFiles.length > 0 ? 'text-black' : 'text-yellow-500')} />
-                                </Button>
-                                <Button variant="ghost" type="button" onClick={onClose} className="text-muted-foreground hover:text-white hover:bg-white/5 px-6 py-3 rounded-xl transition-all font-manrope">
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={loading || (!title.trim() && !body.trim() && selectedFiles.length === 0)}
-                                    className="w-full sm:w-auto px-8 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black text-base rounded-xl shadow-[0_0_40px_rgba(234,179,8,0.25)] hover:shadow-[0_0_60px_rgba(234,179,8,0.4)] transition-all flex items-center justify-center gap-2 active:scale-[0.98] font-manrope"
-                                    style={{ backgroundColor: '#e6b31c', color: 'black' }}
-                                >
-                                    {loading ? (
-                                        <>
-                                            <span className="w-6 h-6 border-4 border-black/20 border-t-black rounded-full animate-spin" />
-                                            <span>Posting...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Send className="w-8 h-8" />
-                                            <span>Create Post</span>
-                                        </>
-                                    )}
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-foreground/10">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full sm:w-auto border-foreground/20 hover:bg-foreground/10"
+                  >
+                    <ImageIcon className="w-5 h-5 mr-2" />
+                    Add Images ({selectedFiles.length}/3)
+                  </Button>
+
+                  <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="lg"
+                      onClick={onClose}
+                      className="flex-1 sm:flex-initial"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      size="lg"
+                      disabled={
+                        loading ||
+                        (!title.trim() &&
+                          !body.trim() &&
+                          selectedFiles.length === 0)
+                      }
+                      className="flex-1 sm:flex-initial bg-yellow-500 hover:bg-yellow-400 text-background font-semibold px-8 shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/40 transition-all"
+                    >
+                      {loading ? (
+                        <>Posting...</>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5 mr-2" />
+                          Create Post
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
