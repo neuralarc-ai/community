@@ -1,0 +1,1821 @@
+{
+  "info": {
+    "name": "Community Portal API",
+    "description": "Comprehensive API documentation for all backend routes in the Community Portal application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "community-portal-api"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string",
+      "description": "Supabase session token (if using Bearer token auth)"
+    }
+  ],
+  "item": [
+    {
+      "name": "Posts API",
+      "item": [
+        {
+          "name": "GET /api/posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search posts by tags",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "0",
+                  "description": "Limit number of results",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Fetch all posts with pagination and filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/posts",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"body\": \"\",\n  \"tags\": [],\n  \"image_urls\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Create a new post"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/posts/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "description": "Get a single post with all comments (threaded)"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/posts/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "description": "Delete a post"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/posts/pin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts/pin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts",
+                "pin"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Pin or unpin a post (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/posts/save",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts/save",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts",
+                "save"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Save or unsave a post for the current user"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/posts/saved",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts/saved",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts",
+                "saved"
+              ]
+            },
+            "description": "Get all saved posts for the current user"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/posts/user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts",
+                "user"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "",
+                  "description": "User ID. If not provided, returns current user's posts",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all posts by a specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/posts/vote",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/posts/vote",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "posts",
+                "vote"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Vote on a post (upvote/downvote with toggle support)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Comments API",
+      "item": [
+        {
+          "name": "POST /api/comments",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/comments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "comments"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"post_id\": \"00000000-0000-0000-0000-000000000000\",\n  \"body\": \"\",\n  \"parent_comment_id\": \"00000000-0000-0000-0000-000000000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Create a new comment"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/comments/user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/comments/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "comments",
+                "user"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "",
+                  "description": "User ID. If not provided, returns current user's comments",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all comments by a specific user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Votes API",
+      "item": [
+        {
+          "name": "POST /api/votes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/votes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "votes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Create, update, or remove a vote on a post or comment"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profile API",
+      "item": [
+        {
+          "name": "GET /api/profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "profile"
+              ]
+            },
+            "description": "Get current user's profile"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "profile"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Update current user's profile"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/profile/avatar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/profile/avatar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "profile",
+                "avatar"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Upload or update user avatar"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/avatar/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/avatar/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "avatar",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "description": "Get avatar image for a user"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Workshops API",
+      "item": [
+        {
+          "name": "GET /api/workshops",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/workshops",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "workshops"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by title or description",
+                  "disabled": true
+                },
+                {
+                  "key": "showArchived",
+                  "value": "",
+                  "description": "Include archived workshops (admin only)",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "Filter by type (AUDIO | VIDEO)",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Filter by status (SCHEDULED | LIVE | ENDED)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all workshops with filtering"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/workshops",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/workshops",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "workshops"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"\",\n  \"description\": \"\",\n  \"start_time\": \"\",\n  \"status\": \"\",\n  \"type\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Create a new workshop (admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/workshops/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/workshops/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "workshops",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "description": "Get a single workshop with host details and waitlist count"
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /api/workshops/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/workshops/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "workshops",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"\",\n  \"is_archived\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Update workshop status or archive status (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/workshops/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/workshops/:id",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "workshops",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "description": "Delete a workshop (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/workshops/:id/waitlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/workshops/:id/waitlist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "workshops",
+                ":id",
+                "waitlist"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Join workshop waitlist"
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/workshops/:id/waitlist",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/workshops/:id/waitlist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "workshops",
+                ":id",
+                "waitlist"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "id parameter"
+                }
+              ]
+            },
+            "description": "Get waitlist for a workshop (host only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "LiveKit API",
+      "item": [
+        {
+          "name": "POST /api/livekit/token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomName\": \"\",\n  \"participantName\": \"\",\n  \"workshopId\": \"00000000-0000-0000-0000-000000000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Generate LiveKit access token for joining a workshop/conclave"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/manage-role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/manage-role",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "manage-role"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Update participant permissions (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/manage-participant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/manage-participant",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "manage-participant"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Remove a participant from the room (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/mute-participant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/mute-participant",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "mute-participant"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Mute or unmute a participant's track (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/toggle-hand-raise",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/toggle-hand-raise",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "toggle-hand-raise"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Toggle hand raise status for a participant"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/toggle-speak-permission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/toggle-speak-permission",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "toggle-speak-permission"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Toggle speak permission for a participant (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/start-recording",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/start-recording",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "start-recording"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Start recording a workshop (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/livekit/start-recording",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/start-recording",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "start-recording"
+              ],
+              "query": [
+                {
+                  "key": "egressId",
+                  "value": "",
+                  "disabled": false
+                },
+                {
+                  "key": "workshopId",
+                  "value": "",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Stop recording a workshop (host only)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "webhook"
+              ]
+            },
+            "description": "LiveKit webhook endpoint for room events"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/livekit/chat-moderation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/livekit/chat-moderation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "livekit",
+                "chat-moderation"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Moderate chat messages in LiveKit rooms"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tags API",
+      "item": [
+        {
+          "name": "GET /api/tags",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tags",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "tags"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "",
+                  "description": "Search/filter tags",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "0",
+                  "description": "Limit results (default: 10)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all unique tags from posts"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard API",
+      "item": [
+        {
+          "name": "GET /api/dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "dashboard"
+              ]
+            },
+            "description": "Get dashboard statistics (currently returns mock data)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Leaderboard API",
+      "item": [
+        {
+          "name": "GET /api/leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/leaderboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "leaderboard"
+              ]
+            },
+            "description": "Get leaderboard data (currently returns mock data)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin API",
+      "item": [
+        {
+          "name": "GET /api/admin/users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "admin",
+                "users"
+              ]
+            },
+            "description": "Get all users (admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Utility API",
+      "item": [
+        {
+          "name": "GET /api/check-username",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/check-username",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "check-username"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "",
+                  "description": "Username to check (min 3 chars, alphanumeric + underscore only)",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Check if a username is available"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events API",
+      "item": [
+        {
+          "name": "GET /api/events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search events",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get events (currently returns mock data)"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/events",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "events"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Create an event (currently mock implementation)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notification API",
+      "item": [
+        {
+          "name": "POST /api/notify/post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notify/post",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "notify",
+                "post"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send email notifications to all users about a new post"
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/notify/conclave",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/notify/conclave",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "notify",
+                "conclave"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Send conclave invitation emails"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cron Jobs",
+      "item": [
+        {
+          "name": "GET /api/cron/check-workshop-notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/cron/check-workshop-notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "cron",
+                "check-workshop-notifications"
+              ]
+            },
+            "description": "Cron job to check and send workshop notifications (e.g., for waitlist)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Email API",
+      "item": [
+        {
+          "name": "POST /api/email/notify",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": false
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "description": "Supabase Auth token"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/email/notify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "email",
+                "notify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Generic email notification endpoint"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check API",
+      "item": [
+        {
+          "name": "GET /api/health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "health"
+              ]
+            },
+            "description": "Check API health status and database connectivity"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "API Documentation",
+      "item": [
+        {
+          "name": "GET /api/docs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/docs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "",
+                "docs"
+              ]
+            },
+            "description": "Get API documentation in JSON format"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

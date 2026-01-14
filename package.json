@@ -6,7 +6,9 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "eslint"
+        "lint": "eslint",
+        "generate-api-docs": "node scripts/generate-api-docs.js",
+        "generate-postman": "node scripts/generate-postman-collection.js"
     },
     "dependencies": {
         "@dicebear/collection": "^9.2.4",
