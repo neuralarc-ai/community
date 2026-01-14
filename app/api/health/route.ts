@@ -3,7 +3,17 @@ import { createServerClient } from '@/app/lib/supabaseServerClient';
 import { setCorsHeaders } from '@/app/lib/setCorsHeaders';
 
 export async function GET(request: NextRequest) {
-  const health = {
+  const health: {
+    status: string;
+    timestamp: string;
+    uptime: number;
+    checks: {
+      database: string;
+      environment: string;
+      databaseError?: string;
+      missingEnvVars?: string[];
+    };
+  } = {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),

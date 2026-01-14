@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { setCorsHeaders } from '@/app/lib/setCorsHeaders';
 
+// This is the same data as in /api/docs/route.ts
+// We're duplicating it here so /api/docs can be a page for Swagger UI
+// and /api/docs/json can return the JSON format
 export async function GET(request: NextRequest) {
   const apiDocs = {
     info: {
@@ -628,7 +631,7 @@ export async function GET(request: NextRequest) {
           {
             method: 'GET',
             path: '/api/docs',
-            description: 'Get API documentation in JSON format',
+            description: 'Get API documentation in JSON format (use /api/docs/json for JSON)',
             response: { status: 200 },
           },
         ],
